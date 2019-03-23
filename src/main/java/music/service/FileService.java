@@ -1,6 +1,5 @@
 package music.service;
 
-import music.model.Track;
 import org.apache.commons.io.FileUtils;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
@@ -13,13 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Service
 public class FileService {
-
-    @Autowired
-    private MetadataService metadataService;
 
     public Collection<File> listMusicFiles() throws ReadOnlyFileException, IOException, TagException, InvalidAudioFrameException, CannotReadException {
 //        return FileUtils.listFiles(new File("/music"), new String[]{"mp3", "flac", "FLAC"}, true);
