@@ -7,3 +7,5 @@ https://github.com/psaravan/JamsMusicPlayer
 
 ### Java library to convert music files
 https://github.com/a-schild/jave2
+
+https://www.mediamonkey.com/wiki/index.php/MediaMonkey_Database_structure

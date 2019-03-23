@@ -2,12 +2,14 @@ package music.endpoint;
 
 import music.mapper.SongMapper;
 import music.model.Song;
+import music.model.SongVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/song")
@@ -17,12 +19,13 @@ public class SongEndpoint {
     private SongMapper songsMapper;
 
     @GetMapping("/count")
-    public Song count(){
-        return songsMapper.selectByPrimaryKey(16668);
+    public SongVO count() {
+        return new SongVO(songsMapper.selectByPrimaryKey(16668));
     }
 
     @GetMapping()
-    public List<Song> list(){
-        return songsMapper.selectByExample(null);
+    public List<SongVO> list() {
+        List<Song> songs = songsMapper.selectByExample(null);
+        return songs.stream().map(SongVO::new).collect(Collectors.toList());
     }
 }
