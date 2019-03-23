@@ -24,7 +24,9 @@ public class MetadataService {
     @Autowired
     private FileService fileService;
 
-    public List<Track> parseIntoTracks(Collection<File> files) throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
+    public List<Track> getTracks() throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
+        Collection<File> files = fileService.listMusicFiles();
+
         List<Track> tracks = new ArrayList<>();
 
         for(File file : files){

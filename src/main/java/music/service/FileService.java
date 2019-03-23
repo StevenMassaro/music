@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -19,8 +21,12 @@ public class FileService {
     @Autowired
     private MetadataService metadataService;
 
-    public List<Track> listMusicFiles() throws ReadOnlyFileException, IOException, TagException, InvalidAudioFrameException, CannotReadException {
+    public Collection<File> listMusicFiles() throws ReadOnlyFileException, IOException, TagException, InvalidAudioFrameException, CannotReadException {
 //        return FileUtils.listFiles(new File("/music"), new String[]{"mp3", "flac", "FLAC"}, true);
-         return metadataService.parseIntoTracks(FileUtils.listFiles(new File("/music"), new String[]{"mp3", "flac", "FLAC"}, true));
+        return FileUtils.listFiles(new File("/music"), new String[]{"mp3", "flac", "FLAC"}, true);
+    }
+
+    public File getFile() throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
+        return new ArrayList<>(listMusicFiles()).get(0);
     }
 }

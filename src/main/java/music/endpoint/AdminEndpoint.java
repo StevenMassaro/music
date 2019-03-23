@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 @RestController()
@@ -31,7 +33,7 @@ public class AdminEndpoint {
 
     @GetMapping("/dbSync")
     public List<Track> syncTracksToDb() throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
-        List<Track> files = fileService.listMusicFiles();
+        List<Track> files = metadataService.getTracks();
         trackService.addTracks(files);
         return trackService.list();
     }
