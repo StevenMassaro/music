@@ -1,5 +1,8 @@
 package music.model;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class SongVO {
 
     private String artist;
@@ -55,6 +58,10 @@ public class SongVO {
         this.idmedia = song.getIDMedia();
         this.idalbum = song.getIDAlbum();
         this.idfolder = song.getIDFolder();
+    }
+
+    public static List<SongVO> toList(List<Song> songs){
+        return songs.stream().map(SongVO::new).collect(Collectors.toList());
     }
 
     public String getArtist() {

@@ -1,5 +1,7 @@
 package music.model;
 
+import org.apache.commons.io.FilenameUtils;
+
 public class Song {
     /**
      *
@@ -3431,5 +3433,9 @@ public class Song {
      */
     public void setArtworkModified(Double artworkModified) {
         this.artworkModified = artworkModified;
+    }
+
+    public String getFilename(){
+        return FilenameUtils.getName(songPath);
     }
 }

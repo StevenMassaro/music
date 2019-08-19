@@ -3,8 +3,8 @@ create database music;
 
 create schema music;
 
-drop table if exists music.music;
-create table music.music (
+drop table if exists music.track;
+create table music.track (
 	id serial not null,
   title varchar(1000) not null,
   album varchar(1000),
