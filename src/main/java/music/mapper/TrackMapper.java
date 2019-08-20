@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface TrackMapper {
 
-    void insert(@Param("track") Track track);
+    void upsert(@Param("track") Track track);
 
     List<Track> list();
 }

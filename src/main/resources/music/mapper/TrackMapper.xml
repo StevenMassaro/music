@@ -26,8 +26,19 @@
         <!--<result property="dateCreated" column="dateCreated"/>-->
     </resultMap>
 
-    <insert id="insert">
-        INSERT INTO music.track (title, album, artist, albumartist, genre, "year")
-        VALUES(#{track.title}, #{track.album}, #{track.artist}, #{track.albumArtist}, #{track.genre}, #{track.year});
+    <insert id="upsert">
+        INSERT INTO music.track (title, album, artist, albumartist, genre, "year", discnumber, tracknumber, comment)
+        VALUES(#{track.title}, #{track.album}, #{track.artist}, #{track.albumArtist},
+        #{track.genre}, #{track.year}, #{track.discNumber}, #{track.trackNumber}, #{track.comment})
+        ON CONFLICT (title,album) DO UPDATE
+          set title = #{track.title},
+          album = #{track.album},
+          artist = #{track.artist},
+          albumartist = #{track.albumArtist},
+          genre = #{track.genre},
+          "year" = #{track.year},
+          discnumber = #{track.discNumber},
+          tracknumber = #{track.trackNumber},
+          comment = #{track.comment}
     </insert>
 </mapper>

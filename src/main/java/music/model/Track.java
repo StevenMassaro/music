@@ -1,8 +1,13 @@
 package music.model;
 
 import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.flac.FlacTag;
 import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
+
+import java.util.Date;
+
+import static music.utils.FieldUtils.getLongOrNull;
 
 public class Track {
 
@@ -13,6 +18,11 @@ public class Track {
     private String albumArtist;
     private String genre;
     private String year;
+    private Long discNumber;
+    private Long trackNumber;
+    private String comment;
+    private Date dateCreated;
+    private Date dateUpdated;
 
     public Track(){
         //            AudioHeader audioHeader = f.getAudioHeader();
@@ -25,22 +35,16 @@ public class Track {
 ////            tag.getFields(FieldKey.COMMENT);
     }
 
-    public Track(AbstractID3v2Tag v2tag) {
+    public Track(Tag v2tag) {
         this.title = v2tag.getFirst(FieldKey.TITLE);
         this.album = v2tag.getFirst(FieldKey.ALBUM);
         this.artist = v2tag.getFirst(FieldKey.ARTIST);
         this.albumArtist = v2tag.getFirst(FieldKey.ALBUM_ARTIST);
         this.genre = v2tag.getFirst(FieldKey.GENRE);
         this.year = v2tag.getFirst(FieldKey.YEAR);
-    }
-
-    public Track(FlacTag flacTag) {
-        this.title = flacTag.getFirst(FieldKey.TITLE);
-        this.album = flacTag.getFirst(FieldKey.ALBUM);
-        this.artist = flacTag.getFirst(FieldKey.ARTIST);
-        this.albumArtist = flacTag.getFirst(FieldKey.ALBUM_ARTIST);
-        this.genre = flacTag.getFirst(FieldKey.GENRE);
-        this.year = flacTag.getFirst(FieldKey.YEAR);
+        this.discNumber = getLongOrNull(v2tag, FieldKey.DISC_NO);
+        this.trackNumber = getLongOrNull(v2tag, FieldKey.TRACK);
+        this.comment = v2tag.getFirst(FieldKey.COMMENT);
     }
 
     public long getId() {

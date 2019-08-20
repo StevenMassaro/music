@@ -1,10 +1,17 @@
 package music.endpoint;
 
+import music.model.Track;
 import music.service.FileService;
+import music.service.MetadataService;
+import music.service.TrackService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs2.provider.ram.RamFileProvider;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.tag.TagException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -19,12 +26,22 @@ import ws.schild.jave.EncodingAttributes;
 import ws.schild.jave.MultimediaObject;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 @RestController("/track")
 public class TrackEndpoint {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private TrackService trackService;
+
+    @GetMapping()
+    public List<Track> list() throws ReadOnlyFileException, IOException, TagException, InvalidAudioFrameException, CannotReadException {
+        return trackService.list();
+    }
 
     @GetMapping("/get/{id}")
     public ResponseEntity<Resource> convertFile(@PathVariable long id) {

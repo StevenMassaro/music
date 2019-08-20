@@ -8,9 +8,12 @@ import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.audio.mp3.MP3File;
+import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.flac.FlacTag;
 import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,30 +24,23 @@ import java.util.*;
 @Service
 public class MetadataService {
 
+    private Logger logger = LoggerFactory.getLogger(MetadataService.class);
+
     @Autowired
     private FileService fileService;
 
     public List<Track> getTracks() throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
-        Collection<File> files = fileService.listMusicFiles();
+        List<File> files = new ArrayList<>(fileService.listMusicFiles());
+        logger.debug(String.format("Found %s files in music directory.", files.size()));
 
         List<Track> tracks = new ArrayList<>();
 
-        for(File file : files){
-            String extension = FilenameUtils.getExtension(file.getName());
-            Track track;
-            if(extension.contains("mp3")){
-                MP3File mp3File = (MP3File) AudioFileIO.read(file);
-                AbstractID3v2Tag v2tag  = mp3File.getID3v2Tag();
-                v2tag.getFieldCount();
-                track = new Track(v2tag);
-            } else if(extension.contains("flac")){
-                AudioFile f = AudioFileIO.read(file);
-                FlacTag flacTag = (FlacTag) f.getTag();
-                flacTag.getFieldCount();
-                track = new Track(flacTag);
-            } else {
-                track = new Track();
-            }
+        for (int i = 0; i < files.size(); i++) {
+            File file = files.get(i);
+            logger.debug(String.format("Processing file %s of %s: %s", (i + 1), files.size(), file.getName()));
+            AudioFile audioFile = AudioFileIO.read(file);
+            Tag tag = audioFile.getTag();
+            Track track = new Track(tag);
             tracks.add(track);
         }
         return tracks;

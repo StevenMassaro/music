@@ -13,9 +13,9 @@ public class TrackService {
     @Autowired
     private TrackMapper trackMapper;
 
-    public void addTracks(List<Track> tracks){
+    public void upsertTracks(List<Track> tracks){
         for(Track track : tracks){
-            trackMapper.insert(track);
+            trackMapper.upsert(track);
         }
     }
 

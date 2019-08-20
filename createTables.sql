@@ -3,14 +3,19 @@ create database music;
 
 create schema music;
 
-drop table if exists music.music;
-create table music.music (
-	id serial not null,
+drop table if exists music.track;
+create table music.track (
+  id serial not null,
   title varchar(1000) not null,
   album varchar(1000),
   artist varchar(1000),
   albumArtist varchar(1000),
   genre varchar(1000),
   year varchar(1000),
-	dateCreated timestamp DEFAULT now()
+  discnumber int,
+  tracknumber int,
+  comment varchar,
+	dateCreated timestamp DEFAULT now(),
+	dateUpdated timestamp,
+	primary key(title, album)
 );
