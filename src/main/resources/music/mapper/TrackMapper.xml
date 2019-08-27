@@ -12,6 +12,11 @@
         SELECT * FROM music.track
     </sql>
 
+    <select id="get" resultMap="trackResultMap">
+        <include refid="selectAccounts"/>
+        WHERE id = ${id}
+    </select>
+
     <resultMap id="trackResultMap" type="music.model.Track">
         <id property="id" column="id"/>
         <!--<result property=""-->

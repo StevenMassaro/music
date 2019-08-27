@@ -22,4 +22,8 @@ public class TrackService {
     public List<Track> list(){
         return trackMapper.list();
     }
+
+    public Track get(long id){
+        return trackMapper.get(id);
+    }
 }

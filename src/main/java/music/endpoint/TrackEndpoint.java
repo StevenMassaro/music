@@ -5,6 +5,7 @@ import music.service.FileService;
 import music.service.MetadataService;
 import music.service.TrackService;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs2.provider.ram.RamFileProvider;
@@ -14,11 +15,13 @@ import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.TagException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ws.schild.jave.AudioAttributes;
 import ws.schild.jave.Encoder;
@@ -29,7 +32,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-@RestController("/track")
+@RestController
+@RequestMapping("/track")
 public class TrackEndpoint {
 
     @Autowired
@@ -38,12 +42,12 @@ public class TrackEndpoint {
     @Autowired
     private TrackService trackService;
 
-    @GetMapping()
-    public List<Track> list() throws ReadOnlyFileException, IOException, TagException, InvalidAudioFrameException, CannotReadException {
+    @GetMapping
+    public List<Track> list() {
         return trackService.list();
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("{id}/convert")
     public ResponseEntity<Resource> convertFile(@PathVariable long id) {
         try {
             File source = fileService.getFile();
@@ -73,5 +77,16 @@ public class TrackEndpoint {
         }
 
         return null;
+    }
+
+    @GetMapping("/{id}/stream")
+    public ResponseEntity<Resource> stream(@PathVariable long id) throws IOException {
+        Track track = trackService.get(id);
+
+        Resource file = new InputStreamResource(FileUtils.openInputStream(new File(track.getLocation())));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + FilenameUtils.getName(track.getLocation()) + "\"")
+                .header(HttpHeaders.CONTENT_TYPE, "audio/" + FilenameUtils.getExtension(track.getLocation()).toLowerCase())
+                .body(file);
     }
 }

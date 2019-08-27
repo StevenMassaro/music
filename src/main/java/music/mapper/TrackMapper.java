@@ -12,4 +12,7 @@ public interface TrackMapper {
     void upsert(@Param("track") Track track);
 
     List<Track> list();
+
+    Track get(@Param("id") long id);
+
 }
