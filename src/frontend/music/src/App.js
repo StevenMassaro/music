@@ -26,7 +26,7 @@ class App extends Component {
             loadingSongs: true,
             loadedSongs: false
         });
-        fetch("./song/")
+        fetch("./track/")
             .then(res => res.json())
             .then(
                 (result) => {
@@ -53,9 +53,9 @@ class App extends Component {
         if (song) {
             let playlist = Object.assign([], this.state.playlist);
             playlist.push({
-                name: song.songTitle,
+                name: song.title,
                 singer: song.artist,
-                musicSrc: "./song/" + song.id + "/download"
+                musicSrc: "./track/" + song.id + "/stream"
             });
 
             this.setState({
@@ -124,7 +124,7 @@ class App extends Component {
                         },
                         {
                             Header: "Title",
-                            accessor: "songTitle",
+                            accessor: "title",
                             maxWidth: 175
                         },
                         {
