@@ -7,6 +7,7 @@ drop table if exists music.track;
 create table music.track (
   id serial not null,
   title varchar(1000) not null,
+  location varchar primary key,
   album varchar(1000),
   artist varchar(1000),
   albumArtist varchar(1000),
@@ -16,6 +17,5 @@ create table music.track (
   tracknumber int,
   comment varchar,
 	dateCreated timestamp DEFAULT now(),
-	dateUpdated timestamp,
-	primary key(title, album)
+	dateUpdated timestamp
 );

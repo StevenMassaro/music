@@ -40,7 +40,7 @@ public class MetadataService {
             logger.debug(String.format("Processing file %s of %s: %s", (i + 1), files.size(), file.getName()));
             AudioFile audioFile = AudioFileIO.read(file);
             Tag tag = audioFile.getTag();
-            Track track = new Track(tag);
+            Track track = new Track(tag, file.getAbsolutePath());
             tracks.add(track);
         }
         return tracks;

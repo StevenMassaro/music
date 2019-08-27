@@ -13,6 +13,7 @@ public class Track {
 
     private long id;
     private String title;
+    private String location;
     private String album;
     private String artist;
     private String albumArtist;
@@ -35,7 +36,7 @@ public class Track {
 ////            tag.getFields(FieldKey.COMMENT);
     }
 
-    public Track(Tag v2tag) {
+    public Track(Tag v2tag, String location) {
         this.title = v2tag.getFirst(FieldKey.TITLE);
         this.album = v2tag.getFirst(FieldKey.ALBUM);
         this.artist = v2tag.getFirst(FieldKey.ARTIST);
@@ -45,6 +46,7 @@ public class Track {
         this.discNumber = getLongOrNull(v2tag, FieldKey.DISC_NO);
         this.trackNumber = getLongOrNull(v2tag, FieldKey.TRACK);
         this.comment = v2tag.getFirst(FieldKey.COMMENT);
+        this.location = location;
     }
 
     public long getId() {
