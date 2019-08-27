@@ -104,4 +104,52 @@ public class Track {
     public void setYear(String year) {
         this.year = year;
     }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Long getDiscNumber() {
+        return discNumber;
+    }
+
+    public void setDiscNumber(Long discNumber) {
+        this.discNumber = discNumber;
+    }
+
+    public Long getTrackNumber() {
+        return trackNumber;
+    }
+
+    public void setTrackNumber(Long trackNumber) {
+        this.trackNumber = trackNumber;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Date getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(Date dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
 }
