@@ -31,7 +31,7 @@ public class MetadataService {
 
     public List<Track> getTracks() throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
         List<File> files = new ArrayList<>(fileService.listMusicFiles());
-        logger.debug(String.format("Found %s files in music directory.", files.size()));
+        logger.info(String.format("Found %s files in music directory.", files.size()));
 
         List<Track> tracks = new ArrayList<>();
 
@@ -40,8 +40,12 @@ public class MetadataService {
             logger.debug(String.format("Processing file %s of %s: %s", (i + 1), files.size(), file.getName()));
             AudioFile audioFile = AudioFileIO.read(file);
             Tag tag = audioFile.getTag();
-            Track track = new Track(tag, file.getAbsolutePath());
-            tracks.add(track);
+            try {
+                Track track = new Track(tag, file.getAbsolutePath());
+                tracks.add(track);
+            } catch (Exception e) {
+                logger.error(String.format("Failed to parse tag for metadata for file %s", file.getAbsolutePath()), e);
+            }
         }
         return tracks;
     }

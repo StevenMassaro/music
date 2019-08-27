@@ -38,6 +38,7 @@ public class AdminEndpoint {
         logger.info("Begin database sync");
         List<Track> files = metadataService.getTracks();
         trackService.upsertTracks(files);
+        logger.info("Finished database sync");
         return trackService.list();
     }
 }
