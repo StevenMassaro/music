@@ -6,6 +6,7 @@
 
     <select id="list" resultMap="trackResultMap">
         <include refid="selectAccounts"/>
+        ORDER BY artist,album,discnumber,tracknumber
     </select>
 
     <sql id="selectAccounts">
