@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="music.mapper.TrackMapper">
+
+    <select id="list" resultMap="trackResultMap">
+        <include refid="selectAccounts"/>
+    </select>
+
+    <sql id="selectAccounts">
+        SELECT * FROM music.track
+    </sql>
+
+    <resultMap id="trackResultMap" type="music.model.Track">
+        <id property="id" column="id"/>
+        <!--<result property=""-->
+        <!---->
+        <!---->
+        <!--<result property="hostname" column="hostname"/>-->
+        <!--<result property="port" column="port"/>-->
+        <!--<result property="authentication" column="authentication"/>-->
+        <!--<result property="inboxName" column="inboxname"/>-->
+        <!--<result property="username" column="username"/>-->
+        <!--<result property="password" column="password"/>-->
+        <!--<result property="dateCreated" column="dateCreated"/>-->
+    </resultMap>
+
+    <insert id="upsert">
+        INSERT INTO music.track (title, location, album, artist, albumartist, genre, "year", discnumber, tracknumber, comment)
+        VALUES(#{track.title}, #{track.location}, #{track.album}, #{track.artist}, #{track.albumArtist},
+        #{track.genre}, #{track.year}, #{track.discNumber}, #{track.trackNumber}, #{track.comment})
+        ON CONFLICT (location) DO UPDATE
+          set title = #{track.title},
+          album = #{track.album},
+          artist = #{track.artist},
+          albumartist = #{track.albumArtist},
+          genre = #{track.genre},
+          "year" = #{track.year},
+          discnumber = #{track.discNumber},
+          tracknumber = #{track.trackNumber},
+          comment = #{track.comment}
+    </insert>
+</mapper>
