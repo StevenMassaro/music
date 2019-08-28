@@ -166,7 +166,7 @@ class App extends Component {
                     autoPlay={true}
                     mode={"full"}
                     toggleMode={false}
-                    preload={true}
+                    preload={false}
                     onAudioListsChange={this.onAudioListsChange}
                 />
             </div>
