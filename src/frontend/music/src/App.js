@@ -163,7 +163,7 @@ class App extends Component {
                 />
                 <ReactJkMusicPlayer
                     audioLists={this.state.playlist}
-                    autoPlay={false}
+                    autoPlay={true}
                     mode={"full"}
                     toggleMode={false}
                     preload={true}
