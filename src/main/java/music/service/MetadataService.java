@@ -15,6 +15,7 @@ import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -29,6 +30,9 @@ public class MetadataService {
     @Autowired
     private FileService fileService;
 
+    @Value("${music.file.source}")
+    private String musicFileSource;
+
     public List<Track> getTracks() throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
         List<File> files = new ArrayList<>(fileService.listMusicFiles());
         logger.info(String.format("Found %s files in music directory.", files.size()));
@@ -41,7 +45,7 @@ public class MetadataService {
             AudioFile audioFile = AudioFileIO.read(file);
             Tag tag = audioFile.getTag();
             try {
-                Track track = new Track(tag, file.getAbsolutePath());
+                Track track = new Track(tag, file.getAbsolutePath().replace(musicFileSource, ""));
                 tracks.add(track);
             } catch (Exception e) {
                 logger.error(String.format("Failed to parse tag for metadata for file %s", file.getAbsolutePath()), e);
