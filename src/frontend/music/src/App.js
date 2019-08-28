@@ -55,7 +55,7 @@ class App extends Component {
             playlist.push({
                 name: song.title,
                 singer: song.artist,
-                musicSrc: "./track/" + song.id + "/stream"
+                musicSrc: window.location.origin + "/media" + song.location
             });
 
             this.setState({
