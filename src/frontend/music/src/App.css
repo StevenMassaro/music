@@ -35,3 +35,7 @@
 .ReactTable {
   height: 95vh;
 }
+
+.rt-tr-group {
+  flex: 0 0 auto !important;
+}
