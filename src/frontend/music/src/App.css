@@ -31,3 +31,7 @@
     transform: rotate(360deg);
   }
 }
+
+.ReactTable {
+  height: 95vh;
+}
