@@ -1,9 +1,7 @@
 import React, {Component} from 'react';
 import './App.css';
-import ReactJkMusicPlayer from "react-jinke-music-player";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
-import "react-jinke-music-player/assets/index.css";
 
 class SongListComponent extends Component {
 
@@ -142,14 +140,6 @@ class SongListComponent extends Component {
                     defaultFilterMethod={this.props.defaultFilterMethod}
 
                 />
-                {/*<ReactJkMusicPlayer*/}
-                    {/*audioLists={this.state.playlist}*/}
-                    {/*autoPlay={true}*/}
-                    {/*mode={"full"}*/}
-                    {/*toggleMode={false}*/}
-                    {/*preload={false}*/}
-                    {/*onAudioListsChange={this.onAudioListsChange}*/}
-                {/*/>*/}
             </div>
 
         );
