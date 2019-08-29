@@ -11,7 +11,7 @@ class PlayerComponent extends Component {
             <audio
                 controls
                 src={this.props.currentSongSrc()}
-                preload={auto}
+                preload={"auto"}
             >
                 Your browser does not support the
                 <code>audio</code> element.
