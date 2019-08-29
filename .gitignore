@@ -1,0 +1,10 @@
+*.mp3
+*.flac
+MM.DB
+*.iml
+.idea/*
+node_modules/
+src/frontend/music/node/*
+src/frontend/music/node_modules/*
+src/main/resources/static/*
+target/*
