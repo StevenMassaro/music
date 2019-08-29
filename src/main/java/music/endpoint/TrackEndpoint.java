@@ -14,6 +14,7 @@ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.TagException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -42,6 +43,9 @@ public class TrackEndpoint {
     @Autowired
     private TrackService trackService;
 
+    @Value("${music.file.source}")
+    private String musicFileSource;
+
     @GetMapping
     public List<Track> list() {
         return trackService.list();
@@ -50,7 +54,7 @@ public class TrackEndpoint {
     @GetMapping("{id}/convert")
     public ResponseEntity<Resource> convertFile(@PathVariable long id) {
         try {
-            File source = fileService.getFile();
+            File source = fileService.getFile(id);
             File target = File.createTempFile("example", ".mp3");
             target.deleteOnExit();
 
@@ -83,7 +87,7 @@ public class TrackEndpoint {
     public ResponseEntity<Resource> stream(@PathVariable long id) throws IOException {
         Track track = trackService.get(id);
 
-        Resource file = new InputStreamResource(FileUtils.openInputStream(new File(track.getLocation())));
+        Resource file = new InputStreamResource(FileUtils.openInputStream(fileService.getFile(track)));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + FilenameUtils.getName(track.getLocation()) + "\"")
                 .header(HttpHeaders.CONTENT_TYPE, "audio/" + FilenameUtils.getExtension(track.getLocation()).toLowerCase())

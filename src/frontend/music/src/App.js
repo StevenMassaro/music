@@ -37,7 +37,7 @@ class App extends Component {
     };
 
     getCurrentSongSrc = () => {
-        return this.state.upNext ? window.location.origin + "/media" + this.state.upNext[0].location : 'fart';
+        return this.state.upNext ? "./track/" + this.state.upNext[0].id + "/stream" : undefined;
     };
 
     onCurrentSongEnd = (audioElement) => {

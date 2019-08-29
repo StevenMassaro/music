@@ -8,7 +8,7 @@ class PlayerComponent extends Component {
     }
 
     render() {
-        return (
+        return (this.props.currentSongSrc() ?
             <ReactAudioPlayer
                 controls
                 src={this.props.currentSongSrc()}
@@ -19,7 +19,7 @@ class PlayerComponent extends Component {
             >
                 Your browser does not support the
                 <code>audio</code> element.
-            </ReactAudioPlayer>
+            </ReactAudioPlayer> : null
         )
     }
 }
