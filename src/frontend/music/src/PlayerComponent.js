@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
+import ReactAudioPlayer from 'react-audio-player';
 
 class PlayerComponent extends Component {
     constructor(props) {
@@ -8,14 +9,17 @@ class PlayerComponent extends Component {
 
     render() {
         return (
-            <audio
+            <ReactAudioPlayer
                 controls
                 src={this.props.currentSongSrc()}
-                preload={"auto"}
+                autoplay
+                onEnded={() => this.props.onSongEnd(this.audioPlayer.audioEl)}
+                ref={(element) => { this.audioPlayer = element; }}
+                style={{"width":"100%"}}
             >
                 Your browser does not support the
                 <code>audio</code> element.
-            </audio>
+            </ReactAudioPlayer>
         )
     }
 }

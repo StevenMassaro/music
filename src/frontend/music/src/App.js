@@ -40,15 +40,22 @@ class App extends Component {
         return this.state.upNext ? window.location.origin + "/media" + this.state.upNext[0].location : 'fart';
     };
 
+    onCurrentSongEnd = (audioElement) => {
+        let upNext = Object.assign([], this.state.upNext);
+        upNext.shift(); // remove current song
+        this.setState({
+            upNext: upNext
+        }, () => audioElement.play()); // callback to start playing the next song
+    };
+
     render() {
         return (
             <div>
                 <SplitPane split="horizontal" defaultSize="8%">
-                    <div>
-                        <PlayerComponent
-                            currentSongSrc={this.getCurrentSongSrc}
-                        />
-                    </div>
+                    <PlayerComponent
+                        currentSongSrc={this.getCurrentSongSrc}
+                        onSongEnd={this.onCurrentSongEnd}
+                    />
                     <div>
                         <SplitPane split="vertical" defaultSize="15%">
                             <div>navigation</div>
