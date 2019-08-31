@@ -102,10 +102,11 @@ class App extends Component {
                         currentSongSrc={this.getCurrentSongSrc}
                         onSongEnd={this.onCurrentSongEnd}
                         shuffle={this.shuffle}
+                        songs={this.state.songs}
                     />
                     <div>
                         <SplitPane split="vertical" defaultSize="15%">
-                            <div>navigation</div>
+                            <div></div>
                             <SplitPane split="vertical" defaultSize="70%">
                                 <div>
                                     <SongListComponent
