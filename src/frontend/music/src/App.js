@@ -11,8 +11,12 @@ class App extends Component {
         super(props);
         this.state = {
             loadingSongs: false,
-            loadedSongs: false,
+            loadedSongs: false
         };
+    }
+
+    componentDidMount() {
+        this.listSongs();
     }
 
     addToPlaylist = (song) => {
@@ -48,6 +52,48 @@ class App extends Component {
         }, () => audioElement.play()); // callback to start playing the next song
     };
 
+    listSongs = () => {
+        this.setState({
+            loadingSongs: true,
+            loadedSongs: false
+        });
+        fetch("./track/")
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    this.setState({
+                        loadingSongs: false,
+                        loadedSongs: true,
+                        songs: result
+                    });
+                },
+                // Note: it's important to handle errors here
+                // instead of a catch() block so that we don't swallow
+                // exceptions from actual bugs in components.
+                (error) => {
+                    this.setState({
+                        loadingSongs: false,
+                        loadedSongs: true,
+                        errorSongs: error
+                    });
+                }
+            );
+    };
+
+    shuffle = () => {
+        let a = Object.assign([], this.state.songs);
+        var j, x, i;
+        for (i = a.length - 1; i > 0; i--) {
+            j = Math.floor(Math.random() * (i + 1));
+            x = a[i];
+            a[i] = a[j];
+            a[j] = x;
+        }
+        this.setState({
+            upNext: a
+        });
+    };
+
     render() {
         return (
             <div>
@@ -55,6 +101,7 @@ class App extends Component {
                     <PlayerComponent
                         currentSongSrc={this.getCurrentSongSrc}
                         onSongEnd={this.onCurrentSongEnd}
+                        shuffle={this.shuffle}
                     />
                     <div>
                         <SplitPane split="vertical" defaultSize="15%">
@@ -64,6 +111,9 @@ class App extends Component {
                                     <SongListComponent
                                         addToPlaylist={this.addToPlaylist}
                                         defaultFilterMethod={this.defaultFilterMethod}
+                                        error={this.state.errorSongs}
+                                        loadedSongs={this.state.loadedSongs}
+                                        songs={this.state.songs}
                                     />
                                 </div>
                                 <div>

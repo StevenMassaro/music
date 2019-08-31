@@ -8,7 +8,8 @@ class PlayerComponent extends Component {
     }
 
     render() {
-        return (this.props.currentSongSrc() ?
+        return (<div>
+            {this.props.currentSongSrc() &&
                 <div>
                     <ReactAudioPlayer
                         controls
@@ -24,7 +25,11 @@ class PlayerComponent extends Component {
                     <button onClick={() => this.props.onSongEnd(this.audioPlayer.audioEl)}>
                         Next
                     </button>
-                </div> : null
+                </div>}
+                <button onClick={this.props.shuffle}>
+                    Shuffle
+                </button>
+        </div>
         )
     }
 }
