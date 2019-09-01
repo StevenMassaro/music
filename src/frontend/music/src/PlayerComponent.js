@@ -17,7 +17,7 @@ class PlayerComponent extends Component {
                         autoplay
                         onEnded={() => this.props.onSongEnd(this.audioPlayer.audioEl)}
                         ref={(element) => { this.audioPlayer = element; }}
-                        style={{"width":"100%"}}
+                        style={{"width":"70%"}}
                     >
                         Your browser does not support the
                         <code>audio</code> element.
