@@ -1,13 +1,11 @@
 package music.model;
 
+import music.utils.FieldUtils;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
-import org.jaudiotagger.tag.flac.FlacTag;
-import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 
 import java.util.Date;
 
-import static music.utils.FieldUtils.getLongOrNull;
 
 public class Track {
 
@@ -43,8 +41,8 @@ public class Track {
         this.albumArtist = v2tag.getFirst(FieldKey.ALBUM_ARTIST);
         this.genre = v2tag.getFirst(FieldKey.GENRE);
         this.year = v2tag.getFirst(FieldKey.YEAR);
-        this.discNumber = getLongOrNull(v2tag, FieldKey.DISC_NO);
-        this.trackNumber = getLongOrNull(v2tag, FieldKey.TRACK);
+        this.discNumber = FieldUtils.getLongOrNull(v2tag, FieldKey.DISC_NO);
+        this.trackNumber = FieldUtils.getLongOrNull(v2tag, FieldKey.TRACK);
         this.comment = v2tag.getFirst(FieldKey.COMMENT);
         this.location = location;
     }

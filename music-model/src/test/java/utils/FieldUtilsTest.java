@@ -1,5 +1,6 @@
-package music.utils;
+package utils;
 
+import music.utils.FieldUtils;
 import org.jaudiotagger.tag.FieldDataInvalidException;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
@@ -11,6 +12,7 @@ import org.junit.Test;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
+
 
 public class FieldUtilsTest {
 
