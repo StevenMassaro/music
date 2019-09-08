@@ -24,7 +24,7 @@ node {
       }
    }
    stage('Publish docker image') {
-       sh label: '', script: 'docker push stevenmassaro/rclone-watchdog:latest'
+       sh label: '', script: 'docker push stevenmassaro/music-api:latest'
    }
    stage('Results') {
       junit '**/target/surefire-reports/TEST-*.xml'
