@@ -12,10 +12,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ws.schild.jave.AudioAttributes;
 import ws.schild.jave.Encoder;
 import ws.schild.jave.EncodingAttributes;
@@ -41,6 +38,11 @@ public class TrackEndpoint {
     @GetMapping
     public List<Track> list() {
         return trackService.list();
+    }
+
+    @DeleteMapping("/{id}")
+    public Track delete(@PathVariable long id) throws IOException {
+        return trackService.delete(id);
     }
 
     @GetMapping("{id}/convert")

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -15,6 +16,9 @@ public class TrackService {
 
     @Autowired
     private TrackMapper trackMapper;
+
+    @Autowired
+    private FileService fileService;
 
     public void upsertTracks(List<Track> tracks){
         for(Track track : tracks){
@@ -32,5 +36,12 @@ public class TrackService {
 
     public Track get(long id){
         return trackMapper.get(id);
+    }
+
+    public Track delete(long id) throws IOException {
+        Track track = get(id);
+        fileService.deleteFile(track);
+        trackMapper.deleteById(id);
+        return track;
     }
 }

@@ -15,4 +15,5 @@ public interface TrackMapper {
 
     Track get(@Param("id") long id);
 
+    void deleteById(@Param("id") long id);
 }

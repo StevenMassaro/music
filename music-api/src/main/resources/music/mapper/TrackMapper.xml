@@ -18,6 +18,10 @@
         WHERE id = ${id}
     </select>
 
+    <delete id="deleteById">
+        DELETE FROM music.track WHERE id = #{id}
+    </delete>
+
     <resultMap id="trackResultMap" type="music.model.Track">
         <id property="id" column="id"/>
         <!--<result property=""-->
