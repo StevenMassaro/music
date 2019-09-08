@@ -1,4 +1,4 @@
 FROM java:8
 EXPOSE 8080
-ADD /music-api/target/music-api.jar demo.jar
+ADD /target/music-api.jar demo.jar
 ENTRYPOINT ["java","-jar","demo.jar"]
