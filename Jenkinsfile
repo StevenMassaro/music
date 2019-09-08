@@ -8,23 +8,14 @@ node {
       // Run the maven build
       withEnv(["MVN_HOME=$mvnHome"]) {
          if (isUnix()) {
-            sh '"$MVN_HOME/bin/mvn" -Dmaven.test.failure.ignore clean install'
+            sh '"$MVN_HOME/bin/mvn" -Dmaven.test.failure.ignore clean install dockerfile:build'
          } else {
-            bat(/"%MVN_HOME%\bin\mvn" -Dmaven.test.failure.ignore clean install/)
+            bat(/"%MVN_HOME%\bin\mvn" -Dmaven.test.failure.ignore clean install dockerfile:build/)
          }
       }
    }
    stage('Results') {
       junit '**/target/surefire-reports/TEST-*.xml'
-      archiveArtifacts 'music-api/target/*.war'
-   }
-   stage('Deploy') {
-	   sh label: '', script: '''rm -rf /webapps/${JOB_BASE_NAME}.war
-		while [ -d /webapps/${JOB_BASE_NAME} ]
-		do
-		  sleep 1
-		  echo "${JOB_BASE_NAME} not removed yet, sleeping"
-		done
-		cp ${WORKSPACE}/music-api/target/${JOB_BASE_NAME}.war /webapps/${JOB_BASE_NAME}.war'''
+      archiveArtifacts 'music-api/target/*.jar'
    }
 }
