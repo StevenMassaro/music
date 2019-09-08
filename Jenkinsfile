@@ -23,6 +23,9 @@ node {
          }
       }
    }
+   stage('Publish docker image') {
+       sh label: '', script: 'docker push stevenmassaro/rclone-watchdog:latest'
+   }
    stage('Results') {
       junit '**/target/surefire-reports/TEST-*.xml'
       archiveArtifacts 'music-api/target/*.jar'
