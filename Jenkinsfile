@@ -24,6 +24,7 @@ node {
       }
    }
    stage('Publish docker image') {
+	   sh label: '', script: 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
        sh label: '', script: 'docker push stevenmassaro/music-api:latest'
    }
    stage('Results') {
