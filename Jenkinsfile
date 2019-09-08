@@ -14,6 +14,15 @@ node {
          }
       }
    }
+   stage('Docker build') {
+      withEnv(["MVN_HOME=$mvnHome"]) {
+         if (isUnix()) {
+            sh '"$MVN_HOME/bin/mvn" -Dmaven.test.failure.ignore -pl :music-api dockerfile:build'
+         } else {
+            bat(/"%MVN_HOME%\bin\mvn" -Dmaven.test.failure.ignore -pl :music-api dockerfile:build/)
+         }
+      }
+   }
    stage('Results') {
       junit '**/target/surefire-reports/TEST-*.xml'
       archiveArtifacts 'music-api/target/*.jar'
