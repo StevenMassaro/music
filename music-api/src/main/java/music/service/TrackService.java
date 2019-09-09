@@ -60,7 +60,6 @@ public class TrackService {
      * Deletes the track from the file system and deletes any relevant metadata from the database.
      */
     public Track permanentlyDelete(Track track) throws IOException {
-        logger.debug(String.format("Permanently deleting file %s", track.getLocation()));
         fileService.deleteFile(track);
         trackMapper.deleteById(track.getId());
         return track;

@@ -37,26 +37,28 @@ public class FileService {
         return getFile(trackService.get(id));
     }
 
-    public void deleteFile(Track track) throws IOException {
+    public boolean deleteFile(Track track) throws IOException {
+        logger.debug(String.format("Permanently deleting file %s", track.getLocation()));
         boolean fileDeleted = new File(musicFileSource + track.getLocation()).delete();
-        String trackDirectory = FilenameUtils.getFullPath(musicFileSource + track.getLocation());
-        recursivelyDeleteEmptyDirectories(trackDirectory);
+        if(fileDeleted){
+            String trackDirectory = FilenameUtils.getFullPath(musicFileSource + track.getLocation());
+            boolean dirDeleted = recursivelyDeleteEmptyDirectories(trackDirectory);
+        }
+        return fileDeleted;
     }
 
     /**
      * Deletes the supplied directory if it is empty. If it is empty, goes one directory up and repeats process until
      * a nonempty directory is found, then stops.
      */
-    public boolean recursivelyDeleteEmptyDirectories(String directory) throws IOException {
-        Collection<File> filesInDirectory = FileUtils.listFiles(new File(directory), null, false);
-        if(filesInDirectory.isEmpty()){
-            logger.debug(String.format("Directory %s is empty, deleting", directory));
-            FileUtils.deleteDirectory(new File(directory));
-            recursivelyDeleteEmptyDirectories(FilenameUtils.getFullPath(directory.substring(0, directory.length()-1)));
-            return true;
+    public boolean recursivelyDeleteEmptyDirectories(String directory) {
+        boolean wasDirectoryDeleted = new File(directory).delete();
+        if (wasDirectoryDeleted) {
+            logger.debug(String.format("Directory %s is empty and was deleted", directory));
+            return recursivelyDeleteEmptyDirectories(FilenameUtils.getFullPath(directory.substring(0, directory.length() - 1)));
         } else {
-            logger.debug(String.format("Directory %s is not empty, stopping deletion process", directory));
-            return false;
+            logger.debug(String.format("Directory %s is not empty and was not deleted", directory));
         }
+        return wasDirectoryDeleted;
     }
 }
