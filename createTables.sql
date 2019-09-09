@@ -16,6 +16,7 @@ create table music.track (
   discnumber int,
   tracknumber int,
   comment varchar,
+  deletedInd boolean not null,
 	dateCreated timestamp DEFAULT now(),
 	dateUpdated timestamp
 );

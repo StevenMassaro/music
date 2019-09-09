@@ -6,6 +6,12 @@
 
     <select id="list" resultMap="trackResultMap">
         <include refid="selectAccounts"/>
+        WHERE deletedInd != true
+        ORDER BY artist,album,discnumber,tracknumber
+    </select>
+
+    <select id="listAll" resultMap="trackResultMap">
+        <include refid="selectAccounts"/>
         ORDER BY artist,album,discnumber,tracknumber
     </select>
 
@@ -22,6 +28,10 @@
         DELETE FROM music.track WHERE id = #{id}
     </delete>
 
+    <update id="markDeletedById">
+        UPDATE music.track SET deletedInd = #{deletedInd} WHERE id = #{id}
+    </update>
+
     <resultMap id="trackResultMap" type="music.model.Track">
         <id property="id" column="id"/>
         <!--<result property=""-->
@@ -37,9 +47,9 @@
     </resultMap>
 
     <insert id="upsert">
-        INSERT INTO music.track (title, location, album, artist, albumartist, genre, "year", discnumber, tracknumber, comment)
+        INSERT INTO music.track (title, location, album, artist, albumartist, genre, "year", discnumber, tracknumber, comment, deletedInd)
         VALUES(#{track.title}, #{track.location}, #{track.album}, #{track.artist}, #{track.albumArtist},
-        #{track.genre}, #{track.year}, #{track.discNumber}, #{track.trackNumber}, #{track.comment})
+        #{track.genre}, #{track.year}, #{track.discNumber}, #{track.trackNumber}, #{track.comment}, #{track.deletedInd})
         ON CONFLICT (location) DO UPDATE
           set title = #{track.title},
           album = #{track.album},

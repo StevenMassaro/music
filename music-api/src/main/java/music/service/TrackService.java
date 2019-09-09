@@ -30,18 +30,48 @@ public class TrackService {
         }
     }
 
+    /**
+     * Lists all non-deleted tracks.
+     */
     public List<Track> list(){
         return trackMapper.list();
+    }
+
+    /**
+     * Lists all tracks, including those that were marked deleted in the database.
+     */
+    public List<Track> listAll(){
+        return trackMapper.listAll();
     }
 
     public Track get(long id){
         return trackMapper.get(id);
     }
 
-    public Track delete(long id) throws IOException {
+    /**
+     * Deletes the track from the file system and deletes any relevant metadata from the database.
+     */
+    public Track permanentlyDelete(long id) throws IOException {
         Track track = get(id);
+        return permanentlyDelete(track);
+    }
+
+    /**
+     * Deletes the track from the file system and deletes any relevant metadata from the database.
+     */
+    public Track permanentlyDelete(Track track) throws IOException {
+        logger.debug(String.format("Permanently deleting file %s", track.getLocation()));
         fileService.deleteFile(track);
-        trackMapper.deleteById(id);
+        trackMapper.deleteById(track.getId());
+        return track;
+    }
+
+    /**
+     * Mark the track deleted in the database. Does not actually delete the file from the file system.
+     */
+    public Track markDeleted(long id){
+        Track track = get(id);
+        trackMapper.markDeletedById(id, true);
         return track;
     }
 }

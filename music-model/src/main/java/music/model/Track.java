@@ -20,6 +20,7 @@ public class Track {
     private Long discNumber;
     private Long trackNumber;
     private String comment;
+    private boolean deletedInd = false;
     private Date dateCreated;
     private Date dateUpdated;
 
@@ -125,6 +126,14 @@ public class Track {
 
     public void setTrackNumber(Long trackNumber) {
         this.trackNumber = trackNumber;
+    }
+
+    public boolean getDeletedInd() {
+        return deletedInd;
+    }
+
+    public void setDeletedInd(boolean deletedInd) {
+        this.deletedInd = deletedInd;
     }
 
     public String getComment() {

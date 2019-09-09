@@ -13,7 +13,11 @@ public interface TrackMapper {
 
     List<Track> list();
 
+    List<Track> listAll();
+
     Track get(@Param("id") long id);
 
     void deleteById(@Param("id") long id);
+
+    void markDeletedById(@Param("id")long id, @Param("deletedInd") boolean deletedInd);
 }

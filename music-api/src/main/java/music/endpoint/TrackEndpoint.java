@@ -42,7 +42,7 @@ public class TrackEndpoint {
 
     @DeleteMapping("/{id}")
     public Track delete(@PathVariable long id) throws IOException {
-        return trackService.delete(id);
+        return trackService.markDeleted(id);
     }
 
     @GetMapping("{id}/convert")
