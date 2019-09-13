@@ -33,7 +33,7 @@ public class StartupProcessor implements CommandLineRunner {
      * Find all tracks marked deleted in the database and delete those tracks from the file system.
      */
     private void purgeDeletedTracks() throws IOException {
-        logger.debug("Purging deleted files from disk.");
+        logger.info("Purging deleted files from disk.");
         List<Track> allTracks = trackService.listAll();
         long deletedCount = 0;
         for(Track track : allTracks){
