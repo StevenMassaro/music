@@ -87,4 +87,9 @@ public class TrackEndpoint {
                 .header(HttpHeaders.CONTENT_TYPE, "audio/" + FilenameUtils.getExtension(track.getLocation()).toLowerCase())
                 .body(file);
     }
+
+    @PostMapping("/{id}/listened")
+    public Track markTrackAsListened(@PathVariable long id){
+        return trackService.markListened(id);
+    }
 }

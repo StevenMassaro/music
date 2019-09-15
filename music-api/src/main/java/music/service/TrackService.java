@@ -1,5 +1,6 @@
 package music.service;
 
+import music.mapper.PlayMapper;
 import music.mapper.TrackMapper;
 import music.model.Track;
 import org.slf4j.Logger;
@@ -8,17 +9,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class TrackService {
     private Logger logger = LoggerFactory.getLogger(TrackService.class);
 
-    @Autowired
-    private TrackMapper trackMapper;
+    private final TrackMapper trackMapper;
+    private final PlayMapper playMapper;
+    private final FileService fileService;
 
     @Autowired
-    private FileService fileService;
+    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService) {
+        this.trackMapper = trackMapper;
+        this.playMapper = playMapper;
+        this.fileService = fileService;
+    }
 
     public void upsertTracks(List<Track> tracks){
         for(Track track : tracks){
@@ -71,6 +78,12 @@ public class TrackService {
     public Track markDeleted(long id){
         Track track = get(id);
         trackMapper.markDeletedById(id, true);
+        return track;
+    }
+
+    public Track markListened(long id){
+        Track track = get(id);
+        playMapper.insertPlay(id, new Date());
         return track;
     }
 }

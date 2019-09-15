@@ -20,3 +20,10 @@ create table music.track (
 	dateCreated timestamp DEFAULT now(),
 	dateUpdated timestamp
 );
+
+drop table if exists music.plays;
+create table music.plays (
+  id serial not null,
+  songid int not null,
+  playdate timestamp not null
+)
