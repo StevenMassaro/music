@@ -47,11 +47,12 @@
     </resultMap>
 
     <insert id="upsert">
-        INSERT INTO music.track (title, location, album, artist, albumartist, genre, "year", discnumber, tracknumber, comment, deletedInd)
-        VALUES(#{track.title}, #{track.location}, #{track.album}, #{track.artist}, #{track.albumArtist},
+        INSERT INTO music.track (title, location, hash, album, artist, albumartist, genre, "year", discnumber, tracknumber, comment, deletedInd)
+        VALUES(#{track.title}, #{track.location}, #{track.hash}, #{track.album}, #{track.artist}, #{track.albumArtist},
         #{track.genre}, #{track.year}, #{track.discNumber}, #{track.trackNumber}, #{track.comment}, #{track.deletedInd})
         ON CONFLICT (location) DO UPDATE
           set title = #{track.title},
+          hash = #{track.hash},
           album = #{track.album},
           artist = #{track.artist},
           albumartist = #{track.albumArtist},

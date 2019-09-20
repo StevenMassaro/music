@@ -1,9 +1,13 @@
 package music.model;
 
 import music.utils.FieldUtils;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 
 
@@ -12,6 +16,7 @@ public class Track {
     private long id;
     private String title;
     private String location;
+    private String hash;
     private String album;
     private String artist;
     private String albumArtist;
@@ -35,7 +40,7 @@ public class Track {
 ////            tag.getFields(FieldKey.COMMENT);
     }
 
-    public Track(Tag v2tag, String location) {
+    public Track(Tag v2tag, String location, File file) throws IOException {
         this.title = v2tag.getFirst(FieldKey.TITLE);
         this.album = v2tag.getFirst(FieldKey.ALBUM);
         this.artist = v2tag.getFirst(FieldKey.ARTIST);
@@ -46,6 +51,7 @@ public class Track {
         this.trackNumber = FieldUtils.getLongOrNull(v2tag, FieldKey.TRACK);
         this.comment = v2tag.getFirst(FieldKey.COMMENT);
         this.location = location;
+        this.hash = DigestUtils.sha512Hex(FileUtils.openInputStream(file));
     }
 
     public long getId() {
@@ -110,6 +116,14 @@ public class Track {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 
     public Long getDiscNumber() {

@@ -45,7 +45,7 @@ public class MetadataService {
             AudioFile audioFile = AudioFileIO.read(file);
             Tag tag = audioFile.getTag();
             try {
-                Track track = new Track(tag, file.getAbsolutePath().replace(musicFileSource, ""));
+                Track track = new Track(tag, file.getAbsolutePath().replace(musicFileSource, ""), file);
                 tracks.add(track);
             } catch (Exception e) {
                 logger.error(String.format("Failed to parse tag for metadata for file %s", file.getAbsolutePath()), e);

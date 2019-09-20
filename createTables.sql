@@ -8,6 +8,7 @@ create table music.track (
   id serial not null,
   title varchar(1000) not null,
   location varchar primary key,
+  hash varchar(128) not null,
   album varchar(1000),
   artist varchar(1000),
   albumArtist varchar(1000),
