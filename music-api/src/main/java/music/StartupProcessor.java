@@ -36,10 +36,12 @@ public class StartupProcessor implements CommandLineRunner {
         logger.info("Purging deleted files from disk.");
         List<Track> allTracks = trackService.listAll();
         long deletedCount = 0;
-        for(Track track : allTracks){
-            if(track.getDeletedInd()){
-                trackService.permanentlyDelete(track);
-                deletedCount++;
+        if (allTracks != null) {
+            for (Track track : allTracks) {
+                if (track.getDeletedInd()) {
+                    trackService.permanentlyDelete(track);
+                    deletedCount++;
+                }
             }
         }
         logger.info(String.format("Deleted %s tracks from the file system.", deletedCount));
