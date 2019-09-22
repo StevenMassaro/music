@@ -9,13 +9,17 @@ import java.util.List;
 @Mapper
 public interface TrackMapper {
 
-    void upsert(@Param("track") Track track);
+    void updateByLocation(@Param("track") Track track);
+
+    void insert(@Param("track") Track track);
 
     List<Track> list();
 
     List<Track> listAll();
 
     Track get(@Param("id") long id);
+
+    Track getByLocation(@Param("location") String location);
 
     void deleteById(@Param("id") long id);
 

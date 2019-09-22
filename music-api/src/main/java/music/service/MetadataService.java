@@ -1,5 +1,6 @@
 package music.service;
 
+import music.model.DeferredTrack;
 import music.model.Track;
 import org.apache.commons.io.FilenameUtils;
 import org.jaudiotagger.audio.AudioFile;
@@ -45,7 +46,7 @@ public class MetadataService {
             AudioFile audioFile = AudioFileIO.read(file);
             Tag tag = audioFile.getTag();
             try {
-                Track track = new Track(tag, file.getAbsolutePath().replace(musicFileSource, ""), file);
+                Track track = new DeferredTrack(tag, file.getAbsolutePath().replace(musicFileSource, ""), file, musicFileSource);
                 tracks.add(track);
             } catch (Exception e) {
                 logger.error(String.format("Failed to parse tag for metadata for file %s", file.getAbsolutePath()), e);

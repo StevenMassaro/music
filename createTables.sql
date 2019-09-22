@@ -19,7 +19,8 @@ create table music.track (
   comment varchar,
   deletedInd boolean not null,
 	dateCreated timestamp DEFAULT now(),
-	dateUpdated timestamp
+	dateUpdated timestamp,
+	fileLastModifiedDate timestamp
 );
 
 drop table if exists music.plays;
@@ -27,4 +28,4 @@ create table music.plays (
   id serial not null,
   songid int not null,
   playdate timestamp not null
-)
+);

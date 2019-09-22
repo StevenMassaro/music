@@ -28,6 +28,7 @@ public class Track {
     private boolean deletedInd = false;
     private Date dateCreated;
     private Date dateUpdated;
+    private Date fileLastModifiedDate;
 
     public Track(){
         //            AudioHeader audioHeader = f.getAudioHeader();
@@ -40,7 +41,7 @@ public class Track {
 ////            tag.getFields(FieldKey.COMMENT);
     }
 
-    public Track(Tag v2tag, String location, File file) throws IOException {
+    public Track(Tag v2tag, String location, File file, Date fileLastModifiedDate) throws IOException {
         this.title = v2tag.getFirst(FieldKey.TITLE);
         this.album = v2tag.getFirst(FieldKey.ALBUM);
         this.artist = v2tag.getFirst(FieldKey.ARTIST);
@@ -51,7 +52,10 @@ public class Track {
         this.trackNumber = FieldUtils.getLongOrNull(v2tag, FieldKey.TRACK);
         this.comment = v2tag.getFirst(FieldKey.COMMENT);
         this.location = location;
-        this.hash = DigestUtils.sha512Hex(FileUtils.openInputStream(file));
+        this.fileLastModifiedDate = fileLastModifiedDate;
+        if(file != null){
+            this.hash = DigestUtils.sha512Hex(FileUtils.readFileToByteArray(file));
+        }
     }
 
     public long getId() {
@@ -118,7 +122,7 @@ public class Track {
         this.location = location;
     }
 
-    public String getHash() {
+    public String getHash() throws IOException {
         return hash;
     }
 
@@ -172,5 +176,13 @@ public class Track {
 
     public void setDateUpdated(Date dateUpdated) {
         this.dateUpdated = dateUpdated;
+    }
+
+    public Date getFileLastModifiedDate() {
+        return fileLastModifiedDate;
+    }
+
+    public void setFileLastModifiedDate(Date fileLastModifiedDate) {
+        this.fileLastModifiedDate = fileLastModifiedDate;
     }
 }

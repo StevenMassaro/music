@@ -21,7 +21,12 @@
 
     <select id="get" resultMap="trackResultMap">
         <include refid="selectAccounts"/>
-        WHERE id = ${id}
+        WHERE id = #{id}
+    </select>
+
+    <select id="getByLocation" resultMap="trackResultMap">
+        <include refid="selectAccounts"/>
+        WHERE location = #{location}
     </select>
 
     <delete id="deleteById">
@@ -46,20 +51,26 @@
         <!--<result property="dateCreated" column="dateCreated"/>-->
     </resultMap>
 
-    <insert id="upsert">
-        INSERT INTO music.track (title, location, hash, album, artist, albumartist, genre, "year", discnumber, tracknumber, comment, deletedInd)
+    <insert id="insert">
+        INSERT INTO music.track (title, location, hash, album, artist, albumartist, genre, "year", discnumber, tracknumber, comment, deletedInd, fileLastModifiedDate)
         VALUES(#{track.title}, #{track.location}, #{track.hash}, #{track.album}, #{track.artist}, #{track.albumArtist},
-        #{track.genre}, #{track.year}, #{track.discNumber}, #{track.trackNumber}, #{track.comment}, #{track.deletedInd})
-        ON CONFLICT (location) DO UPDATE
-          set title = #{track.title},
-          hash = #{track.hash},
-          album = #{track.album},
-          artist = #{track.artist},
-          albumartist = #{track.albumArtist},
-          genre = #{track.genre},
-          "year" = #{track.year},
-          discnumber = #{track.discNumber},
-          tracknumber = #{track.trackNumber},
-          comment = #{track.comment}
+        #{track.genre}, #{track.year}, #{track.discNumber}, #{track.trackNumber}, #{track.comment}, #{track.deletedInd}, #{track.fileLastModifiedDate})
     </insert>
+
+    <update id="updateByLocation">
+        UPDATE music.track
+        SET
+        title = #{track.title},
+        hash = #{track.hash},
+        album = #{track.album},
+        artist = #{track.artist},
+        albumartist = #{track.albumArtist},
+        genre = #{track.genre},
+        "year" = #{track.year},
+        discnumber = #{track.discNumber},
+        tracknumber = #{track.trackNumber},
+        comment = #{track.comment},
+        fileLastModifiedDate = #{track.fileLastModifiedDate}
+        WHERE location = #{track.location}
+    </update>
 </mapper>

@@ -30,7 +30,18 @@ public class TrackService {
     public void upsertTracks(List<Track> tracks){
         for(Track track : tracks){
             try {
-                trackMapper.upsert(track);
+                Track existingTrack = getByLocation(track.getLocation());
+                if (existingTrack != null) {
+                    if (!existingTrack.getFileLastModifiedDate().equals(track.getFileLastModifiedDate())) {
+                        logger.debug(String.format("Existing track has been modified since last sync, updating: %s", existingTrack.getTitle()));
+                        trackMapper.updateByLocation(track);
+                    } else {
+                        logger.debug(String.format("Existing track has same modified date as last sync, skipping: %s", existingTrack.getTitle()));
+                    }
+                } else {
+                    logger.debug(String.format("No existing track found, inserting new metadata for %s", track.getTitle()));
+                    trackMapper.insert(track);
+                }
             } catch (Exception e) {
                 logger.error(String.format("Failed to insert metadata for track %s", track.getLocation()), e);
             }
@@ -49,6 +60,10 @@ public class TrackService {
      */
     public List<Track> listAll(){
         return trackMapper.listAll();
+    }
+
+    public Track getByLocation(String location) {
+        return trackMapper.getByLocation(location);
     }
 
     public Track get(long id){
