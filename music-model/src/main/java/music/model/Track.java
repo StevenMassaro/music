@@ -185,4 +185,26 @@ public class Track {
     public void setFileLastModifiedDate(Date fileLastModifiedDate) {
         this.fileLastModifiedDate = fileLastModifiedDate;
     }
+
+    @Override
+    public String toString() {
+        return "Track{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", location='" + location + '\'' +
+                ", hash='" + hash + '\'' +
+                ", album='" + album + '\'' +
+                ", artist='" + artist + '\'' +
+                ", albumArtist='" + albumArtist + '\'' +
+                ", genre='" + genre + '\'' +
+                ", year='" + year + '\'' +
+                ", discNumber=" + discNumber +
+                ", trackNumber=" + trackNumber +
+                ", comment='" + comment + '\'' +
+                ", deletedInd=" + deletedInd +
+                ", dateCreated=" + dateCreated +
+                ", dateUpdated=" + dateUpdated +
+                ", fileLastModifiedDate=" + fileLastModifiedDate +
+                '}';
+    }
 }
