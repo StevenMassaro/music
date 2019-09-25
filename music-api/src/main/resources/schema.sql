@@ -1,4 +1,4 @@
-create database music;
+-- create database music;
 -- pause and set active
 
 create schema music;

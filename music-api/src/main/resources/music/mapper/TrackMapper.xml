@@ -5,32 +5,76 @@
 <mapper namespace="music.mapper.TrackMapper">
 
     <select id="list" resultMap="trackResultMap">
-        <include refid="selectAccounts"/>
+        <include refid="selectColumns"/>
         WHERE deletedInd != true
+        <include refid="selectGroupBy"/>
         ORDER BY artist,album,discnumber,tracknumber
     </select>
 
     <select id="listAll" resultMap="trackResultMap">
-        <include refid="selectAccounts"/>
+        <include refid="selectColumns"/>
+        <include refid="selectGroupBy"/>
         ORDER BY artist,album,discnumber,tracknumber
     </select>
 
-    <sql id="selectAccounts">
-        SELECT * FROM music.track
+    <sql id="selectColumns">
+        SELECT
+        t.id
+        , t.title
+        , t."location"
+        , t.hash
+        , t.album
+        , t.artist
+        , t.albumartist
+        , t.genre
+        , t."year"
+        , t.discnumber
+        , t.tracknumber
+        , t."comment"
+        , t.deletedind
+        , t.datecreated
+        , t.dateupdated
+        , t.filelastmodifieddate
+        , count(p.playdate) AS plays
+        FROM music.track t
+        LEFT OUTER JOIN music.plays p
+        ON p.songid = t.id
+    </sql>
+
+    <sql id="selectGroupBy">
+        GROUP BY
+        t.id
+        , t.title
+        , t."location"
+        , t.hash
+        , t.album
+        , t.artist
+        , t.albumartist
+        , t.genre
+        , t."year"
+        , t.discnumber
+        , t.tracknumber
+        , t."comment"
+        , t.deletedind
+        , t.datecreated
+        , t.dateupdated
+        , t.filelastmodifieddate
     </sql>
 
     <select id="get" resultMap="trackResultMap">
-        <include refid="selectAccounts"/>
-        WHERE id = #{id}
+        <include refid="selectColumns"/>
+        WHERE t.id = #{id}
+        <include refid="selectGroupBy"/>
     </select>
 
     <select id="getByLocation" resultMap="trackResultMap">
-        <include refid="selectAccounts"/>
-        WHERE location = #{location}
+        <include refid="selectColumns"/>
+        WHERE t.location = #{location}
+        <include refid="selectGroupBy"/>
     </select>
 
     <delete id="deleteById">
-        DELETE FROM music.track WHERE id = #{id}
+        DELETE FROM music.track WHERE t.id = #{id}
     </delete>
 
     <update id="markDeletedById">

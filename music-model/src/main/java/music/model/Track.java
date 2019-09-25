@@ -24,6 +24,7 @@ public class Track {
     private String year;
     private Long discNumber;
     private Long trackNumber;
+    private long plays;
     private String comment;
     private boolean deletedInd = false;
     private Date dateCreated;
@@ -144,6 +145,14 @@ public class Track {
 
     public void setTrackNumber(Long trackNumber) {
         this.trackNumber = trackNumber;
+    }
+
+    public long getPlays() {
+        return plays;
+    }
+
+    public void setPlays(long plays) {
+        this.plays = plays;
     }
 
     public boolean getDeletedInd() {

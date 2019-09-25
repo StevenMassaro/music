@@ -4,4 +4,3 @@ MM.DB
 *.iml
 .idea/*
 target/
-*.properties
