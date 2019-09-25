@@ -11,6 +11,7 @@ import org.jaudiotagger.tag.TagException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,5 +41,24 @@ public class AdminEndpoint {
         trackService.upsertTracks(files);
         logger.info("Finished database sync");
         return trackService.list();
+    }
+
+    /**
+     * Find all tracks marked deleted in the database and delete those tracks from the file system.
+     */
+    @DeleteMapping("/purge")
+    public void purgeDeletedTracks() throws IOException {
+        logger.info("Purging deleted files from disk.");
+        List<Track> allTracks = trackService.listAll();
+        long deletedCount = 0;
+        if (allTracks != null) {
+            for (Track track : allTracks) {
+                if (track.getDeletedInd()) {
+                    trackService.permanentlyDelete(track);
+                    deletedCount++;
+                }
+            }
+        }
+        logger.info(String.format("Deleted %s tracks from the file system.", deletedCount));
     }
 }
