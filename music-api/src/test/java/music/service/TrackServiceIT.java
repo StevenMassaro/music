@@ -1,5 +1,6 @@
 package music.service;
 
+import music.model.Device;
 import music.model.Track;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +24,9 @@ public class TrackServiceIT {
     @Autowired
     private TrackService trackService;
 
+    @Autowired
+    private DeviceService deviceService;
+
     @Test
     public void addingTracks() throws IOException {
         Track track = track();
@@ -35,12 +39,15 @@ public class TrackServiceIT {
 
     @Test
     public void listenedTrack() {
+        // first create a device with which to associate the plays
+        Device device = deviceService.getOrInsert("devname");
+
         trackService.upsertTracks(Collections.singletonList(track()));
         Track track = trackService.list().get(0);
 
         assertEquals(0, track.getPlays());
 
-        trackService.markListened(track.getId());
+        trackService.markListened(track.getId(), device.getId());
 
         track = trackService.list().get(0);
         assertEquals(1, track.getPlays());

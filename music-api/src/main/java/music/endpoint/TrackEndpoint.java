@@ -89,7 +89,7 @@ public class TrackEndpoint {
     }
 
     @PostMapping("/{id}/listened")
-    public Track markTrackAsListened(@PathVariable long id){
-        return trackService.markListened(id);
+    public Track markTrackAsListened(@PathVariable long id, @RequestParam long deviceId){
+        return trackService.markListened(id, deviceId);
     }
 }

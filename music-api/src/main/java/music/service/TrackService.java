@@ -96,9 +96,9 @@ public class TrackService {
         return track;
     }
 
-    public Track markListened(long id){
+    public Track markListened(long id, long deviceId){
         Track track = get(id);
-        playMapper.insertPlay(id, new Date());
+        playMapper.insertPlay(id, new Date(), deviceId);
         return track;
     }
 }
