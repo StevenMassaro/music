@@ -35,5 +35,6 @@ create table music.plays (
   id serial not null,
   songid int not null references music.track(id),
   deviceid int not null references music.device(id),
-  playdate timestamp not null
+  playdate timestamp not null,
+  primary key (songid, deviceid, playdate)
 );

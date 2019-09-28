@@ -70,6 +70,18 @@ public class TrackService {
         return trackMapper.get(id);
     }
 
+    public Track get(String title, String artist, String album, List<Track> trackCache) {
+        for (Track track : trackCache) {
+            if (track.getTitle().equals(title)
+                    && track.getArtist().equals(artist)
+                    && track.getAlbum().equals(album)) {
+                return track;
+            }
+        }
+        // todo: this should find the track out of the database
+        return null;
+    }
+
     /**
      * Deletes the track from the file system and deletes any relevant metadata from the database.
      */
