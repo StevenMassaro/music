@@ -3,6 +3,9 @@ package music.service;
 import music.model.Track;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOCase;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +25,14 @@ public class FileService {
     @Value("${music.file.source}")
     private String musicFileSource;
 
+    @Value("${music.acceptable.file.extensions}")
+    private String acceptableExtensions;
+
     private Logger logger = LoggerFactory.getLogger(FileService.class);
 
     public Collection<File> listMusicFiles() {
-//        return FileUtils.listFiles(new File("/music"), new String[]{"mp3", "flac", "FLAC"}, true);
-        return FileUtils.listFiles(new File(musicFileSource), new String[]{"mp3", "flac", "FLAC"}, true);
+        SuffixFileFilter caseInsensitiveExtensionFilter = new SuffixFileFilter(acceptableExtensions.split(","), IOCase.INSENSITIVE);
+        return FileUtils.listFiles(new File(musicFileSource), caseInsensitiveExtensionFilter, TrueFileFilter.INSTANCE);
     }
 
     public File getFile(Track track) {
