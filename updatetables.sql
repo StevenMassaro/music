@@ -11,3 +11,5 @@ update plays set deviceid = 1;
 alter table music.plays alter column deviceid set not null;
 
 alter table music.plays add primary key (songid, deviceid, playdate);
+
+alter table music.plays add column imported boolean default false;

@@ -8,8 +8,12 @@
         VALUES(#{id}, #{deviceId}, #{playdate}, #{imported})
     </insert>
 
-    <insert id="insertPlayCount">
+    <insert id="upsertPlayCount">
         INSERT INTO music.playcount (songid, deviceid, playcount, imported)
         VALUES (#{songid}, #{deviceid}, #{playcount}, #{imported})
+        ON CONFLICT (songid, deviceid)
+        DO UPDATE SET
+          playcount = #{playcount}
+          , imported = #{imported}
     </insert>
 </mapper>

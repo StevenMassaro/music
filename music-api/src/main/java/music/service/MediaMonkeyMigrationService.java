@@ -3,10 +3,12 @@ package music.service;
 import music.mapper.PlayMapper;
 import music.model.*;
 import org.apache.commons.io.FileUtils;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -81,7 +83,8 @@ public class MediaMonkeyMigrationService implements MigrationService {
                     try {
                         playMapper.insertPlay(track.getId(), mediaMonkeyPlay.getDateAsDelphi(), device.getId(), true);
                         playImportResult.getSuccessful().add(mediaMonkeyPlay);
-                    } catch (DuplicateKeyException exception) {
+                    } catch (DuplicateKeyException | UncategorizedSQLException exception) {
+                        logger.debug("Failed to import", exception);
                         playImportResult.getAlreadyImported().add(mediaMonkeyPlay);
                     }
                 } else {
@@ -115,10 +118,10 @@ public class MediaMonkeyMigrationService implements MigrationService {
 
                 if(track != null){
                     try {
-                        playMapper.insertPlayCount(track.getId(), device.getId(), playCount, true);
+                        playMapper.upsertPlayCount(track.getId(), device.getId(), playCount, true);
                         playCounts.add(new MediaMonkeyPlayCount(songTitle, artist, album, playCount));
-                    } catch (DuplicateKeyException e) {
-
+                    } catch (DuplicateKeyException |UncategorizedSQLException e) {
+                        logger.debug("Failed to import", e);
                     }
                 }
             }

@@ -12,7 +12,7 @@ public interface PlayMapper {
                     @Param("deviceId") long deviceId,
                     @Param("imported") boolean imported);
 
-    void insertPlayCount(@Param("songid") long songId,
+    void upsertPlayCount(@Param("songid") long songId,
                          @Param("deviceid") long deviceId,
                          @Param("playcount") long playCount,
                          boolean imported);
