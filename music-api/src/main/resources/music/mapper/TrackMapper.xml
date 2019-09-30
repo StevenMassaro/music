@@ -35,10 +35,12 @@
         , t.datecreated
         , t.dateupdated
         , t.filelastmodifieddate
-        , count(p.playdate) AS plays
+        , COUNT(p.playdate) + pc.playcount - (SELECT COUNT(*) FROM music.plays WHERE songid = t.id AND imported = true) AS plays
         FROM music.track t
         LEFT OUTER JOIN music.plays p
         ON p.songid = t.id
+        LEFT OUTER JOIN music.playcount pc
+        ON pc.songid = t.id
     </sql>
 
     <sql id="selectGroupBy">
@@ -59,6 +61,7 @@
         , t.datecreated
         , t.dateupdated
         , t.filelastmodifieddate
+        , pc.playcount
     </sql>
 
     <select id="get" resultMap="trackResultMap">

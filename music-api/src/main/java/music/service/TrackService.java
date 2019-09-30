@@ -110,7 +110,7 @@ public class TrackService {
 
     public Track markListened(long id, long deviceId){
         Track track = get(id);
-        playMapper.insertPlay(id, new Date(), deviceId);
+        playMapper.insertPlay(id, new Date(), deviceId, false);
         return track;
     }
 }

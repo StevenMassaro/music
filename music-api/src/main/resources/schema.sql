@@ -36,5 +36,15 @@ create table music.plays (
   songid int not null references music.track(id),
   deviceid int not null references music.device(id),
   playdate timestamp not null,
+  imported boolean not null default false,
   primary key (songid, deviceid, playdate)
+);
+
+drop table if exists music.playcount cascade;
+create table music.playcount (
+  songid int not null references music.track(id),
+  deviceid int not null references music.device(id),
+  playcount int not null,
+  imported boolean not null default true,
+  primary key(songid, deviceid)
 );
