@@ -35,7 +35,7 @@
         , t.datecreated
         , t.dateupdated
         , t.filelastmodifieddate
-        , COUNT(p.playdate) + pc.playcount - (SELECT COUNT(*) FROM music.plays WHERE songid = t.id AND imported = true) AS plays
+        , COUNT(p.playdate) + COALESCE(pc.playcount, 0) - (SELECT COUNT(*) FROM music.plays WHERE songid = t.id AND imported = true) AS plays
         FROM music.track t
         LEFT OUTER JOIN music.plays p
         ON p.songid = t.id
