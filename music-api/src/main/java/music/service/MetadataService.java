@@ -28,11 +28,15 @@ public class MetadataService {
 
     private Logger logger = LoggerFactory.getLogger(MetadataService.class);
 
-    @Autowired
-    private FileService fileService;
+    private final FileService fileService;
 
     @Value("${music.file.source}")
     private String musicFileSource;
+
+    @Autowired
+    public MetadataService(FileService fileService) {
+        this.fileService = fileService;
+    }
 
     public List<Track> getTracks() throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
         List<File> files = new ArrayList<>(fileService.listMusicFiles());

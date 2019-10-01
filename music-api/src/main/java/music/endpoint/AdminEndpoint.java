@@ -25,14 +25,15 @@ public class AdminEndpoint {
 
     private Logger logger = LoggerFactory.getLogger(AdminEndpoint.class);
 
-    @Autowired
-    private FileService fileService;
+    private final MetadataService metadataService;
+
+    private final TrackService trackService;
 
     @Autowired
-    private MetadataService metadataService;
-
-    @Autowired
-    private TrackService trackService;
+    public AdminEndpoint(MetadataService metadataService, TrackService trackService) {
+        this.metadataService = metadataService;
+        this.trackService = trackService;
+    }
 
     @GetMapping("/dbSync")
     public List<Track> syncTracksToDb() throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {

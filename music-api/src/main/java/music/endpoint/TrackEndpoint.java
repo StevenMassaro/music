@@ -26,14 +26,18 @@ import java.util.List;
 @RequestMapping("/track")
 public class TrackEndpoint {
 
-    @Autowired
-    private FileService fileService;
+    private final FileService fileService;
 
-    @Autowired
-    private TrackService trackService;
+    private final TrackService trackService;
 
     @Value("${music.file.source}")
     private String musicFileSource;
+
+    @Autowired
+    public TrackEndpoint(FileService fileService, TrackService trackService) {
+        this.fileService = fileService;
+        this.trackService = trackService;
+    }
 
     @GetMapping
     public List<Track> list() {
@@ -45,6 +49,7 @@ public class TrackEndpoint {
         return trackService.markDeleted(id);
     }
 
+    /*
     @GetMapping("{id}/convert")
     public ResponseEntity<Resource> convertFile(@PathVariable long id) {
         try {
@@ -76,6 +81,7 @@ public class TrackEndpoint {
 
         return null;
     }
+    */
 
     @GetMapping("/{id}/stream")
     public ResponseEntity<Resource> stream(@PathVariable long id) throws IOException {

@@ -19,9 +19,6 @@ import java.util.Collection;
 @Service
 public class FileService {
 
-    @Autowired
-    private TrackService trackService;
-
     @Value("${music.file.source}")
     private String musicFileSource;
 
@@ -37,10 +34,6 @@ public class FileService {
 
     public File getFile(Track track) {
         return new File(musicFileSource + track.getLocation());
-    }
-
-    public File getFile(long id){
-        return getFile(trackService.get(id));
     }
 
     public boolean deleteFile(Track track) throws IOException {
