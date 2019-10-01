@@ -133,7 +133,6 @@ public class MediaMonkeyMigrationService implements MigrationService {
     }
 
     @Override
-    @Transactional
     public PlayMigrationResult importPlays(MultipartFile file, String deviceName) throws Exception {
         if (file.getOriginalFilename().equalsIgnoreCase("mm.db")) {
             Device device = deviceService.getOrInsert(deviceName);
