@@ -58,11 +58,9 @@ public class MediaMonkeyMigrationService implements MigrationService {
         return conn;
     }
 
-    private PlayImportResult insertIndividualPlays(String absolutePath, Device device) {
+    private void insertIndividualPlays(String absolutePath, Device device, PlayMigrationResult playMigrationResult) {
         String sql = "SELECT s.SongTitle, s.Artist, s.Album, p.PlayDate FROM played p " +
                 "INNER JOIN songs s ON p.IDSong = s.ID";
-
-        PlayImportResult playImportResult = new PlayImportResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
         List<Track> tracks = trackService.list();
 
@@ -82,24 +80,23 @@ public class MediaMonkeyMigrationService implements MigrationService {
                 if (track != null) {
                     try {
                         playMapper.insertPlay(track.getId(), mediaMonkeyPlay.getDateAsDelphi(), device.getId(), true);
-                        playImportResult.getSuccessful().add(mediaMonkeyPlay);
+                        playMigrationResult.getPlays().getSuccessful().add(mediaMonkeyPlay);
                     } catch (DuplicateKeyException | UncategorizedSQLException exception) {
-                        logger.debug("Failed to import", exception);
-                        playImportResult.getAlreadyImported().add(mediaMonkeyPlay);
+                        logger.debug(String.format("Already imported MediaMonkey track %s", songTitle), exception);
+                        playMigrationResult.getPlays().getAlreadyImported().add(mediaMonkeyPlay);
                     }
                 } else {
-                    playImportResult.getFailed().add(mediaMonkeyPlay);
+                    logger.debug(String.format("No matching track found for MediaMonkey track %s", songTitle));
+                    playMigrationResult.getPlays().getFailed().add(mediaMonkeyPlay);
                 }
             }
         } catch (SQLException e) {
             logger.error("Failed to connect to MediaMonkey database", e);
         }
-        return playImportResult;
     }
 
-    private List<MediaMonkeyPlayCount> insertPlayCounts(String absolutePath, Device device) {
+    private void insertPlayCounts(String absolutePath, Device device, PlayMigrationResult playMigrationResult) {
         String playCountSql = "SELECT SongTitle, Artist, Album, PlayCounter FROM songs";
-        List<MediaMonkeyPlayCount> playCounts = new ArrayList<>();
 
         List<Track> tracks = trackService.list();
 
@@ -115,25 +112,29 @@ public class MediaMonkeyMigrationService implements MigrationService {
                 long playCount = rs.getLong(PLAY_COUNT);
 
                 Track track = trackService.get(songTitle, artist, album, tracks);
+                MediaMonkeyPlayCount mediaMonkeyPlay = new MediaMonkeyPlayCount(songTitle, artist, album, playCount);
 
                 if(track != null){
                     try {
                         playMapper.upsertPlayCount(track.getId(), device.getId(), playCount, true);
-                        playCounts.add(new MediaMonkeyPlayCount(songTitle, artist, album, playCount));
+                        playMigrationResult.getPlayCounts().getSuccessful().add(mediaMonkeyPlay);
                     } catch (DuplicateKeyException |UncategorizedSQLException e) {
-                        logger.debug("Failed to import", e);
+                        logger.debug(String.format("Already imported MediaMonkey track %s", songTitle), e);
+                        playMigrationResult.getPlayCounts().getAlreadyImported().add(mediaMonkeyPlay);
                     }
+                } else {
+                    logger.debug(String.format("No matching track found for MediaMonkey track %s", songTitle));
+                    playMigrationResult.getPlayCounts().getFailed().add(mediaMonkeyPlay);
                 }
             }
         } catch (SQLException e) {
             logger.error("Failed to connect to MediaMonkey database", e);
         }
-        return playCounts;
     }
 
     @Override
     @Transactional
-    public PlayImportResult importPlays(MultipartFile file, String deviceName) throws Exception {
+    public PlayMigrationResult importPlays(MultipartFile file, String deviceName) throws Exception {
         if (file.getOriginalFilename().equalsIgnoreCase("mm.db")) {
             Device device = deviceService.getOrInsert(deviceName);
             File temporaryDatabase = File.createTempFile("mediamonkey", ".db");
@@ -142,8 +143,14 @@ public class MediaMonkeyMigrationService implements MigrationService {
             logger.debug(String.format("Temporary database location: %s", temporaryDatabase.getAbsolutePath()));
 
             temporaryDatabase.deleteOnExit();
-            insertPlayCounts(temporaryDatabase.getAbsolutePath(), device);
-            return insertIndividualPlays(temporaryDatabase.getAbsolutePath(), device);
+
+            PlayMigrationResult playMigrationResult = new PlayMigrationResult(
+                    new PlayImportResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
+                    new PlayImportResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
+            );
+            insertPlayCounts(temporaryDatabase.getAbsolutePath(), device, playMigrationResult);
+            insertIndividualPlays(temporaryDatabase.getAbsolutePath(), device, playMigrationResult);
+            return playMigrationResult;
         } else {
             throw new Exception("Imported file does not have the expected filename from a MediaMonkey database 'mm.db'.");
         }

@@ -1,6 +1,7 @@
 package music.endpoint;
 
 import music.model.PlayImportResult;
+import music.model.PlayMigrationResult;
 import music.service.MigrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,8 +22,8 @@ public class MigrationEndpoint {
     }
 
     @PostMapping("/plays")
-    public PlayImportResult importPlays(@RequestParam("file") MultipartFile file,
-                                        @RequestParam String deviceName) throws Exception {
+    public PlayMigrationResult importPlays(@RequestParam("file") MultipartFile file,
+                                           @RequestParam String deviceName) throws Exception {
         return migrationService.importPlays(file, deviceName);
     }
 }

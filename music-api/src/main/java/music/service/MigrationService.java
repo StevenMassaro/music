@@ -1,14 +1,7 @@
 package music.service;
 
-import music.model.PlayImportResult;
-import org.apache.commons.io.FileUtils;
-import org.springframework.stereotype.Service;
+import music.model.PlayMigrationResult;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.*;
 
 public interface MigrationService {
 
@@ -17,5 +10,5 @@ public interface MigrationService {
      * @param file
      * @param deviceName
      */
-    PlayImportResult importPlays(MultipartFile file, String deviceName) throws Exception;
+    PlayMigrationResult importPlays(MultipartFile file, String deviceName) throws Exception;
 }
