@@ -30,6 +30,7 @@
         , t."year"
         , t.discnumber
         , t.tracknumber
+        , t.rating
         , t."comment"
         , t.deletedind
         , t.datecreated
@@ -56,6 +57,7 @@
         , t."year"
         , t.discnumber
         , t.tracknumber
+        , t.rating
         , t."comment"
         , t.deletedind
         , t.datecreated
@@ -99,9 +101,10 @@
     </resultMap>
 
     <insert id="insert">
-        INSERT INTO music.track (title, location, hash, album, artist, albumartist, genre, "year", discnumber, tracknumber, comment, deletedInd, fileLastModifiedDate)
+        INSERT INTO music.track (title, location, hash, album, artist, albumartist, genre, "year", discnumber, tracknumber,
+        rating, comment, deletedInd, fileLastModifiedDate)
         VALUES(#{track.title}, #{track.location}, #{track.hash}, #{track.album}, #{track.artist}, #{track.albumArtist},
-        #{track.genre}, #{track.year}, #{track.discNumber}, #{track.trackNumber}, #{track.comment}, #{track.deletedInd}, #{track.fileLastModifiedDate})
+        #{track.genre}, #{track.year}, #{track.discNumber}, #{track.trackNumber}, #{track.rating}, #{track.comment}, #{track.deletedInd}, #{track.fileLastModifiedDate})
     </insert>
 
     <update id="updateByLocation">
@@ -119,5 +122,11 @@
         comment = #{track.comment},
         fileLastModifiedDate = #{track.fileLastModifiedDate}
         WHERE location = #{track.location}
+    </update>
+
+    <update id="setRatingById">
+        UPDATE music.track
+        SET rating = #{rating}
+        WHERE id = #{id}
     </update>
 </mapper>

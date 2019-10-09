@@ -1,5 +1,6 @@
 package music.service;
 
+import music.exception.RatingRangeException;
 import music.mapper.PlayMapper;
 import music.mapper.TrackMapper;
 import music.model.Track;
@@ -112,5 +113,18 @@ public class TrackService {
         Track track = get(id);
         playMapper.insertPlay(id, new Date(), deviceId, false);
         return track;
+    }
+
+    /**
+     * Set the rating of a track with a particular id.
+     * @param rating the rating of the song, between 0 and 10 (inclusive)
+     * @throws RatingRangeException if the supplied rating is outside the allowable range
+     */
+    public void setRating(long id, byte rating) throws RatingRangeException {
+        if(rating > 10 || rating < 0){
+            throw new RatingRangeException(String.format("Rating %s is outside range of [0-10]", rating));
+        } else {
+            trackMapper.setRatingById(id, rating);
+        }
     }
 }

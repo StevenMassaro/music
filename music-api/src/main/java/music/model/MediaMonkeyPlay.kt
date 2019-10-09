@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import java.math.BigDecimal
 import java.util.*
 
-data class MediaMonkeyPlay(var songTitle: String, var artist: String, var album: String, var playDate: String) : IPlay {
+data class MediaMonkeyPlay(var songTitle: String, var artist: String, var album: String, var playDate: String) : IItem {
 
     @JsonIgnore
     fun getDateAsDelphi():Date {

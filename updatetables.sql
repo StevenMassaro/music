@@ -13,3 +13,5 @@ alter table music.plays alter column deviceid set not null;
 alter table music.plays add primary key (songid, deviceid, playdate);
 
 alter table music.plays add column imported boolean default false;
+
+alter table music.track add column rating smallint constraint within_range check ((rating > 0 and rating < 10) or rating = null)

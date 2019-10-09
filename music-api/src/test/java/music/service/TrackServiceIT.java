@@ -1,5 +1,6 @@
 package music.service;
 
+import music.exception.RatingRangeException;
 import music.model.Device;
 import music.model.Track;
 import org.junit.Test;
@@ -74,6 +75,20 @@ public class TrackServiceIT {
         list = trackService.listAll();
         assertEquals(1, list.size());
         doTrackAssertions(false, track, list.get(0));
+    }
+
+    @Test
+    public void ratingTrack() throws RatingRangeException {
+        trackService.upsertTracks(Collections.singletonList(track()));
+        Track track = trackService.list().get(0);
+
+        assertNull(track.getRating());
+
+        byte rating = 3;
+        trackService.setRating(track.getId(), rating);
+
+        track = trackService.get(track.getId());
+        assertEquals(rating, (byte)track.getRating());
     }
 
     private Track track() {

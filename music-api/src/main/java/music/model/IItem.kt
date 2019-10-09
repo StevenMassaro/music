@@ -1,4 +1,4 @@
 package music.model
 
-interface IPlay {
+interface IItem {
 }

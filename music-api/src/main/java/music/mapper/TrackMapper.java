@@ -24,4 +24,6 @@ public interface TrackMapper {
     void deleteById(@Param("id") long id);
 
     void markDeletedById(@Param("id")long id, @Param("deletedInd") boolean deletedInd);
+
+    void setRatingById(long id, byte rating);
 }

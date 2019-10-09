@@ -16,6 +16,7 @@ create table music.track (
   year varchar(1000),
   discnumber int,
   tracknumber int,
+  rating smallint constraint within_range check ((rating > 0 and rating < 10) or rating = null),
   comment varchar,
   deletedInd boolean not null,
   dateCreated timestamp DEFAULT now(),

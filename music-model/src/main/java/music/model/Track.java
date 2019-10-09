@@ -25,6 +25,7 @@ public class Track {
     private Long discNumber;
     private Long trackNumber;
     private long plays;
+    private Byte rating;
     private String comment;
     private boolean deletedInd = false;
     private Date dateCreated;
@@ -153,6 +154,14 @@ public class Track {
 
     public void setPlays(long plays) {
         this.plays = plays;
+    }
+
+    public Byte getRating() {
+        return rating;
+    }
+
+    public void setRating(Byte rating) {
+        this.rating = rating;
     }
 
     public boolean getDeletedInd() {
