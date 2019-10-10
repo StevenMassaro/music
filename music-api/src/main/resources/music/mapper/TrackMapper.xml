@@ -8,13 +8,13 @@
         <include refid="selectColumns"/>
         WHERE deletedInd != true
         <include refid="selectGroupBy"/>
-        ORDER BY artist,album,discnumber,tracknumber
+        ORDER BY artist,album,disc_no,track
     </select>
 
     <select id="listAll" resultMap="trackResultMap">
         <include refid="selectColumns"/>
         <include refid="selectGroupBy"/>
-        ORDER BY artist,album,discnumber,tracknumber
+        ORDER BY artist,album,disc_no,track
     </select>
 
     <sql id="selectColumns">
@@ -25,11 +25,11 @@
         , t.hash
         , t.album
         , t.artist
-        , t.albumartist
+        , t.album_artist
         , t.genre
         , t."year"
-        , t.discnumber
-        , t.tracknumber
+        , t.disc_no
+        , t.track
         , t.rating
         , t."comment"
         , t.deletedind
@@ -52,11 +52,11 @@
         , t.hash
         , t.album
         , t.artist
-        , t.albumartist
+        , t.album_artist
         , t.genre
         , t."year"
-        , t.discnumber
-        , t.tracknumber
+        , t.disc_no
+        , t.track
         , t.rating
         , t."comment"
         , t.deletedind
@@ -88,23 +88,13 @@
 
     <resultMap id="trackResultMap" type="music.model.Track">
         <id property="id" column="id"/>
-        <!--<result property=""-->
-        <!---->
-        <!---->
-        <!--<result property="hostname" column="hostname"/>-->
-        <!--<result property="port" column="port"/>-->
-        <!--<result property="authentication" column="authentication"/>-->
-        <!--<result property="inboxName" column="inboxname"/>-->
-        <!--<result property="username" column="username"/>-->
-        <!--<result property="password" column="password"/>-->
-        <!--<result property="dateCreated" column="dateCreated"/>-->
     </resultMap>
 
     <insert id="insert">
-        INSERT INTO music.track (title, location, hash, album, artist, albumartist, genre, "year", discnumber, tracknumber,
+        INSERT INTO music.track (title, location, hash, album, artist, album_artist, genre, "year", disc_no, track,
         rating, comment, deletedInd, fileLastModifiedDate)
-        VALUES(#{track.title}, #{track.location}, #{track.hash}, #{track.album}, #{track.artist}, #{track.albumArtist},
-        #{track.genre}, #{track.year}, #{track.discNumber}, #{track.trackNumber}, #{track.rating}, #{track.comment}, #{track.deletedInd}, #{track.fileLastModifiedDate})
+        VALUES(#{track.title}, #{track.location}, #{track.hash}, #{track.album}, #{track.artist}, #{track.album_artist},
+        #{track.genre}, #{track.year}, #{track.disc_no}, #{track.track}, #{track.rating}, #{track.comment}, #{track.deletedInd}, #{track.fileLastModifiedDate})
     </insert>
 
     <update id="updateByLocation">
@@ -114,11 +104,11 @@
         hash = #{track.hash},
         album = #{track.album},
         artist = #{track.artist},
-        albumartist = #{track.albumArtist},
+        album_artist = #{track.album_artist},
         genre = #{track.genre},
         "year" = #{track.year},
-        discnumber = #{track.discNumber},
-        tracknumber = #{track.trackNumber},
+        disc_no = #{track.disc_no},
+        track = #{track.track},
         comment = #{track.comment},
         fileLastModifiedDate = #{track.fileLastModifiedDate}
         WHERE location = #{track.location}

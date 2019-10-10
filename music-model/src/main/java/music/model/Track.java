@@ -19,11 +19,11 @@ public class Track {
     private String hash;
     private String album;
     private String artist;
-    private String albumArtist;
+    private String album_artist;
     private String genre;
     private String year;
-    private Long discNumber;
-    private Long trackNumber;
+    private Long disc_no;
+    private Long track;
     private long plays;
     private Byte rating;
     private String comment;
@@ -47,11 +47,11 @@ public class Track {
         this.title = v2tag.getFirst(FieldKey.TITLE);
         this.album = v2tag.getFirst(FieldKey.ALBUM);
         this.artist = v2tag.getFirst(FieldKey.ARTIST);
-        this.albumArtist = v2tag.getFirst(FieldKey.ALBUM_ARTIST);
+        this.album_artist = v2tag.getFirst(FieldKey.ALBUM_ARTIST);
         this.genre = v2tag.getFirst(FieldKey.GENRE);
         this.year = v2tag.getFirst(FieldKey.YEAR);
-        this.discNumber = FieldUtils.getLongOrNull(v2tag, FieldKey.DISC_NO);
-        this.trackNumber = FieldUtils.getLongOrNull(v2tag, FieldKey.TRACK);
+        this.disc_no = FieldUtils.getLongOrNull(v2tag, FieldKey.DISC_NO);
+        this.track = FieldUtils.getLongOrNull(v2tag, FieldKey.TRACK);
         this.comment = v2tag.getFirst(FieldKey.COMMENT);
         this.location = location;
         this.fileLastModifiedDate = fileLastModifiedDate;
@@ -92,12 +92,12 @@ public class Track {
         this.artist = artist;
     }
 
-    public String getAlbumArtist() {
-        return albumArtist;
+    public String getAlbum_artist() {
+        return album_artist;
     }
 
-    public void setAlbumArtist(String albumArtist) {
-        this.albumArtist = albumArtist;
+    public void setAlbum_artist(String album_artist) {
+        this.album_artist = album_artist;
     }
 
     public String getGenre() {
@@ -132,20 +132,20 @@ public class Track {
         this.hash = hash;
     }
 
-    public Long getDiscNumber() {
-        return discNumber;
+    public Long getDisc_no() {
+        return disc_no;
     }
 
-    public void setDiscNumber(Long discNumber) {
-        this.discNumber = discNumber;
+    public void setDisc_no(Long disc_no) {
+        this.disc_no = disc_no;
     }
 
-    public Long getTrackNumber() {
-        return trackNumber;
+    public Long getTrack() {
+        return track;
     }
 
-    public void setTrackNumber(Long trackNumber) {
-        this.trackNumber = trackNumber;
+    public void setTrack(Long track) {
+        this.track = track;
     }
 
     public long getPlays() {
@@ -213,11 +213,11 @@ public class Track {
                 ", hash='" + hash + '\'' +
                 ", album='" + album + '\'' +
                 ", artist='" + artist + '\'' +
-                ", albumArtist='" + albumArtist + '\'' +
+                ", album_artist='" + album_artist + '\'' +
                 ", genre='" + genre + '\'' +
                 ", year='" + year + '\'' +
-                ", discNumber=" + discNumber +
-                ", trackNumber=" + trackNumber +
+                ", disc_no=" + disc_no +
+                ", track=" + track +
                 ", comment='" + comment + '\'' +
                 ", deletedInd=" + deletedInd +
                 ", dateCreated=" + dateCreated +

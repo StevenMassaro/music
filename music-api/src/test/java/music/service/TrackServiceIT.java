@@ -94,15 +94,15 @@ public class TrackServiceIT {
     private Track track() {
         Track track = new Track();
         track.setAlbum("album");
-        track.setAlbumArtist("aartist");
+        track.setAlbum_artist("aartist");
         track.setArtist("artist");
         track.setComment("comment");
         track.setDateCreated(new Date());
-        track.setDiscNumber(1L);
+        track.setDisc_no(1L);
         track.setGenre("genre");
         track.setLocation("C:/dev/1.flac");
         track.setTitle("title");
-        track.setTrackNumber(3L);
+        track.setTrack(3L);
         track.setYear("1998");
         track.setDeletedInd(false);
         track.setFileLastModifiedDate(new Date());
@@ -112,16 +112,16 @@ public class TrackServiceIT {
 
     private void doTrackAssertions(boolean assertId, Track baseline, Track comparison) throws IOException {
         assertEquals(baseline.getAlbum(), comparison.getAlbum());
-        assertEquals(baseline.getAlbumArtist(), comparison.getAlbumArtist());
+        assertEquals(baseline.getAlbum_artist(), comparison.getAlbum_artist());
         assertEquals(baseline.getArtist(), comparison.getArtist());
         assertEquals(baseline.getComment(), comparison.getComment());
 //        assertEquals(track1.getDateCreated(), track2.getDateCreated());
         assertNotNull(comparison.getDateCreated());
-        assertEquals(baseline.getDiscNumber(), comparison.getDiscNumber());
+        assertEquals(baseline.getDisc_no(), comparison.getDisc_no());
         assertEquals(baseline.getGenre(), comparison.getGenre());
         assertEquals(baseline.getLocation(), comparison.getLocation());
         assertEquals(baseline.getTitle(), comparison.getTitle());
-        assertEquals(baseline.getTrackNumber(), comparison.getTrackNumber());
+        assertEquals(baseline.getTrack(), comparison.getTrack());
         assertEquals(baseline.getYear(), comparison.getYear());
         assertEquals(baseline.getDeletedInd(), comparison.getDeletedInd());
         assertEquals(baseline.getFileLastModifiedDate(), comparison.getFileLastModifiedDate());
