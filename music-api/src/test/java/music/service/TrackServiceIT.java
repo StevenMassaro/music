@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static music.helper.BuilderKt.doTrackAssertions;
+import static music.helper.BuilderKt.track;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
@@ -89,45 +91,5 @@ public class TrackServiceIT {
 
         track = trackService.get(track.getId());
         assertEquals(rating, (byte)track.getRating());
-    }
-
-    private Track track() {
-        Track track = new Track();
-        track.setAlbum("album");
-        track.setAlbum_artist("aartist");
-        track.setArtist("artist");
-        track.setComment("comment");
-        track.setDateCreated(new Date());
-        track.setDisc_no(1L);
-        track.setGenre("genre");
-        track.setLocation("C:/dev/1.flac");
-        track.setTitle("title");
-        track.setTrack(3L);
-        track.setYear("1998");
-        track.setDeletedInd(false);
-        track.setFileLastModifiedDate(new Date());
-        track.setHash("1234abc");
-        return track;
-    }
-
-    private void doTrackAssertions(boolean assertId, Track baseline, Track comparison) throws IOException {
-        assertEquals(baseline.getAlbum(), comparison.getAlbum());
-        assertEquals(baseline.getAlbum_artist(), comparison.getAlbum_artist());
-        assertEquals(baseline.getArtist(), comparison.getArtist());
-        assertEquals(baseline.getComment(), comparison.getComment());
-//        assertEquals(track1.getDateCreated(), track2.getDateCreated());
-        assertNotNull(comparison.getDateCreated());
-        assertEquals(baseline.getDisc_no(), comparison.getDisc_no());
-        assertEquals(baseline.getGenre(), comparison.getGenre());
-        assertEquals(baseline.getLocation(), comparison.getLocation());
-        assertEquals(baseline.getTitle(), comparison.getTitle());
-        assertEquals(baseline.getTrack(), comparison.getTrack());
-        assertEquals(baseline.getYear(), comparison.getYear());
-        assertEquals(baseline.getDeletedInd(), comparison.getDeletedInd());
-        assertEquals(baseline.getFileLastModifiedDate(), comparison.getFileLastModifiedDate());
-        assertEquals(baseline.getHash(), comparison.getHash());
-        if (assertId) {
-            assertEquals(baseline.getId(), comparison.getId());
-        }
     }
 }

@@ -3,22 +3,17 @@ package music.endpoint;
 import music.model.Track;
 import music.service.FileService;
 import music.service.TrackService;
+import music.service.UpdateService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ws.schild.jave.AudioAttributes;
-import ws.schild.jave.Encoder;
-import ws.schild.jave.EncodingAttributes;
-import ws.schild.jave.MultimediaObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -30,13 +25,16 @@ public class TrackEndpoint {
 
     private final TrackService trackService;
 
+    private final UpdateService updateService;
+
     @Value("${music.file.source}")
     private String musicFileSource;
 
     @Autowired
-    public TrackEndpoint(FileService fileService, TrackService trackService) {
+    public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService) {
         this.fileService = fileService;
         this.trackService = trackService;
+        this.updateService = updateService;
     }
 
     @GetMapping
@@ -47,6 +45,13 @@ public class TrackEndpoint {
     @DeleteMapping("/{id}")
     public Track delete(@PathVariable long id) throws IOException {
         return trackService.markDeleted(id);
+    }
+
+    @PatchMapping("/{id}/{field}/{value}")
+    public Track updateTrackInfo(@PathVariable long id, @PathVariable String field, @PathVariable String value){
+        // todo assert that the field is actually one of the fields that can be updated
+        updateService.queueTrackUpdate(id, field, value);
+        return trackService.get(id);
     }
 
     /*

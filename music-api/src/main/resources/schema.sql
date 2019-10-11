@@ -24,6 +24,23 @@ create table music.track (
   fileLastModifiedDate timestamp
 );
 
+drop table if exists music.updatetype cascade;
+create table music.updatetype (
+  id serial unique not null,
+  name varchar primary key
+);
+
+insert into music.updatetype (id, name) values (1, 'ID3 tag update');
+
+drop table if exists music.trackupdates cascade;
+create table music.trackupdates (
+  id serial not null unique,
+  songid int not null references music.track(id),
+  field varchar not null,
+  newvalue varchar not null,
+  updatetype int not null references music.updatetype(id)
+);
+
 drop table if exists music.device cascade;
 create table music.device (
   id serial primary key,

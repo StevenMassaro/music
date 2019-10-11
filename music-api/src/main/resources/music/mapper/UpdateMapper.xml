@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="music.mapper.UpdateMapper">
+    <insert id="insertUpdate">
+        INSERT INTO music.trackupdates (songid, field, newvalue, updatetype)
+        VALUES(#{songId}, #{field}, #{newValue}, 1);
+    </insert>
+
+    <select id="listByTrackId" resultMap="trackUpdateResultMap">
+        SELECT * FROM music.trackupdates WHERE songid = #{songId}
+    </select>
+
+    <resultMap id="trackUpdateResultMap" type="music.model.TrackUpdate">
+        <constructor>
+            <idArg column="id" javaType="Long"/>
+            <arg column="songid" javaType="_long"/>
+            <arg column="field" javaType="String"/>
+            <arg column="newvalue" javaType="String"/>
+            <arg column="updatetype" javaType="Long"/>
+        </constructor>
+    </resultMap>
+</mapper>
