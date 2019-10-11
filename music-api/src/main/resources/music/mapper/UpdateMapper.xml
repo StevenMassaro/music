@@ -12,6 +12,10 @@
         SELECT * FROM music.trackupdates WHERE songid = #{songId}
     </select>
 
+    <select id="list" resultMap="trackUpdateResultMap">
+        SELECT * FROM music.trackupdates ORDER BY id
+    </select>
+
     <resultMap id="trackUpdateResultMap" type="music.model.TrackUpdate">
         <constructor>
             <idArg column="id" javaType="Long"/>

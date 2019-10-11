@@ -30,6 +30,9 @@ public class TrackServiceIT {
     @Autowired
     private DeviceService deviceService;
 
+    @Autowired
+    private UpdateService updateService;
+
     @Test
     public void addingTracks() throws IOException {
         Track track = track();
@@ -91,5 +94,34 @@ public class TrackServiceIT {
 
         track = trackService.get(track.getId());
         assertEquals(rating, (byte)track.getRating());
+    }
+
+    @Test
+    public void testListingTrackWithUpdates(){
+        trackService.upsertTracks(Collections.singletonList(track()));
+        Track track = trackService.list().get(0);
+
+        String field = "album";
+        String newVal = "fart";
+
+        updateService.queueTrackUpdate(track.getId(), field, newVal);
+
+        track = trackService.list().get(0);
+        assertEquals(newVal, track.getAlbum());
+    }
+
+    @Test
+    public void testListingTrackWithTwoUpdates(){
+        trackService.upsertTracks(Collections.singletonList(track()));
+        Track track = trackService.list().get(0);
+
+        String field = "album";
+        String newVal = "fart";
+
+        updateService.queueTrackUpdate(track.getId(), field, newVal);
+        updateService.queueTrackUpdate(track.getId(), field, newVal+newVal);
+
+        track = trackService.list().get(0);
+        assertEquals(newVal+newVal, track.getAlbum());
     }
 }

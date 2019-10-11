@@ -20,12 +20,14 @@ public class TrackService {
     private final TrackMapper trackMapper;
     private final PlayMapper playMapper;
     private final FileService fileService;
+    private final UpdateService updateService;
 
     @Autowired
-    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService) {
+    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService, UpdateService updateService) {
         this.trackMapper = trackMapper;
         this.playMapper = playMapper;
         this.fileService = fileService;
+        this.updateService = updateService;
     }
 
     public void upsertTracks(List<Track> tracks){
@@ -50,25 +52,26 @@ public class TrackService {
     }
 
     /**
-     * Lists all non-deleted tracks.
+     * Lists all non-deleted tracks, applying the updates that are queued.
      */
     public List<Track> list(){
-        return trackMapper.list();
+        return updateService.applyUpdates(trackMapper.list());
     }
 
     /**
-     * Lists all tracks, including those that were marked deleted in the database.
+     * Lists all tracks, including those that were marked deleted in the database, applying the updates
+     * that are queued.
      */
     public List<Track> listAll(){
-        return trackMapper.listAll();
+        return updateService.applyUpdates(trackMapper.listAll());
     }
 
     public Track getByLocation(String location) {
-        return trackMapper.getByLocation(location);
+        return updateService.applyUpdates(trackMapper.getByLocation(location));
     }
 
     public Track get(long id){
-        return trackMapper.get(id);
+        return updateService.applyUpdates(trackMapper.get(id));
     }
 
     public Track get(String title, String artist, String album, List<Track> trackCache) {
