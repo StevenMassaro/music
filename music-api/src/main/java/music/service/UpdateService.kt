@@ -1,6 +1,7 @@
 package music.service
 
 import music.mapper.UpdateMapper
+import music.model.ModifyableTags
 import music.model.Track
 import music.model.TrackUpdate
 import org.slf4j.LoggerFactory
@@ -22,6 +23,7 @@ class UpdateService @Autowired constructor(private val updateMapper: UpdateMappe
      * @return updated track
      */
     fun queueTrackUpdate(id: Long, field: String, newValue: String) {
+        requireNotNull(ModifyableTags.values().find { it.propertyName == field }, { "Supplied field $field is not modifyable." })
         updateMapper.insertUpdate(id, field, newValue)
     }
 

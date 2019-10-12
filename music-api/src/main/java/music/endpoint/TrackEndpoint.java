@@ -49,7 +49,6 @@ public class TrackEndpoint {
 
     @PatchMapping("/{id}/{field}/{value}")
     public Track updateTrackInfo(@PathVariable long id, @PathVariable String field, @PathVariable String value){
-        // todo assert that the field is actually one of the fields that can be updated
         updateService.queueTrackUpdate(id, field, value);
         return trackService.get(id);
     }

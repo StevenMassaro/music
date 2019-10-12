@@ -2,6 +2,7 @@ package music.service;
 
 import music.exception.RatingRangeException;
 import music.model.Device;
+import music.model.ModifyableTags;
 import music.model.Track;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -101,7 +102,7 @@ public class TrackServiceIT {
         trackService.upsertTracks(Collections.singletonList(track()));
         Track track = trackService.list().get(0);
 
-        String field = "album";
+        String field = ModifyableTags.ALBUM.getPropertyName();
         String newVal = "fart";
 
         updateService.queueTrackUpdate(track.getId(), field, newVal);
@@ -115,7 +116,7 @@ public class TrackServiceIT {
         trackService.upsertTracks(Collections.singletonList(track()));
         Track track = trackService.list().get(0);
 
-        String field = "album";
+        String field = ModifyableTags.ALBUM.getPropertyName();
         String newVal = "fart";
 
         updateService.queueTrackUpdate(track.getId(), field, newVal);
