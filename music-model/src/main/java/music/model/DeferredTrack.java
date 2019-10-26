@@ -25,7 +25,7 @@ public class DeferredTrack extends Track {
 
     @Override
     public String getHash() throws IOException {
-        return DigestUtils.sha512Hex(FileUtils.readFileToByteArray(new File(musicFileSource + File.separator + super.getLocation())));
+        return DigestUtils.sha512Hex(FileUtils.openInputStream(new File(musicFileSource + File.separator + super.getLocation())));
     }
 
     @Override
