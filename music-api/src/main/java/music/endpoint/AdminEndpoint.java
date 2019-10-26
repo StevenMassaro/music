@@ -48,18 +48,19 @@ public class AdminEndpoint {
      * Find all tracks marked deleted in the database and delete those tracks from the file system.
      */
     @DeleteMapping("/purge")
-    public void purgeDeletedTracks() throws IOException {
+    public List<Track> purgeDeletedTracks() throws IOException {
         logger.info("Purging deleted files from disk.");
         List<Track> allTracks = trackService.listAll();
-        long deletedCount = 0;
+        List<Track> deleted = new ArrayList<>();
         if (allTracks != null) {
             for (Track track : allTracks) {
                 if (track.getDeletedInd()) {
                     trackService.permanentlyDelete(track);
-                    deletedCount++;
+                    deleted.add(track);
                 }
             }
         }
-        logger.info(String.format("Deleted %s tracks from the file system.", deletedCount));
+        logger.info(String.format("Deleted %s tracks from the file system.", deleted.size()));
+        return deleted;
     }
 }
