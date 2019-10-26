@@ -3,6 +3,7 @@ package music.service;
 import music.exception.RatingRangeException;
 import music.mapper.PlayMapper;
 import music.mapper.TrackMapper;
+import music.model.SyncResult;
 import music.model.Track;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class TrackService {
         this.updateService = updateService;
     }
 
-    public void upsertTracks(List<Track> tracks){
+    public void upsertTracks(List<Track> tracks, SyncResult syncResult){
         for(Track track : tracks){
             try {
                 Track existingTrack = getByLocation(track.getLocation());
@@ -38,15 +39,19 @@ public class TrackService {
                     if (!existingTrack.getFileLastModifiedDate().equals(track.getFileLastModifiedDate())) {
                         logger.debug(String.format("Existing track has been modified since last sync, updating: %s", existingTrack.getTitle()));
                         trackMapper.updateByLocation(track);
+                        syncResult.getModifiedTracks().add(track);
                     } else {
                         logger.debug(String.format("Existing track has same modified date as last sync, skipping: %s", existingTrack.getTitle()));
+                        syncResult.getUnmodifiedTracks().add(track);
                     }
                 } else {
                     logger.debug(String.format("No existing track found, inserting new metadata for %s", track.getTitle()));
                     trackMapper.insert(track);
+                    syncResult.getNewTracks().add(track);
                 }
             } catch (Exception e) {
                 logger.error(String.format("Failed to insert metadata for track %s", track.getLocation()), e);
+                syncResult.getFailedTracks().add(track);
             }
         }
     }
@@ -116,7 +121,7 @@ public class TrackService {
      * Delete metadata for all tracks in database which no longer exist on disk.
      * @param actualTracks list of tracks that exist on disk
      */
-    public void deleteOrphanedTracksMetadata(List<Track> actualTracks) {
+    public void deleteOrphanedTracksMetadata(List<Track> actualTracks, SyncResult syncResult) {
         logger.debug("Begin deleted orphaned tracks");
         List<Track> dbTracks = listAll();
         // if a track exists in the database but doesn't exist on disk, then delete it from the db
@@ -125,8 +130,10 @@ public class TrackService {
             if(!doesTrackExistOnDisk){
                 logger.debug("Track {} no longer exists on disk, deleting associated metadata ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLocation());
                 permanentlyDeleteTrackMetadata(dbTrack);
+                syncResult.getOrphanedTracks().add(dbTrack);
             } else {
                 logger.trace("Track {} still exists on disk ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLocation());
+                syncResult.getUnorphanedTracks().add(dbTrack);
             }
         }
         logger.debug("Finished deleted orphaned tracks");

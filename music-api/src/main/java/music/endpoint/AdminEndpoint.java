@@ -1,5 +1,6 @@
 package music.endpoint;
 
+import music.model.SyncResult;
 import music.model.Track;
 import music.service.MetadataService;
 import music.service.TrackService;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController()
@@ -32,13 +34,14 @@ public class AdminEndpoint {
     }
 
     @PostMapping("/dbSync")
-    public List<Track> syncTracksToDb() throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
+    public SyncResult syncTracksToDb() throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
         logger.info("Begin database sync");
+        SyncResult syncResult = new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         List<Track> files = metadataService.getTracks();
-        trackService.upsertTracks(files);
-        trackService.deleteOrphanedTracksMetadata(files);
+        trackService.upsertTracks(files, syncResult);
+        trackService.deleteOrphanedTracksMetadata(files, syncResult);
         logger.info("Finished database sync");
-        return trackService.list();
+        return syncResult;
     }
 
     /**

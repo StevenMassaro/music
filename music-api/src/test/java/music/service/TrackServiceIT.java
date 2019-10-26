@@ -3,6 +3,7 @@ package music.service;
 import music.exception.RatingRangeException;
 import music.model.Device;
 import music.model.ModifyableTags;
+import music.model.SyncResult;
 import music.model.Track;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +39,7 @@ public class TrackServiceIT {
     @Test
     public void addingTracks() throws IOException {
         Track track = track();
-        trackService.upsertTracks(Collections.singletonList(track));
+        trackService.upsertTracks(Collections.singletonList(track), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
 
         List<Track> list = trackService.list();
         assertEquals(1, list.size());
@@ -49,7 +51,7 @@ public class TrackServiceIT {
         // first create a device with which to associate the plays
         Device device = deviceService.getOrInsert("devname");
 
-        trackService.upsertTracks(Collections.singletonList(track()));
+        trackService.upsertTracks(Collections.singletonList(track()), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         Track track = trackService.list().get(0);
 
         assertEquals(0, track.getPlays());
@@ -62,7 +64,7 @@ public class TrackServiceIT {
 
     @Test
     public void deletedTrack() throws IOException {
-        trackService.upsertTracks(Collections.singletonList(track()));
+        trackService.upsertTracks(Collections.singletonList(track()), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         Track track = trackService.list().get(0);
 
         assertFalse(track.getDeletedInd());
@@ -85,7 +87,7 @@ public class TrackServiceIT {
 
     @Test
     public void ratingTrack() throws RatingRangeException {
-        trackService.upsertTracks(Collections.singletonList(track()));
+        trackService.upsertTracks(Collections.singletonList(track()), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         Track track = trackService.list().get(0);
 
         assertNull(track.getRating());
@@ -99,7 +101,7 @@ public class TrackServiceIT {
 
     @Test
     public void testListingTrackWithUpdates(){
-        trackService.upsertTracks(Collections.singletonList(track()));
+        trackService.upsertTracks(Collections.singletonList(track()), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         Track track = trackService.list().get(0);
 
         String field = ModifyableTags.ALBUM.getPropertyName();
@@ -113,7 +115,7 @@ public class TrackServiceIT {
 
     @Test
     public void testListingTrackWithTwoUpdates(){
-        trackService.upsertTracks(Collections.singletonList(track()));
+        trackService.upsertTracks(Collections.singletonList(track()), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         Track track = trackService.list().get(0);
 
         String field = ModifyableTags.ALBUM.getPropertyName();
