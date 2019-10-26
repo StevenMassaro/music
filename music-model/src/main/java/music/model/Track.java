@@ -8,6 +8,7 @@ import org.jaudiotagger.tag.Tag;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Objects;
 
@@ -57,7 +58,9 @@ public class Track {
         this.location = location;
         this.fileLastModifiedDate = fileLastModifiedDate;
         if(file != null){
-            this.hash = DigestUtils.sha512Hex(FileUtils.readFileToByteArray(file));
+            InputStream inputStream = FileUtils.openInputStream(file);
+            this.hash = DigestUtils.sha512Hex(inputStream);
+            inputStream.close();
         }
     }
 

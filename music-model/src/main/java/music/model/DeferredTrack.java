@@ -6,6 +6,7 @@ import org.jaudiotagger.tag.Tag;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 /**
@@ -25,7 +26,10 @@ public class DeferredTrack extends Track {
 
     @Override
     public String getHash() throws IOException {
-        return DigestUtils.sha512Hex(FileUtils.openInputStream(new File(musicFileSource + File.separator + super.getLocation())));
+        InputStream inputStream = FileUtils.openInputStream(new File(musicFileSource + File.separator + super.getLocation()));
+        String hash = DigestUtils.sha512Hex(inputStream);
+        inputStream.close();
+        return hash;
     }
 
     @Override
