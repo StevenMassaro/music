@@ -16,4 +16,12 @@
           playcount = #{playcount}
           , imported = #{imported}
     </insert>
+
+    <delete id="deletePlays">
+        DELETE FROM music.plays WHERE songid = #{id}
+    </delete>
+
+    <delete id="deletePlayCounts">
+        DELETE FROM music.playcount WHERE songid = #{id}
+    </delete>
 </mapper>

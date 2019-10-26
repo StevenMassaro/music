@@ -79,7 +79,7 @@
     </select>
 
     <delete id="deleteById">
-        DELETE FROM music.track WHERE t.id = #{id}
+        DELETE FROM music.track t WHERE t.id = #{id}
     </delete>
 
     <update id="markDeletedById">

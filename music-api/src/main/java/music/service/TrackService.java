@@ -99,6 +99,8 @@ public class TrackService {
      */
     public Track permanentlyDelete(Track track) throws IOException {
         fileService.deleteFile(track);
+        playMapper.deletePlayCounts(track.getId());
+        playMapper.deletePlays(track.getId());
         trackMapper.deleteById(track.getId());
         return track;
     }

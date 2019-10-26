@@ -16,4 +16,8 @@ public interface PlayMapper {
                          @Param("deviceid") long deviceId,
                          @Param("playcount") long playCount,
                          boolean imported);
+
+    void deletePlays(long id);
+
+    void deletePlayCounts(long id);
 }
