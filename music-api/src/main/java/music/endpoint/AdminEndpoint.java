@@ -1,7 +1,6 @@
 package music.endpoint;
 
 import music.model.Track;
-import music.service.FileService;
 import music.service.MetadataService;
 import music.service.TrackService;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -37,6 +36,7 @@ public class AdminEndpoint {
         logger.info("Begin database sync");
         List<Track> files = metadataService.getTracks();
         trackService.upsertTracks(files);
+        trackService.deleteOrphanedTracksMetadata(files);
         logger.info("Finished database sync");
         return trackService.list();
     }

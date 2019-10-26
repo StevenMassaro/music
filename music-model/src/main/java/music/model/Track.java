@@ -9,6 +9,7 @@ import org.jaudiotagger.tag.Tag;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Objects;
 
 
 public class Track {
@@ -224,5 +225,19 @@ public class Track {
                 ", dateUpdated=" + dateUpdated +
                 ", fileLastModifiedDate=" + fileLastModifiedDate +
                 '}';
+    }
+
+    public boolean id3Equals(Object o) {
+        if (this == o) return true;
+        Track track1 = (Track) o;
+        return Objects.equals(title, track1.title) &&
+                Objects.equals(location, track1.location) &&
+                Objects.equals(album, track1.album) &&
+                Objects.equals(artist, track1.artist) &&
+                Objects.equals(album_artist, track1.album_artist) &&
+                Objects.equals(genre, track1.genre) &&
+                Objects.equals(year, track1.year) &&
+                Objects.equals(disc_no, track1.disc_no) &&
+                Objects.equals(track, track1.track);
     }
 }

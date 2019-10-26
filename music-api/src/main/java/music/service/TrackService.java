@@ -99,10 +99,37 @@ public class TrackService {
      */
     public Track permanentlyDelete(Track track) throws IOException {
         fileService.deleteFile(track);
+        permanentlyDeleteTrackMetadata(track);
+        return track;
+    }
+
+    /**
+     * Delete the metadata for a track, in the order necessary to prevent foreign key errors.
+     */
+    private void permanentlyDeleteTrackMetadata(Track track){
         playMapper.deletePlayCounts(track.getId());
         playMapper.deletePlays(track.getId());
         trackMapper.deleteById(track.getId());
-        return track;
+    }
+
+    /**
+     * Delete metadata for all tracks in database which no longer exist on disk.
+     * @param actualTracks list of tracks that exist on disk
+     */
+    public void deleteOrphanedTracksMetadata(List<Track> actualTracks) {
+        logger.debug("Begin deleted orphaned tracks");
+        List<Track> dbTracks = listAll();
+        // if a track exists in the database but doesn't exist on disk, then delete it from the db
+        for (Track dbTrack : dbTracks){
+            boolean doesTrackExistOnDisk = actualTracks.stream().anyMatch(t -> t.id3Equals(dbTrack));
+            if(!doesTrackExistOnDisk){
+                logger.debug("Track {} no longer exists on disk, deleting associated metadata ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLocation());
+                permanentlyDeleteTrackMetadata(dbTrack);
+            } else {
+                logger.trace("Track {} still exists on disk ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLocation());
+            }
+        }
+        logger.debug("Finished deleted orphaned tracks");
     }
 
     /**
