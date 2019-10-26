@@ -16,6 +16,10 @@ alter table music.plays add column imported boolean default false;
 
 alter table music.track add column rating smallint constraint within_range check ((rating > 0 and rating < 10) or rating = null)
 
+ALTER TABLE music.track RENAME COLUMN albumArtist TO album_artist;
+ALTER TABLE music.track RENAME COLUMN discnumber TO disc_no;
+ALTER TABLE music.track RENAME COLUMN tracknumber TO track;
+
 alter table music.track add column bitrate int not null;
 alter table music.track add column encoding varchar;
 alter table music.track add column sampleRate int not null;
