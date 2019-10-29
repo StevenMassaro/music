@@ -19,4 +19,4 @@ alter table music.track add column rating smallint constraint within_range check
 alter table music.track add column bitrate int not null;
 alter table music.track add column encoding varchar;
 alter table music.track add column sampleRate int not null;
-alter table music.track add column length int not null;
+alter table music.track add column duration int not null;

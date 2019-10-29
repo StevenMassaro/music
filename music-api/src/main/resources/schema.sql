@@ -21,7 +21,7 @@ create table music.track (
   bitrate int not null,
   encoding varchar,
   sampleRate int not null,
-  length int not null,
+  duration int not null,
   deletedInd boolean not null,
   dateCreated timestamp DEFAULT now(),
   dateUpdated timestamp,

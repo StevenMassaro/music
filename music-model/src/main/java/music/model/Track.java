@@ -34,7 +34,7 @@ public class Track {
     private long bitrate;
     private String encoding;
     private int sampleRate;
-    private int length;
+    private int duration;
     private Date dateCreated;
     private Date dateUpdated;
     private Date fileLastModifiedDate;
@@ -70,7 +70,7 @@ public class Track {
         this.bitrate = audioHeader.getBitRateAsNumber();//kbps
         this.encoding = audioHeader.getEncodingType();//FLAC 16 bits (example)
         this.sampleRate = audioHeader.getSampleRateAsNumber();//hz
-        this.length = audioHeader.getTrackLength();//seconds
+        this.duration = audioHeader.getTrackLength();//seconds
     }
 
     public long getId() {
@@ -209,12 +209,12 @@ public class Track {
         this.sampleRate = sampleRate;
     }
 
-    public int getLength() {
-        return length;
+    public int getDuration() {
+        return duration;
     }
 
-    public void setLength(int length) {
-        this.length = length;
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 
     public String getComment() {
