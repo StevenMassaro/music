@@ -3,6 +3,7 @@ package music.model;
 import music.utils.FieldUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 
@@ -30,6 +31,10 @@ public class Track {
     private Byte rating;
     private String comment;
     private boolean deletedInd = false;
+    private long bitrate;
+    private String encoding;
+    private int sampleRate;
+    private int length;
     private Date dateCreated;
     private Date dateUpdated;
     private Date fileLastModifiedDate;
@@ -45,7 +50,7 @@ public class Track {
 ////            tag.getFields(FieldKey.COMMENT);
     }
 
-    public Track(Tag v2tag, String location, File file, Date fileLastModifiedDate) throws IOException {
+    public Track(Tag v2tag, AudioHeader audioHeader, String location, File file, Date fileLastModifiedDate) throws IOException {
         this.title = v2tag.getFirst(FieldKey.TITLE);
         this.album = v2tag.getFirst(FieldKey.ALBUM);
         this.artist = v2tag.getFirst(FieldKey.ARTIST);
@@ -62,6 +67,10 @@ public class Track {
             this.hash = DigestUtils.sha512Hex(inputStream);
             inputStream.close();
         }
+        this.bitrate = audioHeader.getBitRateAsNumber();//kbps
+        this.encoding = audioHeader.getEncodingType();//FLAC 16 bits (example)
+        this.sampleRate = audioHeader.getSampleRateAsNumber();//hz
+        this.length = audioHeader.getTrackLength();//seconds
     }
 
     public long getId() {
@@ -174,6 +183,38 @@ public class Track {
 
     public void setDeletedInd(boolean deletedInd) {
         this.deletedInd = deletedInd;
+    }
+
+    public long getBitrate() {
+        return bitrate;
+    }
+
+    public void setBitrate(long bitrate) {
+        this.bitrate = bitrate;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
+    public int getSampleRate() {
+        return sampleRate;
+    }
+
+    public void setSampleRate(int sampleRate) {
+        this.sampleRate = sampleRate;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
     }
 
     public String getComment() {

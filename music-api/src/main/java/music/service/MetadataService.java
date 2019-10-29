@@ -5,6 +5,7 @@ import music.model.Track;
 import org.apache.commons.io.FilenameUtils;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
@@ -49,8 +50,9 @@ public class MetadataService {
             logger.debug(String.format("Processing file %s of %s: %s", (i + 1), files.size(), file.getName()));
             AudioFile audioFile = AudioFileIO.read(file);
             Tag tag = audioFile.getTag();
+            AudioHeader header = audioFile.getAudioHeader();
             try {
-                Track track = new DeferredTrack(tag, file.getAbsolutePath().replace(musicFileSource, ""), file, musicFileSource);
+                Track track = new DeferredTrack(tag, header, file.getAbsolutePath().replace(musicFileSource, ""), file, musicFileSource);
                 tracks.add(track);
             } catch (Exception e) {
                 logger.error(String.format("Failed to parse tag for metadata for file %s", file.getAbsolutePath()), e);

@@ -2,6 +2,7 @@ package music.model;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.tag.Tag;
 
 import java.io.File;
@@ -19,8 +20,8 @@ public class DeferredTrack extends Track {
 
     private String musicFileSource;
 
-    public DeferredTrack(Tag v2tag, String location, File file, String musicFileSource) throws IOException {
-        super(v2tag, location, null, new Date(file.lastModified()));
+    public DeferredTrack(Tag v2tag, AudioHeader header, String location, File file, String musicFileSource) throws IOException {
+        super(v2tag, header, location, null, new Date(file.lastModified()));
         this.musicFileSource = musicFileSource;
     }
 

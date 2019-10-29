@@ -33,6 +33,10 @@
         , t.rating
         , t."comment"
         , t.deletedind
+        , t.bitrate
+        , t.encoding
+        , t.sampleRate
+        , t."length"
         , t.datecreated
         , t.dateupdated
         , t.filelastmodifieddate
@@ -60,6 +64,10 @@
         , t.rating
         , t."comment"
         , t.deletedind
+        , t.bitrate
+        , t.encoding
+        , t.sampleRate
+        , t."length"
         , t.datecreated
         , t.dateupdated
         , t.filelastmodifieddate
@@ -92,9 +100,10 @@
 
     <insert id="insert">
         INSERT INTO music.track (title, location, hash, album, artist, album_artist, genre, "year", disc_no, track,
-        rating, comment, deletedInd, fileLastModifiedDate)
+        rating, comment, deletedInd, bitrate, encoding, sampleRate, "length", fileLastModifiedDate)
         VALUES(#{track.title}, #{track.location}, #{track.hash}, #{track.album}, #{track.artist}, #{track.album_artist},
-        #{track.genre}, #{track.year}, #{track.disc_no}, #{track.track}, #{track.rating}, #{track.comment}, #{track.deletedInd}, #{track.fileLastModifiedDate})
+        #{track.genre}, #{track.year}, #{track.disc_no}, #{track.track}, #{track.rating}, #{track.comment}, #{track.deletedInd},
+        #{track.bitrate}, #{track.encoding}, #{track.sampleRate}, #{track.length}, #{track.fileLastModifiedDate})
     </insert>
 
     <update id="updateByLocation">
@@ -110,6 +119,10 @@
         disc_no = #{track.disc_no},
         track = #{track.track},
         comment = #{track.comment},
+        bitrate = #{track.birate},
+        encoding = #{track.encoding},
+        sampleRate = #{track.sampleRate},
+        "length" = #{track.length},
         fileLastModifiedDate = #{track.fileLastModifiedDate}
         WHERE location = #{track.location}
     </update>
