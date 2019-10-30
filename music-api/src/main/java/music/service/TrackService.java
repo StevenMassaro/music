@@ -56,6 +56,7 @@ public class TrackService {
                 if (existingTrack != null) {
                     if (forceUpdates || !existingTrack.getFileLastModifiedDate().equals(track.getFileLastModifiedDate())) {
                         logger.debug(forceUpdates ? "Updates are being forced, updating {}" : "Existing track has been modified since last sync, updating: {}", existingTrack.getTitle());
+                        track.setDateUpdated(new Date());
                         trackMapper.updateByLocation(track);
                         syncResult.getModifiedTracks().add(track);
                     } else {
