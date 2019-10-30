@@ -119,7 +119,7 @@
         disc_no = #{track.disc_no},
         track = #{track.track},
         comment = #{track.comment},
-        bitrate = #{track.birate},
+        bitrate = #{track.bitrate},
         encoding = #{track.encoding},
         sampleRate = #{track.sampleRate},
         duration = #{track.duration},

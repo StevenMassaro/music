@@ -31,13 +31,31 @@ public class TrackService {
         this.updateService = updateService;
     }
 
+    /**
+     * Insert tracks if they don't exist, or update them if the file has changed, or if updates are being forced to occur.
+     *
+     * @param tracks       tracks to update/insert
+     * @param syncResult   result object which will be modified during execution
+     */
     public void upsertTracks(List<Track> tracks, SyncResult syncResult){
-        for(Track track : tracks){
+        upsertTracks(tracks, syncResult, false);
+    }
+
+    /**
+     * Insert tracks if they don't exist, or update them if the file has changed, or if updates are being forced to occur.
+     *
+     * @param tracks       tracks to update/insert
+     * @param syncResult   result object which will be modified during execution
+     * @param forceUpdates if true, all tracks will be updated, regardless of whether the file has been modified since
+     *                     the last sync
+     */
+    public void upsertTracks(List<Track> tracks, SyncResult syncResult, boolean forceUpdates) {
+        for (Track track : tracks) {
             try {
                 Track existingTrack = getByLocation(track.getLocation());
                 if (existingTrack != null) {
-                    if (!existingTrack.getFileLastModifiedDate().equals(track.getFileLastModifiedDate())) {
-                        logger.debug(String.format("Existing track has been modified since last sync, updating: %s", existingTrack.getTitle()));
+                    if (forceUpdates || !existingTrack.getFileLastModifiedDate().equals(track.getFileLastModifiedDate())) {
+                        logger.debug(forceUpdates ? "Updates are being forced, updating {}" : "Existing track has been modified since last sync, updating: {}", existingTrack.getTitle());
                         trackMapper.updateByLocation(track);
                         syncResult.getModifiedTracks().add(track);
                     } else {

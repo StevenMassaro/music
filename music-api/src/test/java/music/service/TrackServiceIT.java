@@ -47,6 +47,33 @@ public class TrackServiceIT {
     }
 
     @Test
+    public void updatingTrack() throws IOException {
+        SyncResult syncResult = new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+
+        Track track = track();
+        trackService.upsertTracks(Collections.singletonList(track), syncResult);
+
+        List<Track> list = trackService.list();
+        assertEquals(1, list.size());
+        doTrackAssertions(false, track, list.get(0));
+
+        // not forcing updates, and the date is the same, so it shouldn't update
+        long bitrate = 123;
+        track.setBitrate(bitrate);
+        trackService.upsertTracks(Collections.singletonList(track), syncResult);
+        list = trackService.list();
+        assertEquals(1, list.size());
+        doTrackAssertions(false, track, list.get(0));
+
+        // now force the update
+        trackService.upsertTracks(Collections.singletonList(track), syncResult, true);
+        list = trackService.list();
+        assertEquals(1, list.size());
+        assertEquals(bitrate, list.get(0).getBitrate());
+        assertNotNull(list.get(0).getDateUpdated());
+    }
+
+    @Test
     public void listenedTrack() {
         // first create a device with which to associate the plays
         Device device = deviceService.getOrInsert("devname");
