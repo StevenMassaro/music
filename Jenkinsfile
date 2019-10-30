@@ -29,7 +29,7 @@ node {
        sh label: '', script: 'docker push stevenmassaro/music-api:latest'
    }
    stage('Results') {
-      junit '**/target/surefire-reports/TEST-*.xml'
+      //junit '**/target/surefire-reports/TEST-*.xml'
       archiveArtifacts 'music-api/target/*.jar'
    }
 }
