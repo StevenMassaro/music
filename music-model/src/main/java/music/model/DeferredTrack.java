@@ -20,6 +20,8 @@ public class DeferredTrack extends Track {
 
     private String musicFileSource;
 
+    public DeferredTrack (){}
+
     public DeferredTrack(Tag v2tag, AudioHeader header, String location, File file, String musicFileSource) throws IOException {
         super(v2tag, header, location, null, new Date(file.lastModified()));
         this.musicFileSource = musicFileSource;

@@ -1,17 +1,19 @@
 package music.service;
 
 import music.exception.RatingRangeException;
-import music.model.Device;
-import music.model.ModifyableTags;
-import music.model.SyncResult;
-import music.model.Track;
+import music.model.*;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,9 +38,23 @@ public class TrackServiceIT {
     @Autowired
     private UpdateService updateService;
 
+    private File tempFile;
+
+    @Before
+    public void before() throws IOException {
+        tempFile = File.createTempFile("111", ".flac");
+        FileUtils.copyFile(ResourceUtils.getFile("classpath:1.flac"), tempFile);
+        tempFile.deleteOnExit();
+    }
+
+    @After
+    public void after() {
+        FileUtils.deleteQuietly(tempFile);
+    }
+
     @Test
     public void addingTracks() throws IOException {
-        Track track = track();
+        DeferredTrack track = track(tempFile.getName());
         trackService.upsertTracks(Collections.singletonList(track), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
 
         List<Track> list = trackService.list();
@@ -50,7 +66,7 @@ public class TrackServiceIT {
     public void updatingTrack() throws IOException {
         SyncResult syncResult = new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
-        Track track = track();
+        DeferredTrack track = track(tempFile.getName());
         trackService.upsertTracks(Collections.singletonList(track), syncResult);
 
         List<Track> list = trackService.list();
@@ -78,7 +94,7 @@ public class TrackServiceIT {
         // first create a device with which to associate the plays
         Device device = deviceService.getOrInsert("devname");
 
-        trackService.upsertTracks(Collections.singletonList(track()), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         Track track = trackService.list().get(0);
 
         assertEquals(0, track.getPlays());
@@ -91,7 +107,7 @@ public class TrackServiceIT {
 
     @Test
     public void deletedTrack() throws IOException {
-        trackService.upsertTracks(Collections.singletonList(track()), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         Track track = trackService.list().get(0);
 
         assertFalse(track.getDeletedInd());
@@ -114,7 +130,7 @@ public class TrackServiceIT {
 
     @Test
     public void ratingTrack() throws RatingRangeException {
-        trackService.upsertTracks(Collections.singletonList(track()), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         Track track = trackService.list().get(0);
 
         assertNull(track.getRating());
@@ -128,7 +144,7 @@ public class TrackServiceIT {
 
     @Test
     public void testListingTrackWithUpdates(){
-        trackService.upsertTracks(Collections.singletonList(track()), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         Track track = trackService.list().get(0);
 
         String field = ModifyableTags.ALBUM.getPropertyName();
@@ -142,7 +158,7 @@ public class TrackServiceIT {
 
     @Test
     public void testListingTrackWithTwoUpdates(){
-        trackService.upsertTracks(Collections.singletonList(track()), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         Track track = trackService.list().get(0);
 
         String field = ModifyableTags.ALBUM.getPropertyName();

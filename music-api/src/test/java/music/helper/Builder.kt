@@ -1,13 +1,15 @@
 package music.helper
 
+import music.model.DeferredTrack
 import music.model.Track
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.springframework.test.util.ReflectionTestUtils
 import java.io.IOException
 import java.util.*
 
-fun track(): Track {
-    val track = Track()
+fun track(location: String = "1.flac"): DeferredTrack {
+    val track = DeferredTrack()
     track.album = "album"
     track.album_artist = "aartist"
     track.artist = "artist"
@@ -15,13 +17,14 @@ fun track(): Track {
     track.dateCreated = Date()
     track.disc_no = 1L
     track.genre = "genre"
-    track.location = "C:/dev/1.flac"
+    track.location = location
     track.title = "title"
     track.track = 3L
     track.year = "1998"
     track.deletedInd = false
     track.fileLastModifiedDate = Date()
     track.hash = "1234abc"
+    ReflectionTestUtils.setField(track, "musicFileSource", System.getProperty("java.io.tmpdir"))
     return track
 }
 
