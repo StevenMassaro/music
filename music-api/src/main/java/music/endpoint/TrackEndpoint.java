@@ -2,16 +2,20 @@ package music.endpoint;
 
 import music.model.Track;
 import music.service.FileService;
+import music.service.MetadataService;
 import music.service.TrackService;
 import music.service.UpdateService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.jaudiotagger.tag.datatype.Artwork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -27,14 +31,17 @@ public class TrackEndpoint {
 
     private final UpdateService updateService;
 
+    private final MetadataService metadataService;
+
     @Value("${music.file.source}")
     private String musicFileSource;
 
     @Autowired
-    public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService) {
+    public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService, MetadataService metadataService) {
         this.fileService = fileService;
         this.trackService = trackService;
         this.updateService = updateService;
+        this.metadataService = metadataService;
     }
 
     @GetMapping
@@ -91,10 +98,23 @@ public class TrackEndpoint {
     public ResponseEntity<Resource> stream(@PathVariable long id) throws IOException {
         Track track = trackService.get(id);
 
-        Resource file = new InputStreamResource(FileUtils.openInputStream(fileService.getFile(track)));
+        Resource file = new InputStreamResource(FileUtils.openInputStream(fileService.getFile(track.getLocation())));
+        return responseEntity(FilenameUtils.getName(track.getLocation()), FilenameUtils.getExtension(track.getLocation()).toLowerCase(), file);
+    }
+
+    @GetMapping("/{id}/art")
+    public ResponseEntity<Resource> getAlbumArt(@PathVariable long id, @RequestParam(defaultValue = "0") Integer index){
+        Track track = trackService.get(id);
+
+        Artwork albumArt = metadataService.getAlbumArt(track.getLocation(), index);
+        Resource file = new ByteArrayResource(albumArt.getBinaryData());
+        return responseEntity(null, albumArt.getMimeType(), file);
+    }
+
+    private ResponseEntity<Resource> responseEntity(String filename, String contentType, Resource file){
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + FilenameUtils.getName(track.getLocation()) + "\"")
-                .header(HttpHeaders.CONTENT_TYPE, "audio/" + FilenameUtils.getExtension(track.getLocation()).toLowerCase())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline" + (!StringUtils.isEmpty(filename) ? "; filename=\"" + filename + "\"" : ""))
+                .header(HttpHeaders.CONTENT_TYPE, contentType)
                 .body(file);
     }
 

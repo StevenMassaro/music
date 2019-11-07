@@ -1,5 +1,8 @@
 # changelog
 
+## 1.2-2019.11.07-SNAPSHOT
+* feature: retrieve album art
+
 ## 1.1-2019.10.30-SNAPSHOT
 * feature: allow updates to be forced during sync (though request param `forceUpdates`)
 * fix: `updateByLocation` correctly gets bitrate from POJO

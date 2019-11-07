@@ -6,7 +6,7 @@
 
     <groupId>com.massaro</groupId>
     <artifactId>Music</artifactId>
-    <version>1.1-2019.10.30-SNAPSHOT</version>
+    <version>1.2-2019.11.07-SNAPSHOT</version>
     <modules>
         <module>music-model</module>
         <module>music-api</module>
@@ -48,7 +48,7 @@
             <dependency>
                 <groupId>com.massaro</groupId>
                 <artifactId>music-model</artifactId>
-                <version>1.1-2019.10.30-SNAPSHOT</version>
+                <version>1.2-2019.11.07-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org</groupId>

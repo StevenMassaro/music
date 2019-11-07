@@ -32,8 +32,8 @@ public class FileService {
         return FileUtils.listFiles(new File(musicFileSource), caseInsensitiveExtensionFilter, TrueFileFilter.INSTANCE);
     }
 
-    public File getFile(Track track) {
-        return new File(musicFileSource + track.getLocation());
+    public File getFile(String location){
+        return new File(musicFileSource + location);
     }
 
     public boolean deleteFile(Track track) throws IOException {
