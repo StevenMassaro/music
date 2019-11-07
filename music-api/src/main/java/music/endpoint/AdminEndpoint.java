@@ -1,5 +1,6 @@
 package music.endpoint;
 
+import music.model.DeferredTrack;
 import music.model.SyncResult;
 import music.model.Track;
 import music.service.MetadataService;
@@ -37,7 +38,7 @@ public class AdminEndpoint {
     public SyncResult syncTracksToDb(@RequestParam(defaultValue = "false") boolean forceUpdates) throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
         logger.info("Begin database sync");
         SyncResult syncResult = new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-        List<Track> files = metadataService.getTracks();
+        List<DeferredTrack> files = metadataService.getTracks();
         trackService.upsertTracks(files, syncResult, forceUpdates);
         trackService.deleteOrphanedTracksMetadata(files, syncResult);
         logger.info("Finished database sync");

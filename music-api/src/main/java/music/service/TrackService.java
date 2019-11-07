@@ -3,6 +3,7 @@ package music.service;
 import music.exception.RatingRangeException;
 import music.mapper.PlayMapper;
 import music.mapper.TrackMapper;
+import music.model.DeferredTrack;
 import music.model.SyncResult;
 import music.model.Track;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class TrackService {
      * @param tracks       tracks to update/insert
      * @param syncResult   result object which will be modified during execution
      */
-    public void upsertTracks(List<Track> tracks, SyncResult syncResult){
+    public void upsertTracks(List<DeferredTrack> tracks, SyncResult syncResult){
         upsertTracks(tracks, syncResult, false);
     }
 
@@ -49,8 +50,8 @@ public class TrackService {
      * @param forceUpdates if true, all tracks will be updated, regardless of whether the file has been modified since
      *                     the last sync
      */
-    public void upsertTracks(List<Track> tracks, SyncResult syncResult, boolean forceUpdates) {
-        for (Track track : tracks) {
+    public void upsertTracks(List<DeferredTrack> tracks, SyncResult syncResult, boolean forceUpdates) {
+        for (DeferredTrack track : tracks) {
             try {
                 Track existingTrack = getByLocation(track.getLocation());
                 if (existingTrack != null) {
@@ -140,7 +141,7 @@ public class TrackService {
      * Delete metadata for all tracks in database which no longer exist on disk.
      * @param actualTracks list of tracks that exist on disk
      */
-    public void deleteOrphanedTracksMetadata(List<Track> actualTracks, SyncResult syncResult) {
+    public void deleteOrphanedTracksMetadata(List<DeferredTrack> actualTracks, SyncResult syncResult) {
         logger.debug("Begin deleted orphaned tracks");
         List<Track> dbTracks = listAll();
         // if a track exists in the database but doesn't exist on disk, then delete it from the db

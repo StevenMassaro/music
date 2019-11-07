@@ -1,19 +1,14 @@
 package music.service;
 
 import music.model.DeferredTrack;
-import music.model.Track;
-import org.apache.commons.io.FilenameUtils;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
-import org.jaudiotagger.tag.flac.FlacTag;
-import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +34,11 @@ public class MetadataService {
         this.fileService = fileService;
     }
 
-    public List<Track> getTracks() throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
+    public List<DeferredTrack> getTracks() throws TagException, ReadOnlyFileException, CannotReadException, InvalidAudioFrameException, IOException {
         List<File> files = new ArrayList<>(fileService.listMusicFiles());
         logger.info(String.format("Found %s files in music directory.", files.size()));
 
-        List<Track> tracks = new ArrayList<>();
+        List<DeferredTrack> tracks = new ArrayList<>();
 
         for (int i = 0; i < files.size(); i++) {
             File file = files.get(i);
@@ -52,7 +47,7 @@ public class MetadataService {
             Tag tag = audioFile.getTag();
             AudioHeader header = audioFile.getAudioHeader();
             try {
-                Track track = new DeferredTrack(tag, header, file.getAbsolutePath().replace(musicFileSource, ""), file, musicFileSource);
+                DeferredTrack track = new DeferredTrack(tag, header, file.getAbsolutePath().replace(musicFileSource, ""), file, musicFileSource);
                 tracks.add(track);
             } catch (Exception e) {
                 logger.error(String.format("Failed to parse tag for metadata for file %s", file.getAbsolutePath()), e);
