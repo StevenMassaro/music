@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 
+import static music.utils.EndpointUtils.responseEntity;
+
 @RestController
 @RequestMapping("/track")
 public class TrackEndpoint {
@@ -99,7 +101,7 @@ public class TrackEndpoint {
         Track track = trackService.get(id);
 
         Resource file = new InputStreamResource(FileUtils.openInputStream(fileService.getFile(track.getLocation())));
-        return responseEntity(FilenameUtils.getName(track.getLocation()), FilenameUtils.getExtension(track.getLocation()).toLowerCase(), file);
+        return responseEntity(FilenameUtils.getName(track.getLocation()), "audio/" + FilenameUtils.getExtension(track.getLocation()).toLowerCase(), file);
     }
 
     @GetMapping("/{id}/art")
