@@ -35,9 +35,6 @@ public class TrackEndpoint {
 
     private final MetadataService metadataService;
 
-    @Value("${music.file.source}")
-    private String musicFileSource;
-
     @Autowired
     public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService, MetadataService metadataService) {
         this.fileService = fileService;
@@ -108,16 +105,8 @@ public class TrackEndpoint {
     public ResponseEntity<Resource> getAlbumArt(@PathVariable long id, @RequestParam(defaultValue = "0") Integer index){
         Track track = trackService.get(id);
 
-        Artwork albumArt = metadataService.getAlbumArt(track.getLocation(), index);
-        Resource file = new ByteArrayResource(albumArt.getBinaryData());
-        return responseEntity(null, albumArt.getMimeType(), file);
-    }
-
-    private ResponseEntity<Resource> responseEntity(String filename, String contentType, Resource file){
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline" + (!StringUtils.isEmpty(filename) ? "; filename=\"" + filename + "\"" : ""))
-                .header(HttpHeaders.CONTENT_TYPE, contentType)
-                .body(file);
+        Artwork albumArt = metadataService.getAlbumArt(track.getLocation(), false, index);
+        return responseEntity(null, albumArt.getMimeType(), albumArt.getBinaryData());
     }
 
     @PostMapping("/{id}/listened")

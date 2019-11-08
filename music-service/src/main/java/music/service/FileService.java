@@ -1,6 +1,7 @@
 package music.service;
 
 import music.model.Track;
+import music.settings.PrivateSettings;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
@@ -8,8 +9,6 @@ import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -19,28 +18,28 @@ import java.util.Collection;
 @Service
 public class FileService {
 
-    @Value("${music.file.source}")
-    private String musicFileSource;
-
-    @Value("${music.acceptable.file.extensions}")
-    private String acceptableExtensions;
+    private final PrivateSettings privateSettings;
 
     private Logger logger = LoggerFactory.getLogger(FileService.class);
 
+    public FileService(PrivateSettings privateSettings) {
+        this.privateSettings = privateSettings;
+    }
+
     public Collection<File> listMusicFiles() {
-        SuffixFileFilter caseInsensitiveExtensionFilter = new SuffixFileFilter(acceptableExtensions.split(","), IOCase.INSENSITIVE);
-        return FileUtils.listFiles(new File(musicFileSource), caseInsensitiveExtensionFilter, TrueFileFilter.INSTANCE);
+        SuffixFileFilter caseInsensitiveExtensionFilter = new SuffixFileFilter(privateSettings.getAcceptableExtensions().split(","), IOCase.INSENSITIVE);
+        return FileUtils.listFiles(new File(privateSettings.getLocalMusicFileLocation()), caseInsensitiveExtensionFilter, TrueFileFilter.INSTANCE);
     }
 
     public File getFile(String location){
-        return new File(musicFileSource + location);
+        return new File(privateSettings.getLocalMusicFileLocation() + location);
     }
 
     public boolean deleteFile(Track track) throws IOException {
         logger.debug(String.format("Permanently deleting file %s", track.getLocation()));
-        boolean fileDeleted = new File(musicFileSource + track.getLocation()).delete();
+        boolean fileDeleted = new File(privateSettings.getLocalMusicFileLocation() + track.getLocation()).delete();
         if(fileDeleted){
-            String trackDirectory = FilenameUtils.getFullPath(musicFileSource + track.getLocation());
+            String trackDirectory = FilenameUtils.getFullPath(privateSettings.getLocalMusicFileLocation() + track.getLocation());
             boolean dirDeleted = recursivelyDeleteEmptyDirectories(trackDirectory);
         }
         return fileDeleted;

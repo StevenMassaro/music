@@ -5,7 +5,7 @@
     <parent>
         <artifactId>Music</artifactId>
         <groupId>com.massaro</groupId>
-        <version>1.2-2019.11.07-SNAPSHOT</version>
+        <version>1.2-2019.11.08</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
@@ -13,10 +13,6 @@
     <artifactId>music-api</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -54,6 +50,10 @@
         <dependency>
             <groupId>com.massaro</groupId>
             <artifactId>music-model</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.massaro</groupId>
+          <artifactId>music-service</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
