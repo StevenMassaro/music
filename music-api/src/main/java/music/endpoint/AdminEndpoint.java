@@ -4,6 +4,7 @@ import music.model.DeferredTrack;
 import music.model.SyncResult;
 import music.model.Track;
 import music.service.MetadataService;
+import music.service.SyncService;
 import music.service.TrackService;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
@@ -24,26 +25,20 @@ public class AdminEndpoint {
 
     private Logger logger = LoggerFactory.getLogger(AdminEndpoint.class);
 
-    private final MetadataService metadataService;
+	private final TrackService trackService;
 
-    private final TrackService trackService;
+	private final SyncService syncService;
 
     @Autowired
-    public AdminEndpoint(MetadataService metadataService, TrackService trackService) {
-        this.metadataService = metadataService;
-        this.trackService = trackService;
-    }
+	public AdminEndpoint(TrackService trackService, SyncService syncService) {
+		this.trackService = trackService;
+		this.syncService = syncService;
+	}
 
     @PostMapping("/dbSync")
     public SyncResult syncTracksToDb(@RequestParam(defaultValue = "false") boolean forceUpdates) throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
-        logger.info("Begin database sync");
-        SyncResult syncResult = new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-        List<DeferredTrack> files = metadataService.getTracks();
-        trackService.upsertTracks(files, syncResult, forceUpdates);
-        trackService.deleteOrphanedTracksMetadata(files, syncResult);
-        logger.info("Finished database sync");
-        return syncResult;
-    }
+		return syncService.syncTracksToDb(forceUpdates);
+	}
 
     /**
      * Find all tracks marked deleted in the database and delete those tracks from the file system.

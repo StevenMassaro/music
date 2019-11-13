@@ -1,5 +1,9 @@
 # changelog
 
+## 1.2-2019.11.12
+* fix: prevent sync from beginning if sync is already occurring
+* fix: prevent migration from beginning if migration is already occurring
+
 ## 1.2-2019.11.08
 * move services to separate module for sharing to client
 

@@ -1,6 +1,7 @@
 package music.service;
 
 import music.exception.RatingRangeException;
+import music.exception.TaskInProgressException;
 import music.mapper.PlayMapper;
 import music.model.*;
 import org.apache.commons.io.FileUtils;
@@ -17,11 +18,13 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class MediaMonkeyMigrationService implements MigrationService {
 
     private Logger logger = LoggerFactory.getLogger(MediaMonkeyMigrationService.class);
+	private AtomicBoolean currentlyMigrating = new AtomicBoolean(false);
 
     private final String SONG_TITLE = "SongTitle";
     private final String ARTIST = "Artist";
@@ -136,24 +139,32 @@ public class MediaMonkeyMigrationService implements MigrationService {
 
     @Override
     public MigrationResult doImport(MultipartFile file, String deviceName, boolean importPlays, boolean importRatings) throws Exception {
-        validateDatabaseFilename(file);
-        Device device = deviceService.getOrInsert(deviceName);
-        File temporaryDatabase = createTempDb(file);
+		checkNotCurrentlyMigrating();
+		try {
+			currentlyMigrating.set(true);
+			validateDatabaseFilename(file);
+			Device device = deviceService.getOrInsert(deviceName);
+			File temporaryDatabase = createTempDb(file);
 
-        MigrationResult migrationResult = new MigrationResult(
-                new ItemImportResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new ItemImportResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new ItemImportResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-        );
+			MigrationResult migrationResult = new MigrationResult(
+				new ItemImportResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
+				new ItemImportResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
+				new ItemImportResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
+			);
 
-        if(importPlays){
-            insertPlayCounts(temporaryDatabase.getAbsolutePath(), device, migrationResult);
-            insertIndividualPlays(temporaryDatabase.getAbsolutePath(), device, migrationResult);
-        }
-        if (importRatings){
-            insertRatings(temporaryDatabase.getAbsolutePath(), migrationResult);
-        }
-        return migrationResult;
+			if (importPlays) {
+				insertPlayCounts(temporaryDatabase.getAbsolutePath(), device, migrationResult);
+				insertIndividualPlays(temporaryDatabase.getAbsolutePath(), device, migrationResult);
+			}
+			if (importRatings) {
+				insertRatings(temporaryDatabase.getAbsolutePath(), migrationResult);
+			}
+			currentlyMigrating.set(false);
+			return migrationResult;
+		} catch (Exception e) {
+			currentlyMigrating.set(false);
+			throw e;
+		}
     }
 
     private void insertRatings(String absolutePath, MigrationResult migrationResult) {
@@ -222,4 +233,13 @@ public class MediaMonkeyMigrationService implements MigrationService {
             throw new Exception(String.format("Imported file does not have the expected filename from a MediaMonkey database '%s'.", expectedFilename));
         }
     }
+
+	/**
+	 * Check to make sure that a migration is not currently underway.
+	 */
+	private void checkNotCurrentlyMigrating() throws Exception {
+		if (currentlyMigrating.get()) {
+			throw new TaskInProgressException("migration");
+		}
+	}
 }
