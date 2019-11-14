@@ -13,13 +13,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static music.utils.EndpointUtils.responseEntity;
 
@@ -35,6 +39,8 @@ public class TrackEndpoint {
 
     private final MetadataService metadataService;
 
+    private final String DATE_FORMAT = "yyyy-MM-dd";
+
     @Autowired
     public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService, MetadataService metadataService) {
         this.fileService = fileService;
@@ -47,6 +53,16 @@ public class TrackEndpoint {
     public List<Track> list() {
         return trackService.list();
     }
+
+    @GetMapping("/historical/dates")
+	public List<String> listHistoricalDates(){
+		return trackService.listHistoricalDates().stream().map(d -> new SimpleDateFormat(DATE_FORMAT).format(d)).collect(Collectors.toList());
+	}
+
+	@GetMapping("/historical/{date}")
+	public List<Track> listHistoricalPlaysByDate(@PathVariable @DateTimeFormat(pattern = DATE_FORMAT) Date date) {
+    	return trackService.listPlaysByDate(date);
+	}
 
     @DeleteMapping("/{id}")
     public Track delete(@PathVariable long id) throws IOException {

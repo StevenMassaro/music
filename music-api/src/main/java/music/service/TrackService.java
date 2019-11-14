@@ -3,9 +3,7 @@ package music.service;
 import music.exception.RatingRangeException;
 import music.mapper.PlayMapper;
 import music.mapper.TrackMapper;
-import music.model.DeferredTrack;
-import music.model.SyncResult;
-import music.model.Track;
+import music.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +88,10 @@ public class TrackService {
     public List<Track> listAll(){
         return updateService.applyUpdates(trackMapper.listAll());
     }
+
+    public List<Track> listPlaysByDate(Date date) { return trackMapper.listPlaysByDate(date); }
+
+    public List<Date> listHistoricalDates(){ return trackMapper.listHistoricalDates(); }
 
     public Track getByLocation(String location) {
         return updateService.applyUpdates(trackMapper.getByLocation(location));

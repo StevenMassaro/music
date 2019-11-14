@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
+import org.testcontainers.shaded.org.apache.commons.lang.time.DateUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,7 +91,7 @@ public class TrackServiceIT {
     }
 
     @Test
-    public void listenedTrack() {
+    public void listenedTrack() throws IOException {
         // first create a device with which to associate the plays
         Device device = deviceService.getOrInsert("devname");
 
@@ -103,6 +104,14 @@ public class TrackServiceIT {
 
         track = trackService.list().get(0);
         assertEquals(1, track.getPlays());
+
+        List<Date> historicalDates = trackService.listHistoricalDates();
+        assertEquals(1, historicalDates.size());
+        assertTrue(DateUtils.isSameDay(new Date(), historicalDates.get(0)));
+
+        List<Track> playedTracks = trackService.listPlaysByDate(historicalDates.get(0));
+        assertEquals(1, playedTracks.size());
+        doTrackAssertions(false, track, playedTracks.get(0));
     }
 
     @Test

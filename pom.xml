@@ -6,7 +6,7 @@
 
     <groupId>com.massaro</groupId>
     <artifactId>Music</artifactId>
-	<version>1.2-2019.11.12</version>
+	<version>1.2-2019.11.14</version>
     <modules>
         <module>music-model</module>
         <module>music-api</module>
@@ -47,7 +47,7 @@
         <java.version>1.8</java.version>
         <docker.image.prefix>stevenmassaro</docker.image.prefix>
         <kotlin.version>1.3.50</kotlin.version>
-		<myversion>1.2-2019.11.12</myversion>
+		<myversion>1.2-2019.11.14</myversion>
     </properties>
 
     <dependencyManagement>

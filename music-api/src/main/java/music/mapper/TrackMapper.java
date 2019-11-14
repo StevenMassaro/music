@@ -4,6 +4,7 @@ import music.model.Track;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 @Mapper
@@ -16,6 +17,10 @@ public interface TrackMapper {
     List<Track> list();
 
     List<Track> listAll();
+
+    List<Track> listPlaysByDate(Date date);
+
+    List<Date> listHistoricalDates();
 
     Track get(@Param("id") long id);
 

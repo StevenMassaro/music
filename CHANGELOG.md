@@ -1,5 +1,8 @@
 # changelog
 
+## 1.2-2019.11.14
+* feature: show historical plays (songs played on a particular date)
+
 ## 1.2-2019.11.12
 * fix: prevent sync from beginning if sync is already occurring
 * fix: prevent migration from beginning if migration is already occurring
