@@ -17,6 +17,12 @@
         ORDER BY artist,album,disc_no,track
     </select>
 
+	<select id="countPurgableTracks" resultType="long">
+		SELECT COUNT(*)
+		<include refid="selectJoin"></include>
+		WHERE deletedInd = true
+	</select>
+
 	<select id="listPlaysByDate" resultMap="trackResultMap">
 		<include refid="selectColumns"/>
 		WHERE date_trunc('day', p.playdate) = #{date}
@@ -56,12 +62,16 @@
         , t.dateupdated
         , t.filelastmodifieddate
         , COUNT(p.playdate) + COALESCE(pc.playcount, 0) - (SELECT COUNT(*) FROM music.plays WHERE songid = t.id AND imported = true) AS plays
-        FROM music.track t
+        <include refid="selectJoin"></include>
+    </sql>
+
+	<sql id="selectJoin">
+		FROM music.track t
         LEFT OUTER JOIN music.plays p
         ON p.songid = t.id
         LEFT OUTER JOIN music.playcount pc
         ON pc.songid = t.id
-    </sql>
+	</sql>
 
     <sql id="selectGroupBy">
         GROUP BY

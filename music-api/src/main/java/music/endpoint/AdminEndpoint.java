@@ -40,6 +40,11 @@ public class AdminEndpoint {
 		return syncService.syncTracksToDb(forceUpdates);
 	}
 
+	@GetMapping("/purge/count")
+	public long countPurgableTracks(){
+		return trackService.countPurgableTracks();
+	}
+
     /**
      * Find all tracks marked deleted in the database and delete those tracks from the file system.
      */

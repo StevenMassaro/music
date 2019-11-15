@@ -89,6 +89,14 @@ public class TrackService {
         return updateService.applyUpdates(trackMapper.listAll());
     }
 
+	/**
+	 * Return the count of tracks that can be purged from the file system (or in other words, they were marked deleted
+	 * in the database).
+	 */
+	public long countPurgableTracks(){
+    	return trackMapper.countPurgableTracks();
+	}
+
     public List<Track> listPlaysByDate(Date date) { return trackMapper.listPlaysByDate(date); }
 
     public List<Date> listHistoricalDates(){ return trackMapper.listHistoricalDates(); }

@@ -18,6 +18,8 @@ public interface TrackMapper {
 
     List<Track> listAll();
 
+    long countPurgableTracks();
+
     List<Track> listPlaysByDate(Date date);
 
     List<Date> listHistoricalDates();
