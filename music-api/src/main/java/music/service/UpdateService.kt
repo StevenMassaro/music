@@ -1,6 +1,7 @@
 package music.service
 
 import music.mapper.UpdateMapper
+import music.model.HtmlType
 import music.model.ModifyableTags
 import music.model.Track
 import music.model.TrackUpdate
@@ -82,9 +83,13 @@ class UpdateService @Autowired constructor(private val updateMapper: UpdateMappe
                 // todo find the field using correct name
                 val field = ReflectionUtils.findField(Track::class.java, trackUpdate.field)
                 if (field != null) {
-                    // todo correctly cast the new value
-                    ReflectionUtils.makeAccessible(field)
-                    ReflectionUtils.setField(field, track, trackUpdate.newValue)
+					val tag = ModifyableTags.valueOf(trackUpdate.field.toUpperCase())
+					ReflectionUtils.makeAccessible(field)
+					if(tag.htmlType == HtmlType.number){
+						ReflectionUtils.setField(field, track, trackUpdate.newValue.toLong())
+					} else {
+						ReflectionUtils.setField(field, track, trackUpdate.newValue)
+					}
                 } else {
                     logger.error(String.format("Failed to reflectively update field %s on track %s", trackUpdate.field, track.getId()))
                 }

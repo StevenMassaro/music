@@ -1,5 +1,6 @@
 package music.endpoint;
 
+import music.model.ModifyableTags;
 import music.model.Track;
 import music.service.FileService;
 import music.service.MetadataService;
@@ -7,7 +8,11 @@ import music.service.TrackService;
 import music.service.UpdateService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.builder.Diff;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.jaudiotagger.tag.datatype.Artwork;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -21,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +36,8 @@ import static music.utils.EndpointUtils.responseEntity;
 @RestController
 @RequestMapping("/track")
 public class TrackEndpoint {
+
+	private Logger logger = LoggerFactory.getLogger(TrackEndpoint.class);
 
     private final FileService fileService;
 
@@ -69,11 +77,21 @@ public class TrackEndpoint {
         return trackService.markDeleted(id);
     }
 
-    @PatchMapping("/{id}/{field}/{value}")
-    public Track updateTrackInfo(@PathVariable long id, @PathVariable String field, @PathVariable String value){
-        updateService.queueTrackUpdate(id, field, value);
-        return trackService.get(id);
-    }
+    @PatchMapping
+	public Track updateTrackInfo(@RequestBody Track track){
+    	Track existing = trackService.get(track.getId());
+		DiffResult diff = existing.diff(track);
+		for(Diff<?> d: diff.getDiffs()) {
+			logger.trace("Applying track update: {}, from {} to {}", d.getFieldName(), d.getLeft().toString(), d.getRight().toString());
+			updateService.queueTrackUpdate(track.getId(), d.getFieldName(), d.getRight().toString());
+		}
+		return trackService.get(track.getId());
+	}
+
+    @GetMapping("/modifyabletags")
+	public List<ModifyableTags> listModifyableTags(){
+    	return Arrays.asList(ModifyableTags.values());
+	}
 
     /*
     @GetMapping("{id}/convert")

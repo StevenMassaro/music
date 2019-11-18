@@ -3,18 +3,24 @@ package music.model;
 import music.utils.FieldUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.builder.DiffBuilder;
+import org.apache.commons.lang3.builder.DiffResult;
+import org.apache.commons.lang3.builder.Diffable;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
+import org.springframework.util.ReflectionUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.Objects;
 
 
-public class Track {
+public class Track implements Diffable<Track> {
 
     private long id;
     private String title;
@@ -284,4 +290,19 @@ public class Track {
                 Objects.equals(disc_no, track1.disc_no) &&
                 Objects.equals(track, track1.track);
     }
+
+	@Override
+	public DiffResult diff(Track track) {
+		DiffBuilder diffBuilder = new DiffBuilder(this, track, ToStringStyle.SHORT_PREFIX_STYLE);
+		for (ModifyableTags modifyableTag : ModifyableTags.values()) {
+			Field field = ReflectionUtils.findField(Track.class, modifyableTag.getPropertyName());
+			if (field != null) {
+				ReflectionUtils.makeAccessible(field);
+				Object trackVal = ReflectionUtils.getField(field, track);
+				Object thisVal = ReflectionUtils.getField(field, this);
+				diffBuilder.append(modifyableTag.getPropertyName(), thisVal, trackVal);
+			}
+		}
+		return diffBuilder.build();
+	}
 }
