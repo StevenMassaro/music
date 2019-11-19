@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.sql.SQLType;
 import java.util.Date;
 import java.util.List;
 
@@ -196,4 +197,9 @@ public class TrackService {
             trackMapper.setRatingById(id, rating);
         }
     }
+
+    public Track updateField(long id, String field, Object newValue, SQLType type){
+    	trackMapper.updateFieldById(id, field, newValue, type.getName());
+    	return get(id);
+	}
 }

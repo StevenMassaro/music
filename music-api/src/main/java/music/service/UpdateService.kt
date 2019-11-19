@@ -5,15 +5,23 @@ import music.model.HtmlType
 import music.model.ModifyableTags
 import music.model.Track
 import music.model.TrackUpdate
+import music.utils.FieldUtils.calculateHash
+import org.jaudiotagger.tag.FieldKey
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.util.ReflectionUtils
+import java.lang.Exception
+import java.sql.JDBCType
 import kotlin.collections.HashMap
 
 @Service
-class UpdateService @Autowired constructor(private val updateMapper: UpdateMapper) {
-    private val logger = LoggerFactory.getLogger(TrackService::class.java)
+class UpdateService @Autowired constructor(
+	private val updateMapper: UpdateMapper,
+	private val metadataService: MetadataService,
+	private val fileService: FileService
+) {
+	private val logger = LoggerFactory.getLogger(UpdateService::class.java)
 
     /**
      * Update the specified tracks field with the new value. These updates do not occur immediately.
@@ -49,6 +57,52 @@ class UpdateService @Autowired constructor(private val updateMapper: UpdateMappe
         }
         return updates
     }
+
+	/**
+	 * Delete a queued track update by the [id] of the particular update (not the track ID).
+	 */
+	fun deleteUpdateById(id: Long) {
+		updateMapper.deleteById(id)
+		logger.debug("Deleted queued track update (ID: {})", id)
+	}
+
+	/**
+	 * Apply all the queued updates to the files on disk. This silently updates the fields in the track table, and
+	 * updates the hash of the file in the database (which is necessary because the file itself is modified).
+	 */
+	fun applyUpdatesToDisk(trackService: TrackService): Map<Long, List<TrackUpdate>> {
+		// todo, the TrackService should not be a param, but this bypasses a circular dependency that was annoying
+		val updates = list();
+		updates.forEach { (id, trackUpdates) ->
+			if (trackUpdates.isNotEmpty()) {
+				val track = trackService.get(id)
+				trackUpdates.forEach {
+					try {
+						logger.trace("Applying update to disk: {}", it.toString())
+						metadataService.updateTrackField(track, FieldKey.valueOf(it.field.toUpperCase()), it.newValue)
+						deleteUpdateById(it.id)
+
+						logger.trace("Updating field {} to {} for ID: {}", it.field, it.newValue, id)
+						trackService.updateField(id, it.field, it.newValue, ModifyableTags.valueOf(it.field.toUpperCase()).sqlType);
+
+						val hash: String = calculateHash(fileService.getFile(track.location))
+						logger.trace("Updating field hash to {} for ID: {}", hash, id)
+						trackService.updateField(id, "hash", hash, JDBCType.VARCHAR);
+					} catch (e: Exception) {
+						logger.error("Failed to apply update to disk: $it", e)
+					}
+				}
+			}
+		}
+		return updates
+	}
+
+	/**
+	 * Count how many updates are queued.
+	 */
+	fun count(): Long {
+		return updateMapper.count()
+	}
 
     /**
      * Apply updates to the provided [tracks]

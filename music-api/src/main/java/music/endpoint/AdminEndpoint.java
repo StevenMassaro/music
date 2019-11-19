@@ -1,11 +1,11 @@
 package music.endpoint;
 
-import music.model.DeferredTrack;
 import music.model.SyncResult;
 import music.model.Track;
-import music.service.MetadataService;
+import music.model.TrackUpdate;
 import music.service.SyncService;
 import music.service.TrackService;
+import music.service.UpdateService;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController()
 @RequestMapping("/admin")
@@ -29,10 +30,13 @@ public class AdminEndpoint {
 
 	private final SyncService syncService;
 
+	private final UpdateService updateService;
+
     @Autowired
-	public AdminEndpoint(TrackService trackService, SyncService syncService) {
+	public AdminEndpoint(TrackService trackService, SyncService syncService, UpdateService updateService) {
 		this.trackService = trackService;
 		this.syncService = syncService;
+		this.updateService = updateService;
 	}
 
     @PostMapping("/dbSync")
@@ -64,4 +68,16 @@ public class AdminEndpoint {
         logger.info(String.format("Deleted %s tracks from the file system.", deleted.size()));
         return deleted;
     }
+
+    @PostMapping("/update")
+    public void applyUpdatesToSongs(){
+    	logger.info("Applying updates to disk");
+        Map<Long, List<TrackUpdate>> updates = updateService.applyUpdatesToDisk(trackService);
+        logger.info("Finished applying {} updates to disk", updates.size());
+    }
+
+    @GetMapping("/update/count")
+	public long countUpdates(){
+    	return updateService.count();
+	}
 }

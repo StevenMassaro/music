@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
+import static music.utils.FieldUtils.calculateHash;
+
 /**
  * A track object, where the calculation of the hash is deferred until it is requested. On the first sync performed
  * the hash will be calculated for each file and put into the database. The first sync will be slow. Subsequent syncs
@@ -29,10 +31,7 @@ public class DeferredTrack extends Track {
 
     @Override
     public String getHash() throws IOException {
-        InputStream inputStream = FileUtils.openInputStream(new File(musicFileSource + File.separator + super.getLocation()));
-        String hash = DigestUtils.sha512Hex(inputStream);
-        inputStream.close();
-        return hash;
+    	return calculateHash(musicFileSource + File.separator + super.getLocation());
     }
 
     @Override

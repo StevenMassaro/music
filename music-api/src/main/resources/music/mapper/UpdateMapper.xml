@@ -16,9 +16,18 @@
         SELECT * FROM music.trackupdates ORDER BY id
     </select>
 
+	<select id="count" resultType="Long">
+		SELECT COUNT(*) FROM music.trackupdates
+	</select>
+
+	<delete id="deleteById">
+		DELETE FROM music.trackupdates
+		WHERE id = #{id}
+	</delete>
+
     <resultMap id="trackUpdateResultMap" type="music.model.TrackUpdate">
         <constructor>
-            <idArg column="id" javaType="Long"/>
+            <idArg column="id" javaType="_long"/>
             <arg column="songid" javaType="_long"/>
             <arg column="field" javaType="String"/>
             <arg column="newvalue" javaType="String"/>

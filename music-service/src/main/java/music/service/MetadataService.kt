@@ -1,6 +1,7 @@
 package music.service
 
 import music.model.DeferredTrack
+import music.model.Track
 import music.settings.PrivateSettings
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.audio.exceptions.CannotReadException
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.io.IOException
 import java.util.ArrayList
+import org.jaudiotagger.tag.FieldKey
 
 @Service
 class MetadataService @Autowired constructor(val fileService: FileService, val privateSettings: PrivateSettings) {
@@ -66,4 +68,18 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 
         return tag.artworkList.get(index)
     }
+
+	/**
+	 * Update the [track]'s [field] to the [newValue], persisting the change to the ID3 tag on disk.
+	 */
+	@Throws(TagException::class, ReadOnlyFileException::class, CannotReadException::class, InvalidAudioFrameException::class, IOException::class)
+	fun updateTrackField(track: Track, field: FieldKey, newValue: String) {
+		val file = fileService.getFile(track.location)
+		if (file != null && file.exists()) {
+			val audioFile = AudioFileIO.read(file)
+			val tag = audioFile.tag
+			tag.setField(field, newValue)
+			audioFile.commit()
+		}
+	}
 }

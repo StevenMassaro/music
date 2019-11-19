@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static music.utils.EndpointUtils.responseEntity;
+import static music.utils.FieldUtils.getStringOrNull;
 
 @RestController
 @RequestMapping("/track")
@@ -82,7 +83,7 @@ public class TrackEndpoint {
     	Track existing = trackService.get(track.getId());
 		DiffResult diff = existing.diff(track);
 		for(Diff<?> d: diff.getDiffs()) {
-			logger.trace("Applying track update: {}, from {} to {}", d.getFieldName(), d.getLeft().toString(), d.getRight().toString());
+			logger.trace("Applying track update: {}, from {} to {}", d.getFieldName(), getStringOrNull(d.getLeft()), getStringOrNull(d.getRight()));
 			updateService.queueTrackUpdate(track.getId(), d.getFieldName(), d.getRight().toString());
 		}
 		return trackService.get(track.getId());
