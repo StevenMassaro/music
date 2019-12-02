@@ -5,7 +5,7 @@
   <parent>
     <artifactId>Music</artifactId>
     <groupId>com.massaro</groupId>
-    <version>1.6-2019.12.02</version>
+    <version>1.7-2019.12.02</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 

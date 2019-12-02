@@ -1,5 +1,6 @@
 package music.endpoint;
 
+import music.exception.RatingRangeException;
 import music.model.ModifyableTags;
 import music.model.SmartPlaylist;
 import music.model.Track;
@@ -92,6 +93,12 @@ public class TrackEndpoint {
 			updateService.queueTrackUpdate(track.getId(), d.getFieldName(), d.getRight().toString());
 		}
 		return trackService.get(track.getId());
+	}
+
+	@PatchMapping("/{id}/rating/{rating}")
+	public Track updateRating(@PathVariable long id, @PathVariable byte rating) throws RatingRangeException {
+    	trackService.setRating(id, rating);
+    	return trackService.get(id);
 	}
 
     @GetMapping("/modifyabletags")
