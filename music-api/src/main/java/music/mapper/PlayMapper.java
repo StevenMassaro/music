@@ -2,10 +2,12 @@ package music.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 
 @Mapper
+@Repository
 public interface PlayMapper {
 
     void insertPlay(@Param("id") long id, @Param("playdate") Date playDate,
