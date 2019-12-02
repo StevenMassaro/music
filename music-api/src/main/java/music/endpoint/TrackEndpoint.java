@@ -1,6 +1,7 @@
 package music.endpoint;
 
 import music.model.ModifyableTags;
+import music.model.SmartPlaylist;
 import music.model.Track;
 import music.service.FileService;
 import music.service.MetadataService;
@@ -59,11 +60,15 @@ public class TrackEndpoint {
     }
 
     @GetMapping
-    public List<Track> list() {
-        return trackService.list();
+	public List<Track> list(@RequestParam(required = false, name = "smartPlaylist") Long smartPlaylistId) {
+		if (smartPlaylistId != null) {
+			return trackService.listWithSmartPlaylist(smartPlaylistId);
+		} else {
+			return trackService.list();
+		}
     }
 
-    @GetMapping("/historical/dates")
+    @GetMapping("/historical")
 	public List<String> listHistoricalDates(){
 		return trackService.listHistoricalDates().stream().map(d -> new SimpleDateFormat(DATE_FORMAT).format(d)).collect(Collectors.toList());
 	}

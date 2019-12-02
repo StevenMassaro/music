@@ -2,6 +2,7 @@ package music.service;
 
 import music.exception.RatingRangeException;
 import music.mapper.PlayMapper;
+import music.mapper.PlaylistMapper;
 import music.mapper.TrackMapper;
 import music.model.*;
 import org.slf4j.Logger;
@@ -22,14 +23,16 @@ public class TrackService {
     private final PlayMapper playMapper;
     private final FileService fileService;
     private final UpdateService updateService;
+    private final SmartPlaylistService smartPlaylistService;
 
     @Autowired
-    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService, UpdateService updateService) {
+    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService, UpdateService updateService, SmartPlaylistService smartPlaylistService) {
         this.trackMapper = trackMapper;
         this.playMapper = playMapper;
         this.fileService = fileService;
         this.updateService = updateService;
-    }
+		this.smartPlaylistService = smartPlaylistService;
+	}
 
     /**
      * Insert tracks if they don't exist, or update them if the file has changed, or if updates are being forced to occur.
@@ -89,6 +92,11 @@ public class TrackService {
     public List<Track> listAll(){
         return updateService.applyUpdates(trackMapper.listAll());
     }
+
+    public List<Track> listWithSmartPlaylist(long playlistId) {
+    	SmartPlaylist smartPlaylist = smartPlaylistService.get(playlistId);
+    	return trackMapper.listWithSmartPlaylist(smartPlaylist.getDynamicSql());
+	}
 
 	/**
 	 * Return the count of tracks that can be purged from the file system (or in other words, they were marked deleted

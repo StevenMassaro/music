@@ -5,10 +5,7 @@
 <mapper namespace="music.mapper.TrackMapper">
 
     <select id="list" resultMap="trackResultMap">
-        <include refid="selectColumns"/>
-        WHERE deletedInd != true
-        <include refid="selectGroupBy"/>
-        ORDER BY artist,album,disc_no,track
+		<include refid="listSql"></include>
     </select>
 
     <select id="listAll" resultMap="trackResultMap">
@@ -16,6 +13,18 @@
         <include refid="selectGroupBy"/>
         ORDER BY artist,album,disc_no,track
     </select>
+
+	<select id="listWithSmartPlaylist" resultMap="trackResultMap">
+		SELECT * FROM (<include refid="listSql"></include>) as tracks
+		WHERE ${dynamicSql}
+	</select>
+
+	<sql id="listSql">
+		<include refid="selectColumns"/>
+		WHERE deletedInd != true
+		<include refid="selectGroupBy"/>
+		ORDER BY artist,album,disc_no,track
+	</sql>
 
 	<select id="countPurgableTracks" resultType="long">
 		SELECT COUNT(*)

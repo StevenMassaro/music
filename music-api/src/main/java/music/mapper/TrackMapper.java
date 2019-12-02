@@ -18,6 +18,8 @@ public interface TrackMapper {
 
     List<Track> listAll();
 
+    List<Track> listWithSmartPlaylist(@Param("dynamicSql") String dynamicSql);
+
     long countPurgableTracks();
 
     List<Track> listPlaysByDate(Date date);

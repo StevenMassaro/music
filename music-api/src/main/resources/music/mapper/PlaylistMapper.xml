@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="music.mapper.PlaylistMapper">
+	<insert id="insertSmartPlaylist">
+        INSERT INTO <include refid="smarttable"></include> (name, dynamicsql)
+        VALUES(#{name}, #{dynamicSql});
+    </insert>
+
+	<select id="getSmartPlaylist" resultMap="smartPlaylistResultMap">
+        SELECT * FROM <include refid="smarttable"></include> WHERE id = #{id}
+    </select>
+
+	<select id="getSmartPlaylistByName" resultMap="smartPlaylistResultMap">
+		SELECT * FROM <include refid="smarttable"></include> WHERE name = #{name}
+	</select>
+
+	<update id="updateSmartPlaylistByName">
+		UPDATE <include refid="smarttable"></include> SET name = #{name}, dynamicSql = #{dynamicSql}, dateUpdated = now() WHERE name = #{name}
+	</update>
+
+	<sql id="smarttable">music.smartplaylist</sql>
+
+	<select id="listSmartPlaylist" resultMap="smartPlaylistResultMap">
+        SELECT * FROM <include refid="smarttable"></include> ORDER BY id
+    </select>
+
+	<delete id="deleteSmartPlaylistById">
+		DELETE FROM <include refid="smarttable"></include>
+		WHERE id = #{id}
+	</delete>
+
+	<resultMap id="smartPlaylistResultMap" type="music.model.SmartPlaylist">
+		<constructor>
+			<idArg column="id" javaType="_long"/>
+			<arg column="name" javaType="String"/>
+			<arg column="dynamicsql" javaType="String"/>
+			<arg column="datecreated" javaType="java.util.Date"/>
+			<arg column="dateupdated" javaType="java.util.Date"/>
+		</constructor>
+	</resultMap>
+</mapper>

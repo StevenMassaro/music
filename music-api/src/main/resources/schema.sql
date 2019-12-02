@@ -28,6 +28,15 @@ create table music.track (
   fileLastModifiedDate timestamp
 );
 
+drop table if exists music.smartplaylist cascade;
+create table music.smartplaylist (
+	id serial unique not null,
+	name varchar(1000) unique not null,
+	dynamicsql varchar not null,
+	dateCreated timestamp DEFAULT now(),
+	dateUpdated timestamp
+);
+
 drop table if exists music.updatetype cascade;
 create table music.updatetype (
   id serial unique not null,

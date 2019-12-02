@@ -39,6 +39,9 @@ public class TrackServiceIT {
     @Autowired
     private UpdateService updateService;
 
+	@Autowired
+	private SmartPlaylistService smartPlaylistService;
+
     private File tempFile;
 
     @Before
@@ -179,4 +182,27 @@ public class TrackServiceIT {
         track = trackService.list().get(0);
         assertEquals(newVal+newVal, track.getAlbum());
     }
+
+	@Test
+	public void testSmartPlaylist() throws IOException {
+		List<DeferredTrack> fauxtracks = Collections.singletonList(track(tempFile.getName()));
+		trackService.upsertTracks(fauxtracks, new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+
+		String name = "test";
+		String sql = "CAST(year AS int) > 1990";
+		smartPlaylistService.insert(name, sql);
+		List<SmartPlaylist> playlists = smartPlaylistService.list();
+
+		List<Track> tracks = trackService.listWithSmartPlaylist(playlists.get(0).getId());
+		assertEquals(1, tracks.size());
+		doTrackAssertions(false, fauxtracks.get(0), tracks.get(0));
+
+		name = "test2";
+		sql = "CAST(year AS int) < 1990";
+		smartPlaylistService.insert(name, sql);
+		playlists = smartPlaylistService.list();
+
+		tracks = trackService.listWithSmartPlaylist(playlists.get(1).getId());
+		assertTrue(tracks.isEmpty());
+	}
 }
