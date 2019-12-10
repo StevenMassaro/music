@@ -120,6 +120,14 @@
         <include refid="selectGroupBy"/>
     </select>
 
+	<select id="getByTitleArtistAlbum" resultMap="trackResultMap">
+		<include refid="selectColumns"/>
+		WHERE t.title = #{title} AND
+		t.album = #{album} AND
+		t.artist = #{artist}
+		<include refid="selectGroupBy"/>
+	</select>
+
     <delete id="deleteById">
         DELETE FROM music.track t WHERE t.id = #{id}
     </delete>

@@ -6,6 +6,10 @@ public class Device {
 
     private long id;
     private String name;
+    private String format;
+    private Integer bitrate;
+    private Integer sampleRate;
+    private Integer channels;
     private Date dateCreated;
 
     public long getId() {
@@ -24,7 +28,39 @@ public class Device {
         this.name = name;
     }
 
-    public Date getDateCreated() {
+	public String getFormat() {
+		return format;
+	}
+
+	public void setFormat(String format) {
+		this.format = format;
+	}
+
+	public Integer getBitrate() {
+		return bitrate;
+	}
+
+	public void setBitrate(Integer bitrate) {
+		this.bitrate = bitrate;
+	}
+
+	public Integer getSampleRate() {
+		return sampleRate;
+	}
+
+	public void setSampleRate(Integer sampleRate) {
+		this.sampleRate = sampleRate;
+	}
+
+	public Integer getChannels() {
+		return channels;
+	}
+
+	public void setChannels(Integer channels) {
+		this.channels = channels;
+	}
+
+	public Date getDateCreated() {
         return dateCreated;
     }
 

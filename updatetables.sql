@@ -24,3 +24,8 @@ alter table music.track add column bitrate int not null;
 alter table music.track add column encoding varchar;
 alter table music.track add column sampleRate int not null;
 alter table music.track add column duration int not null;
+
+alter table music.device add column format varchar;
+alter table music.device add column bitrate int;
+alter table music.device add column sampleRate int;
+alter table music.device add column channels int;

@@ -58,7 +58,21 @@ drop table if exists music.device cascade;
 create table music.device (
   id serial primary key,
   name varchar not null unique,
+  format varchar,
+  bitrate int,
+  sampleRate int,
+  channels int,
   dateCreated timestamp DEFAULT now()
+);
+
+drop table if exists music.hash cascade;
+create table music.hash (
+	trackid int not null references music.track(id),
+	deviceid int not null references music.device(id),
+	hash varchar not null,
+	dateCreated timestamp DEFAULT now(),
+	dateUpdated timestamp,
+	primary key (trackid, deviceid)
 );
 
 drop table if exists music.plays cascade;

@@ -32,6 +32,8 @@ public interface TrackMapper {
 
     Track getByLocation(@Param("location") String location);
 
+    Track getByTitleArtistAlbum(String title, String artist, String album);
+
     void deleteById(@Param("id") long id);
 
     void markDeletedById(@Param("id")long id, @Param("deletedInd") boolean deletedInd);

@@ -1,5 +1,9 @@
 # changelog
 
+## 1.8-2019.12.09
+* feature: services necessary to support converting files
+* remove music-service module
+
 ## 1.7-2019.12.02
 * feature: edit rating for a song
 

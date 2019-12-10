@@ -12,6 +12,9 @@ public class PrivateSettings {
   @Value("${music.acceptable.file.extensions}")
   private String acceptableExtensions;
 
+  @Value("${music.ffmpeg.path}")
+  private String ffmpegPath;
+
   public String getLocalMusicFileLocation() {
     return localMusicFileLocation;
   }
@@ -19,4 +22,8 @@ public class PrivateSettings {
   public String getAcceptableExtensions() {
     return acceptableExtensions;
   }
+
+	public String getFfmpegPath() {
+		return ffmpegPath;
+	}
 }

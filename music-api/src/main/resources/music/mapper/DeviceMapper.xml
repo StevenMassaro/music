@@ -4,11 +4,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="music.mapper.DeviceMapper">
     <insert id="insert">
-        INSERT INTO music.device (name)
+        INSERT INTO <include refid="deviceTable"></include> (name)
         VALUES(#{name})
     </insert>
 
     <select id="getDeviceByName" resultType="music.model.Device">
-        SELECT * FROM music.device WHERE name = #{name}
+        SELECT * FROM <include refid="deviceTable"></include> WHERE name = #{name}
     </select>
+
+	<sql id="deviceTable">music.device</sql>
 </mapper>

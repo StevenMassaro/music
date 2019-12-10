@@ -1,29 +1,23 @@
 package music.endpoint;
 
 import music.exception.RatingRangeException;
+import music.model.Device;
 import music.model.ModifyableTags;
-import music.model.SmartPlaylist;
 import music.model.Track;
-import music.service.FileService;
-import music.service.MetadataService;
-import music.service.TrackService;
-import music.service.UpdateService;
+import music.service.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.Diff;
 import org.apache.commons.lang3.builder.DiffResult;
 import org.jaudiotagger.tag.datatype.Artwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -50,15 +44,21 @@ public class TrackEndpoint {
 
     private final MetadataService metadataService;
 
+	private final DeviceService deviceService;
+
+	private final ConvertService convertService;
+
     private final String DATE_FORMAT = "yyyy-MM-dd";
 
     @Autowired
-    public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService, MetadataService metadataService) {
+	public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService, MetadataService metadataService, DeviceService deviceService, ConvertService convertService) {
         this.fileService = fileService;
         this.trackService = trackService;
         this.updateService = updateService;
         this.metadataService = metadataService;
-    }
+		this.deviceService = deviceService;
+		this.convertService = convertService;
+	}
 
     @GetMapping
 	public List<Track> list(@RequestParam(required = false, name = "smartPlaylist") Long smartPlaylistId) {
@@ -106,46 +106,25 @@ public class TrackEndpoint {
     	return Arrays.asList(ModifyableTags.values());
 	}
 
-    /*
-    @GetMapping("{id}/convert")
-    public ResponseEntity<Resource> convertFile(@PathVariable long id) {
-        try {
-            File source = fileService.getFile(id);
-            File target = File.createTempFile("example", ".mp3");
-            target.deleteOnExit();
-
-            //Audio Attributes
-            AudioAttributes audio = new AudioAttributes();
-            audio.setCodec("libmp3lame");
-            audio.setBitRate(256000);
-            audio.setChannels(2);
-            audio.setSamplingRate(44100);
-
-            //Encoding attributes
-            EncodingAttributes attrs = new EncodingAttributes();
-            attrs.setFormat("mp3");
-            attrs.setAudioAttributes(audio);
-
-            //Encode
-            Encoder encoder = new Encoder();
-            encoder.encode(new MultimediaObject(source), target, attrs);
-            Resource file = new ByteArrayResource(FileUtils.readFileToByteArray(target));
-            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + target.getName() + "\"").body(file);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return null;
-    }
-    */
-
     @GetMapping("/{id}/stream")
-    public ResponseEntity<Resource> stream(@PathVariable long id) throws IOException {
+	public ResponseEntity<Resource> stream(@PathVariable long id,
+										   @RequestParam(required = false) String deviceName,
+										   @RequestParam(required = false) Long deviceId) throws IOException {
         Track track = trackService.get(id);
+		String filename = FilenameUtils.getName(track.getLocation());
 
-        Resource file = new InputStreamResource(FileUtils.openInputStream(fileService.getFile(track.getLocation())));
-        return responseEntity(FilenameUtils.getName(track.getLocation()), "audio/" + FilenameUtils.getExtension(track.getLocation()).toLowerCase(), file);
+		// todo check that the device is actually a device which requires converting
+		if (StringUtils.isNotEmpty(deviceName)) {
+			Device device = deviceService.getDeviceByName(deviceName);
+			byte[] convertedFile = convertService.convertFile(device, track);
+			return responseEntity(filename, "audio/" + device.getFormat(), convertedFile);
+		} else if (deviceId != null) {
+			// todo implement
+			return null;
+		} else {
+			Resource file = new InputStreamResource(FileUtils.openInputStream(fileService.getFile(track.getLocation())));
+			return responseEntity(filename, "audio/" + FilenameUtils.getExtension(track.getLocation()).toLowerCase(), file);
+		}
     }
 
     @GetMapping("/{id}/art")
@@ -160,4 +139,14 @@ public class TrackEndpoint {
     public Track markTrackAsListened(@PathVariable long id, @RequestParam long deviceId){
         return trackService.markListened(id, deviceId);
     }
+
+	@PostMapping("/{artist}/{album}/{title}/listened")
+	public Track markTrackAsListened(@PathVariable String artist,
+									 @PathVariable String album,
+									 @PathVariable String title,
+									 @RequestParam String deviceName) {
+		Device device = deviceService.getOrInsert(deviceName);
+		Track track = trackService.get(title, artist, album, null);
+		return trackService.markListened(track.getId(), device.getId());
+	}
 }

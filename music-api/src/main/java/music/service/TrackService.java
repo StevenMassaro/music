@@ -2,13 +2,13 @@ package music.service;
 
 import music.exception.RatingRangeException;
 import music.mapper.PlayMapper;
-import music.mapper.PlaylistMapper;
 import music.mapper.TrackMapper;
 import music.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.sql.SQLType;
@@ -24,14 +24,16 @@ public class TrackService {
     private final FileService fileService;
     private final UpdateService updateService;
     private final SmartPlaylistService smartPlaylistService;
+    private final ConvertService convertService;
 
     @Autowired
-    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService, UpdateService updateService, SmartPlaylistService smartPlaylistService) {
+    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService, UpdateService updateService, SmartPlaylistService smartPlaylistService, ConvertService convertService) {
         this.trackMapper = trackMapper;
         this.playMapper = playMapper;
         this.fileService = fileService;
         this.updateService = updateService;
 		this.smartPlaylistService = smartPlaylistService;
+		this.convertService = convertService;
 	}
 
     /**
@@ -61,6 +63,7 @@ public class TrackService {
                         logger.debug(forceUpdates ? "Updates are being forced, updating {}" : "Existing track has been modified since last sync, updating: {}", existingTrack.getTitle());
                         track.setDateUpdated(new Date());
                         trackMapper.updateByLocation(track);
+                        convertService.deleteHash(track.getLocation());
                         syncResult.getModifiedTracks().add(track);
                     } else {
                         logger.debug(String.format("Existing track has same modified date as last sync, skipping: %s", existingTrack.getTitle()));
@@ -119,15 +122,16 @@ public class TrackService {
     }
 
     public Track get(String title, String artist, String album, List<Track> trackCache) {
-        for (Track track : trackCache) {
-            if (track.getTitle().equals(title)
-                    && track.getArtist().equals(artist)
-                    && track.getAlbum().equals(album)) {
-                return track;
-            }
-        }
-        // todo: this should find the track out of the database
-        return null;
+		if (!CollectionUtils.isEmpty(trackCache)) {
+			for (Track track : trackCache) {
+				if (track.getTitle().equals(title)
+					&& track.getArtist().equals(artist)
+					&& track.getAlbum().equals(album)) {
+					return track;
+				}
+			}
+		}
+		return trackMapper.getByTitleArtistAlbum(title, artist, album);
     }
 
     /**

@@ -19,7 +19,8 @@ import kotlin.collections.HashMap
 class UpdateService @Autowired constructor(
 	private val updateMapper: UpdateMapper,
 	private val metadataService: MetadataService,
-	private val fileService: FileService
+	private val fileService: FileService,
+	private val convertService: ConvertService
 ) {
 	private val logger = LoggerFactory.getLogger(UpdateService::class.java)
 
@@ -84,6 +85,7 @@ class UpdateService @Autowired constructor(
 
 						logger.trace("Updating field {} to {} for ID: {}", it.field, it.newValue, id)
 						trackService.updateField(id, it.field, it.newValue, ModifyableTags.valueOf(it.field.toUpperCase()).sqlType);
+						convertService.deleteHash(track.id)
 
 						val hash: String = calculateHash(fileService.getFile(track.location))
 						logger.trace("Updating field hash to {} for ID: {}", hash, id)
