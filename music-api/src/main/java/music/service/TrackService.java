@@ -157,6 +157,7 @@ public class TrackService {
     private void permanentlyDeleteTrackMetadata(Track track){
         playMapper.deletePlayCounts(track.getId());
         playMapper.deletePlays(track.getId());
+        convertService.deleteHash(track.getId());
         trackMapper.deleteById(track.getId());
     }
 
