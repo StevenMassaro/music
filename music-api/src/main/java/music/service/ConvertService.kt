@@ -8,6 +8,7 @@ import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,13 +32,22 @@ class ConvertService {
 	fun convertFile(device: Device, track: Track): ByteArray? {
 		try {
 			logger.trace("Converting {}", track.location)
-			val source = fileService.getFile(track.location)
+
+			/*
+			ffmpeg does not like spaces in the source directory path, and I have tried numerous ways of fixing it to
+			no avail. Instead, it seems much simpler to just copy the source file to the temp file location, which
+			usually ensures that it won't have a space in it. At least on Linux, which is what I really care about.
+			 */
+			val sourceTemp = File.createTempFile("source", ".${FilenameUtils.getExtension(track.location)}")
+			sourceTemp.deleteOnExit()
+			FileUtils.copyFile(fileService.getFile(track.location), sourceTemp)
+
 			// todo, figure out a way to convert the file into memory rather than on disk (likely not possible due to using ffmpeg)
 			val target = File.createTempFile("example", ".${device.format}")
 			logger.trace("Output file: {}", target.absolutePath)
 			target.deleteOnExit()
 
-			var cmd = "-y -i \"${source.absolutePath}\" -ac ${device.channels} -ar ${device.sampleRate} -ab ${device.bitrate} -map_metadata 0 \"${target.absolutePath}\""
+			var cmd = "-y -i \"${sourceTemp.absolutePath}\" -ac ${device.channels} -ar ${device.sampleRate} -ab ${device.bitrate} -map_metadata 0 \"${target.absolutePath}\""
 			if (StringUtils.isNotEmpty(privateSettings.ffmpegPath) && !privateSettings.ffmpegPath.contains("$") && !privateSettings.ffmpegPath.contains("@")){
 				cmd = "${privateSettings.ffmpegPath} $cmd"
 			} else { // assume that ffmpeg is on the path
@@ -54,6 +64,7 @@ class ConvertService {
 				upsertHash(device.id, track.id, DigestUtils.sha512Hex(target.inputStream()))
 
 				val fileBytes = FileUtils.readFileToByteArray(target)
+				FileUtils.deleteQuietly(sourceTemp)
 				FileUtils.deleteQuietly(target)
 				return fileBytes
 			} else {
