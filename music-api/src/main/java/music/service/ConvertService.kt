@@ -37,7 +37,7 @@ class ConvertService {
 			logger.trace("Output file: {}", target.absolutePath)
 			target.deleteOnExit()
 
-			var cmd = "-y -i ${source.absolutePath} -ac ${device.channels} -ar ${device.sampleRate} -ab ${device.bitrate} -map_metadata 0 ${target.absolutePath}"
+			var cmd = "-y -i \"${source.absolutePath}\" -ac ${device.channels} -ar ${device.sampleRate} -ab ${device.bitrate} -map_metadata 0 \"${target.absolutePath}\""
 			if (StringUtils.isNotEmpty(privateSettings.ffmpegPath) && !privateSettings.ffmpegPath.contains("$") && !privateSettings.ffmpegPath.contains("@")){
 				cmd = "${privateSettings.ffmpegPath} $cmd"
 			} else { // assume that ffmpeg is on the path
