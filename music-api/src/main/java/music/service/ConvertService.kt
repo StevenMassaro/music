@@ -53,7 +53,9 @@ class ConvertService {
 				// store hash in database for this device
 				upsertHash(device.id, track.id, DigestUtils.sha512Hex(target.inputStream()))
 
-				return FileUtils.readFileToByteArray(target)
+				val fileBytes = FileUtils.readFileToByteArray(target)
+				FileUtils.deleteQuietly(target)
+				return fileBytes
 			} else {
 				throw Exception("Failed to convert ${track.location} with ffmpeg exit value of $exitValue")
 			}
