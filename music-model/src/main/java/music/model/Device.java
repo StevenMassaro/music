@@ -10,6 +10,8 @@ public class Device {
     private Integer bitrate;
     private Integer sampleRate;
     private Integer channels;
+    // max size of artwork
+    private Integer artsize;
     private Date dateCreated;
 
     public long getId() {
@@ -58,6 +60,14 @@ public class Device {
 
 	public void setChannels(Integer channels) {
 		this.channels = channels;
+	}
+
+	public Integer getArtsize() {
+		return artsize;
+	}
+
+	public void setArtsize(Integer artsize) {
+		this.artsize = artsize;
 	}
 
 	public Date getDateCreated() {

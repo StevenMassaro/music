@@ -62,6 +62,7 @@ create table music.device (
   bitrate int,
   sampleRate int,
   channels int,
+  artsize int,
   dateCreated timestamp DEFAULT now()
 );
 

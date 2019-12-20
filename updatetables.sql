@@ -29,3 +29,5 @@ alter table music.device add column format varchar;
 alter table music.device add column bitrate int;
 alter table music.device add column sampleRate int;
 alter table music.device add column channels int;
+
+alter table music.device add column artsize int;
