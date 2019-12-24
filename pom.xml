@@ -11,7 +11,8 @@
         <module>music-model</module>
         <module>music-api</module>
 		<module>music-settings</module>
-    </modules>
+		<module>music-docker</module>
+	</modules>
     <packaging>pom</packaging>
 
     <parent>
@@ -61,6 +62,11 @@
 				<artifactId>music-settings</artifactId>
 				<version>${myversion}</version>
             </dependency>
+			<dependency>
+				<groupId>com.massaro</groupId>
+				<artifactId>music-api</artifactId>
+				<version>${myversion}</version>
+			</dependency>
             <dependency>
                 <groupId>org</groupId>
                 <artifactId>jaudiotagger</artifactId>
