@@ -47,14 +47,27 @@ class ConvertService {
 			logger.trace("Output file: {}", target.absolutePath)
 			target.deleteOnExit()
 
-			var cmd = "-y -i \"${sourceTemp.absolutePath}\" -ac ${device.channels} -ar ${device.sampleRate} -ab ${device.bitrate} -map_metadata 0 -vf \"scale='min(${device.artsize},iw)':'-1'\" \"${target.absolutePath}\""
-			if (StringUtils.isNotEmpty(privateSettings.ffmpegPath) && !privateSettings.ffmpegPath.contains("$") && !privateSettings.ffmpegPath.contains("@")){
-				cmd = "${privateSettings.ffmpegPath} $cmd"
+			val cmdLine = if(StringUtils.isNotEmpty(privateSettings.ffmpegPath) && !privateSettings.ffmpegPath.contains("$") && !privateSettings.ffmpegPath.contains("@")){
+				CommandLine(privateSettings.ffmpegPath)
 			} else { // assume that ffmpeg is on the path
-				cmd = "ffmpeg $cmd"
+				CommandLine("ffmpeg")
 			}
-			logger.debug("ffmpeg command: $cmd")
-			val cmdLine = CommandLine.parse(cmd)
+
+			cmdLine.addArgument("-y")
+			cmdLine.addArgument("-i")
+			cmdLine.addArgument(sourceTemp.absolutePath)
+			cmdLine.addArgument("-ac")
+			cmdLine.addArgument(device.channels.toString())
+			cmdLine.addArgument("-ar")
+			cmdLine.addArgument(device.sampleRate.toString())
+			cmdLine.addArgument("-ab")
+			cmdLine.addArgument(device.bitrate.toString())
+			cmdLine.addArgument("-map_metadata")
+			cmdLine.addArgument(0.toString())
+			cmdLine.addArgument("-vf")
+			cmdLine.addArgument("scale='min(${device.artsize},iw)':'-1'", false)
+			cmdLine.addArgument(target.absolutePath)
+
 			val executor = DefaultExecutor();
 			val exitValue = executor.execute(cmdLine)
 			logger.debug("ffmpeg exit value: $exitValue")
