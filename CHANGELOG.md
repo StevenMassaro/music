@@ -1,5 +1,8 @@
 # changelog
 
+## 1.8-2019.12.24
+* put back music-service module
+
 ## 1.8-2019.12.20
 * feature: scale album art when syncing to devices (apparently, Android won't correctly grab metadata from tracks if a song's embedded album art exceeds some unknown criteria (perhaps dimensions or overall size))
 * build docker image as separate maven module
