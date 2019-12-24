@@ -68,7 +68,7 @@
 				</executions>
 				<configuration>
 					<tag>${project.version}</tag>
-					<repository>${docker.image.prefix}/${project.artifactId}</repository>
+					<repository>${docker.image.prefix}/music-api</repository>
 				</configuration>
 			</plugin>
 		</plugins>
