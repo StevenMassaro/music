@@ -12,6 +12,8 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.springframework.util.ReflectionUtils;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +36,9 @@ public class Track implements Diffable<Track> {
     private Long disc_no;
     private Long track;
     private long plays;
+
+    @Min(0)
+	@Max(10)
     private Byte rating;
     private String comment;
     private boolean deletedInd = false;

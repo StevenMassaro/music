@@ -1,10 +1,12 @@
 package music.model;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 public class Device {
 
     private long id;
+    @NotNull
     private String name;
     private String format;
     private Integer bitrate;
