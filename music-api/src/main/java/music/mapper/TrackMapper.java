@@ -18,6 +18,8 @@ public interface TrackMapper {
 
     List<Track> list();
 
+    List<Track> listByAlbum(String album);
+
     List<Track> listAll();
 
     List<Track> listWithSmartPlaylist(@Param("dynamicSql") String dynamicSql);

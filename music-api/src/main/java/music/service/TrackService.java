@@ -11,9 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.sql.JDBCType;
 import java.sql.SQLType;
 import java.util.Date;
 import java.util.List;
+
+import static music.utils.FieldUtils.calculateHash;
 
 @Service
 public class TrackService {
@@ -87,6 +90,10 @@ public class TrackService {
     public List<Track> list(){
         return updateService.applyUpdates(trackMapper.list());
     }
+
+    public List<Track> listByAlbum(String album){
+    	return updateService.applyUpdates(trackMapper.listByAlbum(album));
+	}
 
     /**
      * Lists all tracks, including those that were marked deleted in the database, applying the updates
@@ -214,5 +221,11 @@ public class TrackService {
     public Track updateField(long id, String field, Object newValue, SQLType type){
     	trackMapper.updateFieldById(id, field, newValue, type.getName());
     	return get(id);
+	}
+
+	public void updateHashOfTrack(String location, long id) throws IOException {
+		String hash = calculateHash(fileService.getFile(location));
+		logger.trace("Updating field hash to {} for ID: {}", hash, id);
+		updateField(id, "hash", hash, JDBCType.VARCHAR);
 	}
 }

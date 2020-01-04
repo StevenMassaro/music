@@ -40,6 +40,12 @@
 		ORDER BY p.playdate DESC
 	</select>
 
+	<select id="listByAlbum" resultMap="trackResultMap">
+		<include refid="selectColumns"/>
+		WHERE t.album = #{album}
+		<include refid="selectGroupBy"/>
+	</select>
+
 	<select id="listHistoricalDates" resultType="java.util.Date">
 		SELECT DISTINCT
 		date_trunc('day', p.playdate) AS playdategroup

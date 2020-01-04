@@ -1,5 +1,8 @@
 # changelog
 
+## 1.9-2020.01.04
+* feature: change album art
+
 ## 1.8-2019.12.24
 * put back music-service module
 

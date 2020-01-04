@@ -87,9 +87,7 @@ class UpdateService @Autowired constructor(
 						trackService.updateField(id, it.field, it.newValue, ModifyableTags.valueOf(it.field.toUpperCase()).sqlType);
 						convertService.deleteHash(track.id)
 
-						val hash: String = calculateHash(fileService.getFile(track.location))
-						logger.trace("Updating field hash to {} for ID: {}", hash, id)
-						trackService.updateField(id, "hash", hash, JDBCType.VARCHAR);
+						trackService.updateHashOfTrack(track.location, id)
 					} catch (e: Exception) {
 						logger.error("Failed to apply update to disk: $it", e)
 					}

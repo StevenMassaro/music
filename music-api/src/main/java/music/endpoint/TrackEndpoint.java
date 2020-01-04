@@ -19,10 +19,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -134,6 +137,40 @@ public class TrackEndpoint {
         Artwork albumArt = metadataService.getAlbumArt(track.getLocation(), false, index);
         return responseEntity(null, albumArt.getMimeType(), albumArt.getBinaryData());
     }
+
+    @PostMapping("{id}/art")
+	public Track setAlbumArt(@PathVariable long id,
+							 @RequestParam(value = "file", required = false) MultipartFile file,
+							 @RequestParam(value = "url", required = false) String url,
+							 @RequestParam(value = "updateForEntireAlbum") Boolean updateForEntireAlbum) throws IOException {
+		Track track = trackService.get(id);
+		List<Track> tracksToUpdate;
+		if (updateForEntireAlbum) {
+			tracksToUpdate = trackService.listByAlbum(track.getAlbum());
+		} else {
+			tracksToUpdate = Collections.singletonList(track);
+		}
+
+		if (file != null) {
+			// todo, probably shouldn't assume that all images are jpegs. Maybe it doesn't matter.
+			File tempFile = File.createTempFile("temp", ".jpg");
+			FileUtils.copyInputStreamToFile(file.getInputStream(), tempFile);
+			for (Track trackToUpdate : tracksToUpdate) {
+				metadataService.updateArtwork(trackToUpdate.getLocation(), tempFile);
+				convertService.deleteHash(trackToUpdate.getId());
+				trackService.updateHashOfTrack(trackToUpdate.getLocation(), trackToUpdate.getId());
+			}
+			tempFile.delete();
+		} else {
+			for (Track trackToUpdate : tracksToUpdate) {
+				metadataService.updateArtwork(trackToUpdate.getLocation(), url);
+				convertService.deleteHash(trackToUpdate.getId());
+				trackService.updateHashOfTrack(trackToUpdate.getLocation(), trackToUpdate.getId());
+			}
+		}
+
+    	return trackService.get(id);
+	}
 
     @PostMapping("/{id}/listened")
     public Track markTrackAsListened(@PathVariable long id, @RequestParam long deviceId){

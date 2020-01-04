@@ -3,6 +3,12 @@ package music.service
 import music.model.DeferredTrack
 import music.model.Track
 import music.settings.PrivateSettings
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
+import okhttp3.Request
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
+import org.apache.commons.io.IOUtils
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.audio.exceptions.CannotReadException
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException
@@ -16,6 +22,11 @@ import java.io.File
 import java.io.IOException
 import java.util.ArrayList
 import org.jaudiotagger.tag.FieldKey
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.file.StandardCopyOption
+import java.util.concurrent.TimeUnit
+
 
 @Service
 class MetadataService @Autowired constructor(val fileService: FileService, val privateSettings: PrivateSettings) {
@@ -79,6 +90,46 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 			val audioFile = AudioFileIO.read(file)
 			val tag = audioFile.tag
 			tag.setField(field, newValue)
+			audioFile.commit()
+		}
+	}
+
+	/**
+	 * Update the artwork of the track at the specified [location], using art downloaded from the [url]. The [url]
+	 * should be the direct link to an image.
+	 */
+	fun updateArtwork(location: String, url: String) {
+		// todo validate that the url actually points to an image
+		val tempArtFile = File.createTempFile("artwork", ".${FilenameUtils.getExtension(url)}")
+		tempArtFile.deleteOnExit()
+
+		val client = OkHttpClient().newBuilder()
+			.connectTimeout(5, TimeUnit.SECONDS)
+			.callTimeout(15, TimeUnit.SECONDS)
+			.readTimeout(15, TimeUnit.SECONDS)
+			.writeTimeout(15, TimeUnit.SECONDS)
+			.build()
+		val request = Request.Builder()
+			.url(url)
+			.build()
+
+		client.newCall(request).execute().use { IOUtils.copy(it.body!!.byteStream(), tempArtFile.outputStream()) }
+
+		updateArtwork(location, tempArtFile)
+		tempArtFile.delete()
+	}
+
+	/**
+	 * Update the artwork of the track at the specified [location], using the [newArt].
+	 */
+	fun updateArtwork(location:String, newArt:File){
+		val file = fileService.getFile(location)
+		if (file != null && file.exists()) {
+			val audioFile = AudioFileIO.read(file)
+			val tag = audioFile.tag
+			val art = Artwork()
+			art.setFromFile(newArt)
+			tag.setField(art)
 			audioFile.commit()
 		}
 	}

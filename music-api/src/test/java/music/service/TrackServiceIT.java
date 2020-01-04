@@ -66,6 +66,19 @@ public class TrackServiceIT {
         doTrackAssertions(false, track, list.get(0));
     }
 
+	@Test
+	public void listingTracksByAlbum() throws IOException {
+		DeferredTrack track = track(tempFile.getName());
+		trackService.upsertTracks(Collections.singletonList(track), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+
+		List<Track> list = trackService.listByAlbum("album");
+		assertEquals(1, list.size());
+		doTrackAssertions(false, track, list.get(0));
+
+		list = trackService.listByAlbum("otherone");
+		assertEquals(0, list.size());
+	}
+
     @Test
     public void updatingTrack() throws IOException {
         SyncResult syncResult = new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
