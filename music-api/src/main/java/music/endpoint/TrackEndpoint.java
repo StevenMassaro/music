@@ -51,16 +51,19 @@ public class TrackEndpoint {
 
 	private final ConvertService convertService;
 
+	private final TrackWebsocket trackWebsocket;
+
     private final String DATE_FORMAT = "yyyy-MM-dd";
 
     @Autowired
-	public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService, MetadataService metadataService, DeviceService deviceService, ConvertService convertService) {
+	public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService, MetadataService metadataService, DeviceService deviceService, ConvertService convertService, TrackWebsocket trackWebsocket) {
         this.fileService = fileService;
         this.trackService = trackService;
         this.updateService = updateService;
         this.metadataService = metadataService;
 		this.deviceService = deviceService;
 		this.convertService = convertService;
+		this.trackWebsocket = trackWebsocket;
 	}
 
     @GetMapping
@@ -155,17 +158,21 @@ public class TrackEndpoint {
 			// todo, probably shouldn't assume that all images are jpegs. Maybe it doesn't matter.
 			File tempFile = File.createTempFile("temp", ".jpg");
 			FileUtils.copyInputStreamToFile(file.getInputStream(), tempFile);
-			for (Track trackToUpdate : tracksToUpdate) {
+			for (int i = 0; i < tracksToUpdate.size(); i++) {
+				Track trackToUpdate = tracksToUpdate.get(i);
 				metadataService.updateArtwork(trackToUpdate.getLocation(), tempFile);
 				convertService.deleteHash(trackToUpdate.getId());
 				trackService.updateHashOfTrack(trackToUpdate.getLocation(), trackToUpdate.getId());
+				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
 			}
 			tempFile.delete();
 		} else {
-			for (Track trackToUpdate : tracksToUpdate) {
+			for (int i = 0; i < tracksToUpdate.size(); i++) {
+				Track trackToUpdate = tracksToUpdate.get(i);
 				metadataService.updateArtwork(trackToUpdate.getLocation(), url);
 				convertService.deleteHash(trackToUpdate.getId());
 				trackService.updateHashOfTrack(trackToUpdate.getLocation(), trackToUpdate.getId());
+				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
 			}
 		}
 

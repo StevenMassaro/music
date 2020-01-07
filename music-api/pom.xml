@@ -5,7 +5,7 @@
     <parent>
         <artifactId>Music</artifactId>
         <groupId>com.massaro</groupId>
-        <version>1.9-2020.01.04</version>
+        <version>1.10-2020.01.07</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,11 +16,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -93,6 +88,31 @@
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-bean-validators</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>webjars-locator-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>sockjs-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>stomp-websocket</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>bootstrap</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>jquery</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
