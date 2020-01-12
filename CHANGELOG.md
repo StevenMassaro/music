@@ -1,5 +1,8 @@
 # changelog
 
+## 1.11-2020.01.12
+* feature: support uploading new tracks through `/track/upload` endpoint
+
 ## 1.10-2020.01.07
 * feature: websocket for album art update status
 

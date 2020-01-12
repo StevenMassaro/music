@@ -4,15 +4,14 @@ import music.model.DeferredTrack
 import music.model.Track
 import music.settings.PrivateSettings
 import okhttp3.OkHttpClient
-import okhttp3.Protocol
 import okhttp3.Request
-import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOUtils
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.audio.exceptions.CannotReadException
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException
+import org.jaudiotagger.tag.FieldKey
 import org.jaudiotagger.tag.TagException
 import org.jaudiotagger.tag.datatype.Artwork
 import org.slf4j.LoggerFactory
@@ -20,11 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.IOException
-import java.util.ArrayList
-import org.jaudiotagger.tag.FieldKey
-import java.net.HttpURLConnection
-import java.net.URL
-import java.nio.file.StandardCopyOption
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 
@@ -42,19 +37,29 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
         for (i in files.indices) {
             val file = files[i]
             logger.debug("Processing file {} of {}: {}", i + 1, files.size, file.name)
-            val audioFile = AudioFileIO.read(file)
-            val tag = audioFile.tag
-            val header = audioFile.audioHeader
-            try {
-                val track = DeferredTrack(tag, header, file.absolutePath.replace(privateSettings.localMusicFileLocation!!, ""), file, privateSettings.localMusicFileLocation)
-                tracks.add(track)
-            } catch (e: Exception) {
-                logger.error(String.format("Failed to parse tag for metadata for file %s", file.absolutePath), e)
-            }
-
+            val parsed = parseMetadata(file)
+			if (parsed != null){
+				tracks.add(parsed)
+			}
         }
         return tracks
     }
+
+	/**
+	 * Parse the ID3 tag in the [file] and return the metadata from that file. Will catch all exceptions and return null
+	 * in the event of an exception.
+	 */
+	fun parseMetadata(file:File) : DeferredTrack? {
+		val audioFile = AudioFileIO.read(file)
+		val tag = audioFile.tag
+		val header = audioFile.audioHeader
+		return try {
+			DeferredTrack(tag, header, file.absolutePath.replace(privateSettings.localMusicFileLocation!!, ""), file, privateSettings.localMusicFileLocation)
+		} catch (e: Exception) {
+			logger.error(String.format("Failed to parse tag for metadata for file %s", file.absolutePath), e)
+			null
+		}
+	}
 
     /**
      * Get album art from the file's [location]. Optionally specify the [index] of the album art you wish to retrieve.

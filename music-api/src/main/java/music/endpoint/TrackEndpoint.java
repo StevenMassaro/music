@@ -1,9 +1,7 @@
 package music.endpoint;
 
 import music.exception.RatingRangeException;
-import music.model.Device;
-import music.model.ModifyableTags;
-import music.model.Track;
+import music.model.*;
 import music.service.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -132,6 +130,23 @@ public class TrackEndpoint {
 			return responseEntity(filename, "audio/" + FilenameUtils.getExtension(track.getLocation()).toLowerCase(), file);
 		}
     }
+
+    @PostMapping("/upload")
+	public Track uploadTrack(@RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+    	// write temp track to disk
+		File track = fileService.writeTempTrack(file);
+
+		// scan metadata for this track
+		DeferredTrack tempTrackMetadata = metadataService.parseMetadata(track);
+
+		File newTrack = fileService.moveTempTrack(track, tempTrackMetadata);
+
+		DeferredTrack trackMetadata = metadataService.parseMetadata(newTrack);
+		trackService.upsertTracks(Collections.singletonList(trackMetadata), null);
+
+		// return track
+		return trackService.getByLocation(trackMetadata.getLocation());
+	}
 
     @GetMapping("/{id}/art")
     public ResponseEntity<Resource> getAlbumArt(@PathVariable long id, @RequestParam(defaultValue = "0") Integer index){

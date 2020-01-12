@@ -67,19 +67,27 @@ public class TrackService {
                         track.setDateUpdated(new Date());
                         trackMapper.updateByLocation(track);
                         convertService.deleteHash(track.getLocation());
-                        syncResult.getModifiedTracks().add(track);
+						if (syncResult != null) {
+							syncResult.getModifiedTracks().add(track);
+						}
                     } else {
                         logger.debug(String.format("Existing track has same modified date as last sync, skipping: %s", existingTrack.getTitle()));
-                        syncResult.getUnmodifiedTracks().add(track);
+						if (syncResult != null) {
+							syncResult.getUnmodifiedTracks().add(track);
+						}
                     }
                 } else {
                     logger.debug(String.format("No existing track found, inserting new metadata for %s", track.getTitle()));
                     trackMapper.insert(track);
-                    syncResult.getNewTracks().add(track);
+					if (syncResult != null) {
+						syncResult.getNewTracks().add(track);
+					}
                 }
             } catch (Exception e) {
                 logger.error(String.format("Failed to insert metadata for track %s", track.getLocation()), e);
-                syncResult.getFailedTracks().add(track);
+				if (syncResult != null) {
+					syncResult.getFailedTracks().add(track);
+				}
             }
         }
     }

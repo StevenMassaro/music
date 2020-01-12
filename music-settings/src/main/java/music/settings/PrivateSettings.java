@@ -15,6 +15,9 @@ public class PrivateSettings {
   @Value("${music.ffmpeg.path}")
   private String ffmpegPath;
 
+  @Value("${music.track.name.pattern}")
+  private String trackNamePattern;
+
   public String getLocalMusicFileLocation() {
     return localMusicFileLocation;
   }
@@ -26,4 +29,9 @@ public class PrivateSettings {
 	public String getFfmpegPath() {
 		return ffmpegPath;
 	}
+
+	public String getTrackNamePattern() {
+		return trackNamePattern;
+	}
+
 }
