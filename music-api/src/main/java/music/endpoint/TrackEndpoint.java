@@ -164,7 +164,7 @@ public class TrackEndpoint {
 		Track track = trackService.get(id);
 		List<Track> tracksToUpdate;
 		if (updateForEntireAlbum) {
-			tracksToUpdate = trackService.listByAlbum(track.getAlbum());
+			tracksToUpdate = trackService.listByAlbum(track.getAlbum(), track.getArtist(), track.getDisc_no());
 		} else {
 			tracksToUpdate = Collections.singletonList(track);
 		}

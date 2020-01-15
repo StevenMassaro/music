@@ -99,8 +99,8 @@ public class TrackService {
         return updateService.applyUpdates(trackMapper.list());
     }
 
-    public List<Track> listByAlbum(String album){
-    	return updateService.applyUpdates(trackMapper.listByAlbum(album));
+    public List<Track> listByAlbum(String album, String artist, Long disc){
+    	return updateService.applyUpdates(trackMapper.listByAlbum(album, artist, disc));
 	}
 
     /**

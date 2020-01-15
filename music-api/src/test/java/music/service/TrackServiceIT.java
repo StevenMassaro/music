@@ -71,11 +71,11 @@ public class TrackServiceIT {
 		DeferredTrack track = track(tempFile.getName());
 		trackService.upsertTracks(Collections.singletonList(track), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
 
-		List<Track> list = trackService.listByAlbum("album");
+		List<Track> list = trackService.listByAlbum("album", track.getArtist(), track.getDisc_no());
 		assertEquals(1, list.size());
 		doTrackAssertions(false, track, list.get(0));
 
-		list = trackService.listByAlbum("otherone");
+		list = trackService.listByAlbum("otherone", track.getArtist(), track.getDisc_no());
 		assertEquals(0, list.size());
 	}
 

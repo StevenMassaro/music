@@ -43,6 +43,8 @@
 	<select id="listByAlbum" resultMap="trackResultMap">
 		<include refid="selectColumns"/>
 		WHERE t.album = #{album}
+		AND t.artist = #{artist}
+		AND t.disc_no = #{disc}
 		<include refid="selectGroupBy"/>
 	</select>
 
