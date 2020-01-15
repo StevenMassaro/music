@@ -13,4 +13,5 @@ interface UpdateMapper {
     fun list():List<TrackUpdate>
 	fun count():Long
 	fun deleteById(id:Long)
+	fun deleteByTrackId(trackId:Long)
 }

@@ -68,6 +68,14 @@ class UpdateService @Autowired constructor(
 	}
 
 	/**
+	 * Delete a queued track update by the [songId] of the particular update.
+	 */
+	fun deleteUpdateBySongId(songId: Long) {
+		updateMapper.deleteByTrackId(songId)
+		logger.debug("Deleted queued track update (Song ID: {})", songId)
+	}
+
+	/**
 	 * Apply all the queued updates to the files on disk. This silently updates the fields in the track table, and
 	 * updates the hash of the file in the database (which is necessary because the file itself is modified).
 	 */

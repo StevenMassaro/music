@@ -2,6 +2,7 @@
 
 ## 1.11-2020.01.14
 * fix: when updating album art for entire album, ensure that album from same artist and disc number are retrieved from database
+* fix: delete queued track updates when purging tracks
 
 ## 1.11-2020.01.12
 * feature: support uploading new tracks through `/track/upload` endpoint

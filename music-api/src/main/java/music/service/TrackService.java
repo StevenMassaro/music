@@ -173,6 +173,7 @@ public class TrackService {
         playMapper.deletePlayCounts(track.getId());
         playMapper.deletePlays(track.getId());
         convertService.deleteHash(track.getId());
+        updateService.deleteUpdateBySongId(track.getId());
         trackMapper.deleteById(track.getId());
     }
 

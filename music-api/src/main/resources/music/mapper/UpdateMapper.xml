@@ -25,6 +25,11 @@
 		WHERE id = #{id}
 	</delete>
 
+	<delete id="deleteByTrackId">
+		DELETE FROM music.trackupdates
+		WHERE songid = #{trackId}
+	</delete>
+
     <resultMap id="trackUpdateResultMap" type="music.model.TrackUpdate">
         <constructor>
             <idArg column="id" javaType="_long"/>
