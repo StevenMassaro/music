@@ -44,7 +44,12 @@
 		<include refid="selectColumns"/>
 		WHERE t.album = #{album}
 		AND t.artist = #{artist}
-		AND t.disc_no = #{disc}
+		<if test="disc == null">
+			AND t.disc_no IS NULL
+		</if>
+		<if test="disc != null">
+			AND t.disc_no = #{disc}
+		</if>
 		<include refid="selectGroupBy"/>
 	</select>
 
