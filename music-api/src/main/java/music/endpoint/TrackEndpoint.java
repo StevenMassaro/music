@@ -169,7 +169,7 @@ public class TrackEndpoint {
 			tracksToUpdate = Collections.singletonList(track);
 		}
 
-		trackWebsocket.sendAlbumArtModificationMessage(track.getAlbum(), 0, tracksToUpdate.size());
+		trackWebsocket.sendAlbumArtModificationMessage(track.getAlbum(), -1, tracksToUpdate.size());
 
 		if (file != null) {
 			// todo, probably shouldn't assume that all images are jpegs. Maybe it doesn't matter.
