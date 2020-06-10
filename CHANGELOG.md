@@ -1,5 +1,8 @@
 # changelog
 
+## 1.12-2020.06.09
+* allow song upload to replace existing song and take over its play history
+
 ## 1.11-2020.01.27
 * refactor music-utils to a separate module
 

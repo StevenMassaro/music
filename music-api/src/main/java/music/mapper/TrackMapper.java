@@ -43,4 +43,8 @@ public interface TrackMapper {
     void setRatingById(long id, byte rating);
 
     void updateFieldById(long id, String field, Object newValue, String type);
+
+	long migratePlays(long oldId, long newId);
+
+	long migratePlayCount(long oldId, long newId);
 }

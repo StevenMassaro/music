@@ -132,7 +132,8 @@ public class TrackEndpoint {
     }
 
     @PostMapping("/upload")
-	public Track uploadTrack(@RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+	public Track uploadTrack(@RequestParam(value = "file", required = false) MultipartFile file,
+							 @RequestParam(value = "existingId", required = false) Long existingId) throws IOException {
     	// write temp track to disk
 		File track = fileService.writeTempTrack(file);
 
@@ -144,8 +145,15 @@ public class TrackEndpoint {
 		DeferredTrack trackMetadata = metadataService.parseMetadata(newTrack);
 		trackService.upsertTracks(Collections.singletonList(trackMetadata), null);
 
+		Track createdTrack = trackService.getByLocation(trackMetadata.getLocation());
+
+		if (existingId != null) {
+			trackService.migratePlays(existingId, createdTrack.getId());
+			trackService.markDeleted(existingId);
+		}
+
 		// return track
-		return trackService.getByLocation(trackMetadata.getLocation());
+		return createdTrack;
 	}
 
     @GetMapping("/{id}/art")

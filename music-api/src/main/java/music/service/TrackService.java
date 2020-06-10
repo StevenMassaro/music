@@ -237,4 +237,19 @@ public class TrackService {
 		logger.trace("Updating field hash to {} for ID: {}", hash, id);
 		updateField(id, "hash", hash, JDBCType.VARCHAR);
 	}
+
+	/**
+	 * Assign all historical plays to a new track ID.
+	 * @param oldId the track to pull historical plays from
+	 * @param newId the track to assign the plays to
+	 */
+	public void migratePlays(long oldId, long newId) {
+		logger.debug("Migrating historical plays from {} to {}", oldId, newId);
+		long migrated = trackMapper.migratePlays(oldId, newId);
+		logger.trace("Migrated {} historical play rows", migrated);
+
+		logger.debug("Migrating play count from {} to {}", oldId, newId);
+		long migrated2 = trackMapper.migratePlayCount(oldId, newId);
+		logger.trace("Migrated {} play count rows", migrated2);
+	}
 }
