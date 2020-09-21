@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="music.mapper.SkipMapper">
+	<insert id="insertSkip">
+		INSERT INTO music.skips (songid, deviceid, skipdate, imported, secondsPlayed)
+		VALUES(#{id}, #{deviceId}, #{skipdate}, #{imported}, #{secondsPlayed})
+	</insert>
+
+	<insert id="upsertPlayCount">
+		INSERT INTO music.playcount (songid, deviceid, playcount, imported)
+		VALUES (#{songid}, #{deviceid}, #{playcount}, #{imported})
+		ON CONFLICT (songid, deviceid)
+			DO UPDATE SET
+			playcount = #{playcount}
+						, imported = #{imported}
+	</insert>
+
+	<delete id="deletePlays">
+		DELETE FROM music.plays WHERE songid = #{id}
+	</delete>
+
+	<delete id="deletePlayCounts">
+		DELETE FROM music.playcount WHERE songid = #{id}
+	</delete>
+</mapper>

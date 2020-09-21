@@ -218,4 +218,9 @@ public class TrackEndpoint {
 		Track track = trackService.get(title, artist, album, null);
 		return trackService.markListened(track.getId(), device.getId());
 	}
+
+	@PostMapping("/{id}/skipped")
+	public Track markTrackAsSkipped(@PathVariable long id, @RequestParam long deviceId, @RequestParam(required = false) Double secondsPlayed) {
+    	return trackService.markSkipped(id, deviceId, secondsPlayed);
+	}
 }

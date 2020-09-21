@@ -14,6 +14,7 @@ I built this after not being able to find another music program that satisfied a
 - ID3 metadata management
 - individual device profiles
 - play count tracking (per profile)
+- skip count tracking (per profile)
 - import existing play count data from MediaMonkey database
 - conversion of music to new format (as specified in the device profile), via [FFmpeg](https://ffmpeg.org/)
 - (basic) websocket implementation for live updates of long running tasks

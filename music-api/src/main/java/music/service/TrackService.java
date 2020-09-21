@@ -2,6 +2,7 @@ package music.service;
 
 import music.exception.RatingRangeException;
 import music.mapper.PlayMapper;
+import music.mapper.SkipMapper;
 import music.mapper.TrackMapper;
 import music.model.*;
 import org.slf4j.Logger;
@@ -28,15 +29,17 @@ public class TrackService {
     private final UpdateService updateService;
     private final SmartPlaylistService smartPlaylistService;
     private final ConvertService convertService;
+    private final SkipMapper skipMapper;
 
     @Autowired
-    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService, UpdateService updateService, SmartPlaylistService smartPlaylistService, ConvertService convertService) {
+    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService, UpdateService updateService, SmartPlaylistService smartPlaylistService, ConvertService convertService, SkipMapper skipMapper) {
         this.trackMapper = trackMapper;
         this.playMapper = playMapper;
         this.fileService = fileService;
         this.updateService = updateService;
 		this.smartPlaylistService = smartPlaylistService;
 		this.convertService = convertService;
+		this.skipMapper = skipMapper;
 	}
 
     /**
@@ -251,5 +254,12 @@ public class TrackService {
 		logger.debug("Migrating play count from {} to {}", oldId, newId);
 		long migrated2 = trackMapper.migratePlayCount(oldId, newId);
 		logger.trace("Migrated {} play count rows", migrated2);
+	}
+
+	public Track markSkipped(long id, long deviceId, Double secondsPlayed) {
+		logger.debug("Marking {} as skipped on device {}", id, deviceId);
+		Track track = get(id);
+		skipMapper.insertSkip(id, new Date(), deviceId, false, secondsPlayed);
+		return track;
 	}
 }
