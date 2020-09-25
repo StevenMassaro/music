@@ -84,6 +84,7 @@
         , t.dateupdated
         , t.filelastmodifieddate
         , COUNT(p.playdate) + COALESCE(pc.playcount, 0) - (SELECT COUNT(*) FROM music.plays WHERE songid = t.id AND imported = true) AS plays
+        , COUNT(s.skipdate) + COALESCE(sc.skipcount, 0) - (SELECT COUNT(*) FROM music.skips WHERE songid = t.id AND imported = true) AS skips
         <include refid="selectJoin"></include>
     </sql>
 
@@ -93,6 +94,10 @@
         ON p.songid = t.id
         LEFT OUTER JOIN music.playcount pc
         ON pc.songid = t.id
+		LEFT OUTER JOIN music.skips s
+		ON s.songid = t.id
+		LEFT OUTER JOIN music.skipcount sc
+		ON sc.songid = t.id
 	</sql>
 
     <sql id="selectGroupBy">
@@ -119,6 +124,7 @@
         , t.dateupdated
         , t.filelastmodifieddate
         , pc.playcount
+		, sc.skipcount
     </sql>
 
     <select id="get" resultMap="trackResultMap">

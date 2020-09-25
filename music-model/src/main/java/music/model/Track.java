@@ -36,6 +36,7 @@ public class Track implements Diffable<Track> {
     private Long disc_no;
     private Long track;
     private long plays;
+    private long skips;
 
     @Min(0)
 	@Max(10)
@@ -259,6 +260,14 @@ public class Track implements Diffable<Track> {
     public void setFileLastModifiedDate(Date fileLastModifiedDate) {
         this.fileLastModifiedDate = fileLastModifiedDate;
     }
+
+	public long getSkips() {
+		return skips;
+	}
+
+	public void setSkips(long skips) {
+		this.skips = skips;
+	}
 
     @Override
     public String toString() {

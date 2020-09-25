@@ -1,5 +1,8 @@
 # changelog
 
+## 1.13.01-SKIP-COUNT
+* return skip count as part of track metadata
+
 ## 1.13-SKIP-COUNT
 * record each time a song is skipped
 
