@@ -24,6 +24,22 @@ I built this after not being able to find another music program that satisfied a
 ## OpenAPI specifications
 URL TODO
 
+## Reverse proxy via nginx
+```
+location /Music {
+	# CORS requires unauthenticated OPTIONS calls to succeed
+	limit_except OPTIONS {
+		auth_basic "Restricted content";
+		auth_basic_user_file .htpasswd;
+	}
+	include /config/nginx/proxy.conf;
+	proxy_pass http://host:port;
+	# WebSocket connection requires this
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection "upgrade";
+}
+```
+
 ## To-do
 - cache album art changes (currently album art changes get applied directly to disk)
 - generate swagger/OpenAPI specifications
