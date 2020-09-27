@@ -24,6 +24,7 @@ fun track(location: String = "1.flac"): DeferredTrack {
     track.deletedInd = false
     track.fileLastModifiedDate = Date()
     track.hash = "1234abc"
+	track.duration = 5
     ReflectionTestUtils.setField(track, "musicFileSource", System.getProperty("java.io.tmpdir"))
     return track
 }

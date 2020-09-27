@@ -131,7 +131,7 @@ public class TrackServiceIT {
     }
 
     @Test
-	public void skippedTrack() {
+	public void skippedTrack() throws Exception {
 		Device device = deviceService.getOrInsert("devname");
 
 		trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
@@ -140,6 +140,37 @@ public class TrackServiceIT {
 		assertEquals(0, track.getSkips());
 
 		trackService.markSkipped(track.getId(), device.getId(), 1.0);
+
+		track = trackService.list().get(0);
+		assertEquals(1, track.getSkips());
+	}
+
+	@Test
+	public void skippedTrack_ExceptionThrownWhenSecondsPlayedEqualsTrackDuration() {
+		Device device = deviceService.getOrInsert("devname");
+
+		trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+		Track track = trackService.list().get(0);
+
+		assertEquals(0, track.getSkips());
+
+		Track finalTrack = track;
+		assertThrows(Exception.class, () -> trackService.markSkipped(finalTrack.getId(), device.getId(), (double) finalTrack.getDuration()));
+
+		track = trackService.list().get(0);
+		assertEquals(0, track.getSkips());
+	}
+
+	@Test
+	public void skippedTrack_NullSecondsPlayed() throws Exception {
+		Device device = deviceService.getOrInsert("devname");
+
+		trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+		Track track = trackService.list().get(0);
+
+		assertEquals(0, track.getSkips());
+
+		trackService.markSkipped(track.getId(), device.getId(), null);
 
 		track = trackService.list().get(0);
 		assertEquals(1, track.getSkips());

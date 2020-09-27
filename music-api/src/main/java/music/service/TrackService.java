@@ -256,10 +256,15 @@ public class TrackService {
 		logger.trace("Migrated {} play count rows", migrated2);
 	}
 
-	public Track markSkipped(long id, long deviceId, Double secondsPlayed) {
+	public Track markSkipped(long id, long deviceId, Double secondsPlayed) throws Exception {
 		logger.debug("Marking {} as skipped on device {}", id, deviceId);
 		Track track = get(id);
-		skipMapper.insertSkip(id, new Date(), deviceId, false, secondsPlayed);
-		return track;
+		if (secondsPlayed != null && secondsPlayed >= track.getDuration()) {
+			throw new Exception("This skip record is being ignored, because the number of seconds played before skipping" +
+				" exceeds the duration of the track, thus it can be assumed that the entire track was played.");
+		} else {
+			skipMapper.insertSkip(id, new Date(), deviceId, false, secondsPlayed);
+			return track;
+		}
 	}
 }

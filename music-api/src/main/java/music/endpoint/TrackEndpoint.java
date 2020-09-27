@@ -220,7 +220,7 @@ public class TrackEndpoint {
 	}
 
 	@PostMapping("/{id}/skipped")
-	public Track markTrackAsSkipped(@PathVariable long id, @RequestParam long deviceId, @RequestParam(required = false) Double secondsPlayed) {
+	public Track markTrackAsSkipped(@PathVariable long id, @RequestParam long deviceId, @RequestParam(required = false) Double secondsPlayed) throws Exception {
     	return trackService.markSkipped(id, deviceId, secondsPlayed);
 	}
 }
