@@ -10,7 +10,6 @@
 
     <select id="listAll" resultMap="trackResultMap">
         <include refid="selectColumns"/>
-        <include refid="selectGroupBy"/>
         ORDER BY artist,album,disc_no,track
     </select>
 
@@ -22,7 +21,6 @@
 	<sql id="listSql">
 		<include refid="selectColumns"/>
 		WHERE deletedInd != true
-		<include refid="selectGroupBy"/>
 		ORDER BY artist,album,disc_no,track
 	</sql>
 
@@ -34,9 +32,9 @@
 
 	<select id="listPlaysByDate" resultMap="trackResultMap">
 		<include refid="selectColumns"/>
+		LEFT OUTER JOIN music.plays p
+		ON p.songid = t.id
 		WHERE date_trunc('day', p.playdate) = #{date}
-		<include refid="selectGroupBy"/>
-		, p.playdate
 		ORDER BY p.playdate DESC
 	</select>
 
@@ -50,7 +48,6 @@
 		<if test="disc != null">
 			AND t.disc_no = #{disc}
 		</if>
-		<include refid="selectGroupBy"/>
 	</select>
 
 	<select id="listHistoricalDates" resultType="java.util.Date">
@@ -83,60 +80,46 @@
         , t.datecreated
         , t.dateupdated
         , t.filelastmodifieddate
-        , COUNT(p.playdate) + COALESCE(pc.playcount, 0) - (SELECT COUNT(*) FROM music.plays WHERE songid = t.id AND imported = true) AS plays
-        , COUNT(s.skipdate) + COALESCE(sc.skipcount, 0) - (SELECT COUNT(*) FROM music.skips WHERE songid = t.id AND imported = true) AS skips
-        <include refid="selectJoin"></include>
+		,
+		(
+		    SELECT Count(p.playdate)
+				   + COALESCE(pc.playcount, 0) - (SELECT Count(*)
+												  FROM   music.plays
+												  WHERE  songid = t.id
+														 AND imported = true)
+			FROM   music.plays p
+				   LEFT OUTER JOIN music.playcount pc
+								ON pc.songid = t.id
+			WHERE  p.songid = t.id
+			GROUP  BY pc.playcount
+		) AS plays,
+       (
+           SELECT Count(s.skipdate)
+				   + COALESCE(sc.skipcount, 0) - (SELECT Count(*)
+												  FROM   music.skips
+												  WHERE  songid = t.id
+														 AND imported = true)
+			FROM   music.skips s
+				   LEFT OUTER JOIN music.skipcount sc
+								ON sc.songid = t.id
+			WHERE  s.songid = t.id
+			GROUP  BY sc.skipcount
+	   ) AS skips
+		<include refid="selectJoin"></include>
     </sql>
 
 	<sql id="selectJoin">
 		FROM music.track t
-        LEFT OUTER JOIN music.plays p
-        ON p.songid = t.id
-        LEFT OUTER JOIN music.playcount pc
-        ON pc.songid = t.id
-		LEFT OUTER JOIN music.skips s
-		ON s.songid = t.id
-		LEFT OUTER JOIN music.skipcount sc
-		ON sc.songid = t.id
 	</sql>
-
-    <sql id="selectGroupBy">
-        GROUP BY
-        t.id
-        , t.title
-        , t."location"
-        , t.hash
-        , t.album
-        , t.artist
-        , t.album_artist
-        , t.genre
-        , t."year"
-        , t.disc_no
-        , t.track
-        , t.rating
-        , t."comment"
-        , t.deletedind
-        , t.bitrate
-        , t.encoding
-        , t.sampleRate
-        , t.duration
-        , t.datecreated
-        , t.dateupdated
-        , t.filelastmodifieddate
-        , pc.playcount
-		, sc.skipcount
-    </sql>
 
     <select id="get" resultMap="trackResultMap">
         <include refid="selectColumns"/>
         WHERE t.id = #{id}
-        <include refid="selectGroupBy"/>
     </select>
 
     <select id="getByLocation" resultMap="trackResultMap">
         <include refid="selectColumns"/>
         WHERE t.location = #{location}
-        <include refid="selectGroupBy"/>
     </select>
 
 	<select id="getByTitleArtistAlbum" resultMap="trackResultMap">
@@ -144,7 +127,6 @@
 		WHERE t.title = #{title} AND
 		t.album = #{album} AND
 		t.artist = #{artist}
-		<include refid="selectGroupBy"/>
 	</select>
 
     <delete id="deleteById">

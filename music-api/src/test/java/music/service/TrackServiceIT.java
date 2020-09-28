@@ -130,6 +130,30 @@ public class TrackServiceIT {
         doTrackAssertions(false, track, playedTracks.get(0));
     }
 
+	/**
+	 * Previously, the TrackMapper was doing left outer joins to the plays and skips tables. This was causing the counts
+	 * to be incorrect in some instances. I rewrote the sql to use subselects, and this test confirms that fix.
+	 * @throws Exception
+	 */
+	@Test
+	public void listenedTrack_PlayCountsCorrect() throws Exception {
+		// first create a device with which to associate the plays
+		Device device = deviceService.getOrInsert("devname");
+
+		trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+		Track track = trackService.list().get(0);
+
+		assertEquals(0, track.getPlays());
+
+		trackService.markListened(track.getId(), device.getId());
+		trackService.markListened(track.getId(), device.getId());
+		trackService.markSkipped(track.getId(), device.getId(), 1.0);
+
+		track = trackService.list().get(0);
+		assertEquals(2, track.getPlays());
+		assertEquals(1, track.getSkips());
+	}
+
     @Test
 	public void skippedTrack() throws Exception {
 		Device device = deviceService.getOrInsert("devname");
