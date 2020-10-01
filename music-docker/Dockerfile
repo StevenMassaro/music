@@ -1,6 +1,5 @@
-FROM openjdk:13-jdk-buster
+FROM openjdk:13-alpine
 EXPOSE 8080
-RUN apt update
-RUN apt-get --yes install ffmpeg
+RUN apk add --no-cache ffmpeg
 ADD /target/music-api.jar demo.jar
 ENTRYPOINT ["java","-jar","demo.jar"]

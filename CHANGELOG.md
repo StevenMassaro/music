@@ -1,5 +1,8 @@
 # changelog
 
+## 1.13.02-ALPINE
+* switch docker image to use alpine base (which is smaller)
+
 ## 1.13.01-SKIP-COUNT
 * return skip count as part of track metadata
 
