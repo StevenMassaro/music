@@ -1,5 +1,6 @@
 package music.service
 
+import com.google.common.cache.CacheBuilder
 import music.model.DeferredTrack
 import music.model.Track
 import music.settings.PrivateSettings
@@ -7,6 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOUtils
+import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.audio.exceptions.CannotReadException
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException
@@ -26,6 +28,9 @@ import java.util.concurrent.TimeUnit
 @Service
 class MetadataService @Autowired constructor(val fileService: FileService, val privateSettings: PrivateSettings) {
     private val logger = LoggerFactory.getLogger(MetadataService::class.java)
+	private val audioFileCache = CacheBuilder.newBuilder()
+		.maximumSize(50)
+		.build<File, AudioFile>()
 
     @Throws(TagException::class, ReadOnlyFileException::class, CannotReadException::class, InvalidAudioFrameException::class, IOException::class)
     fun getTracks(): List<DeferredTrack> {
@@ -50,7 +55,7 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 	 * in the event of an exception.
 	 */
 	fun parseMetadata(file:File) : DeferredTrack? {
-		val audioFile = AudioFileIO.read(file)
+		val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
 		val tag = audioFile.tag
 		val header = audioFile.audioHeader
 		return try {
@@ -79,7 +84,7 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
      * Get album art from the [file]. Optionally specify the [index] of the album art you wish to retrieve.
      */
     fun getAlbumArt(file: File, index: Int = 0): Artwork {
-        val audioFile = AudioFileIO.read(file)
+		val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
         val tag = audioFile.tag
 
         return tag.artworkList.get(index)
@@ -92,7 +97,7 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 	fun updateTrackField(track: Track, field: FieldKey, newValue: String) {
 		val file = fileService.getFile(track.location)
 		if (file != null && file.exists()) {
-			val audioFile = AudioFileIO.read(file)
+			val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
 			val tag = audioFile.tag
 			tag.setField(field, newValue)
 			audioFile.commit()
@@ -130,7 +135,7 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 	fun updateArtwork(location:String, newArt:File){
 		val file = fileService.getFile(location)
 		if (file != null && file.exists()) {
-			val audioFile = AudioFileIO.read(file)
+			val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
 			val tag = audioFile.tag
 			val art = Artwork()
 			art.setFromFile(newArt)
