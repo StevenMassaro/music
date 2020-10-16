@@ -8,7 +8,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import java.io.IOException
 import java.util.*
 
-fun track(location: String = "1.flac"): DeferredTrack {
+fun track(location: String = "sample1.flac"): DeferredTrack {
     val track = DeferredTrack()
     track.album = "album"
     track.album_artist = "aartist"

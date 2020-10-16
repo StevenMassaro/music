@@ -1,5 +1,8 @@
 # changelog
 
+## 1.13.03
+* fix "replacing a track with another track doesn't work properly if the new track has the same exact filename as the old track"
+
 ## 1.13.02-ALPINE
 * switch docker image to use alpine base (which is smaller)
 

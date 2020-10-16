@@ -14,4 +14,7 @@ interface SkipMapper {
 				   @Param("imported") imported: Boolean,
 				   @Param("secondsPlayed") secondsPlayed: Double?)
 
+	fun deleteSkipCounts(@Param("id") id: Long)
+
+	fun deleteBySongId(id: Long)
 }

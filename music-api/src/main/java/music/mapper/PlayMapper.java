@@ -22,4 +22,8 @@ public interface PlayMapper {
     void deletePlays(long id);
 
     void deletePlayCounts(long id);
+
+	long migratePlays(long oldId, long newId);
+
+	long migratePlayCount(long oldId, long newId);
 }

@@ -17,11 +17,11 @@
 						, imported = #{imported}
 	</insert>
 
-	<delete id="deletePlays">
-		DELETE FROM music.plays WHERE songid = #{id}
+	<delete id="deleteBySongId">
+		DELETE FROM music.skips WHERE songid = #{id}
 	</delete>
 
-	<delete id="deletePlayCounts">
-		DELETE FROM music.playcount WHERE songid = #{id}
+	<delete id="deleteSkipCounts">
+		DELETE FROM music.skipcount WHERE songid = #{id}
 	</delete>
 </mapper>

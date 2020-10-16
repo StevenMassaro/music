@@ -182,16 +182,4 @@
 		SET ${field} = CAST(#{newValue} AS ${type})
 		WHERE id = #{id}
 	</update>
-
-	<update id="migratePlays">
-		UPDATE music.plays
-		SET songid = #{newId}
-		WHERE songid = #{oldId}
-	</update>
-
-	<update id="migratePlayCount">
-		UPDATE music.playcount
-		SET songid = #{newId}
-		WHERE songid = #{oldId}
-	</update>
 </mapper>

@@ -24,4 +24,16 @@
     <delete id="deletePlayCounts">
         DELETE FROM music.playcount WHERE songid = #{id}
     </delete>
+
+	<update id="migratePlays">
+		UPDATE music.plays
+		SET songid = #{newId}
+		WHERE songid = #{oldId}
+	</update>
+
+	<update id="migratePlayCount">
+		UPDATE music.playcount
+		SET songid = #{newId}
+		WHERE songid = #{oldId}
+	</update>
 </mapper>

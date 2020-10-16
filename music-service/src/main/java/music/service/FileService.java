@@ -89,8 +89,8 @@ public class FileService {
         return new File(privateSettings.getLocalMusicFileLocation() + location);
     }
 
-    public boolean deleteFile(Track track) throws IOException {
-        logger.debug(String.format("Permanently deleting file %s", track.getLocation()));
+    public boolean deleteFile(Track track) {
+        logger.debug("Permanently deleting file {}", track.getLocation());
         boolean fileDeleted = new File(privateSettings.getLocalMusicFileLocation() + track.getLocation()).delete();
         if(fileDeleted){
             String trackDirectory = FilenameUtils.getFullPath(privateSettings.getLocalMusicFileLocation() + track.getLocation());

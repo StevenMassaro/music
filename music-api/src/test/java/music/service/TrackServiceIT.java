@@ -1,17 +1,25 @@
 package music.service;
 
 import music.exception.RatingRangeException;
+import music.mapper.PlayMapper;
 import music.model.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.shaded.org.apache.commons.lang.time.DateUtils;
 
 import java.io.File;
@@ -28,6 +36,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
+@ContextConfiguration(initializers = TrackServiceIT.MusicPropertiesInitializer.class)
 public class TrackServiceIT {
 
     @Autowired
@@ -42,14 +51,34 @@ public class TrackServiceIT {
 	@Autowired
 	private SmartPlaylistService smartPlaylistService;
 
-    private File tempFile;
+	@Autowired
+	private PlayMapper playMapper;
 
+    private File tempFile;
+    private File tempFile2;
+
+	public static class MusicPropertiesInitializer
+		implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+		@Override
+		public void initialize(ConfigurableApplicationContext applicationContext) {
+			TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext,
+				"music.file.source=" + System.getProperty("java.io.tmpdir").replace("\\", "\\\\"));
+		}
+	}
     @Before
     public void before() throws IOException {
-        tempFile = File.createTempFile("111", ".flac");
-        FileUtils.copyFile(ResourceUtils.getFile("classpath:1.flac"), tempFile);
-        tempFile.deleteOnExit();
+    	tempFile = createTempFile("sample1.flac");
+    	tempFile2 = createTempFile("sample2.flac");
     }
+
+    private File createTempFile(String filename) throws IOException {
+		String extension = "." + FilenameUtils.getExtension(filename);
+		File f = File.createTempFile(filename.replace(extension, ""), extension);
+		FileUtils.copyFile(ResourceUtils.getFile("classpath:" + filename), f);
+		f.deleteOnExit();
+		return f;
+	}
 
     @After
     public void after() {
@@ -65,6 +94,33 @@ public class TrackServiceIT {
         assertEquals(1, list.size());
         doTrackAssertions(false, track, list.get(0));
     }
+
+    @Test
+	public void replacingTrack() throws Exception {
+		DeferredTrack track = track(tempFile.getName());
+		trackService.upsertTracks(Collections.singletonList(track), new SyncResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+
+		List<Track> list = trackService.list();
+		assertEquals(1, list.size());
+		doTrackAssertions(false, track, list.get(0));
+
+		Device device = deviceService.getOrInsert("devname");
+		trackService.markListened(list.get(0).getId(), device.getId());
+		trackService.markListened(list.get(0).getId(), device.getId());
+		playMapper.upsertPlayCount(list.get(0).getId(), device.getId(), 7, true);
+		trackService.markSkipped(list.get(0).getId(), device.getId(), null);
+
+		// get updates on play counts and skip counts
+		list = trackService.list();
+
+		MultipartFile replacementTrack = new MockMultipartFile(tempFile2.getName(), tempFile2.getName(), "application/flac", FileUtils.readFileToByteArray(tempFile2));
+		Track newTrack = trackService.replaceExistingTrack(replacementTrack, list.get(0).getId());
+		assertNotEquals(list.get(0).getHash(), newTrack.getHash());
+		assertEquals(list.get(0).getPlays(), newTrack.getPlays());
+		assertEquals(list.get(0).getSkips(), newTrack.getSkips());
+		List<Track> tracks = trackService.listAll();
+		assertEquals(1, tracks.size());
+	}
 
 	@Test
 	public void listingTracksByAlbum() throws IOException {
