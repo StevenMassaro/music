@@ -1,10 +1,12 @@
 package music.service;
 
+import music.exception.LibraryNotFoundException;
 import music.exception.RatingRangeException;
 import music.mapper.PlayMapper;
 import music.mapper.SkipMapper;
 import music.mapper.TrackMapper;
 import music.model.*;
+import music.repository.ILibraryRepository;
 import music.repository.IPlayCountRepository;
 import music.repository.IPlayRepository;
 import music.repository.ISkipRepository;
@@ -41,9 +43,10 @@ public class TrackService {
 	private final IPlayRepository playRepository;
 	private final ISkipRepository skipRepository;
 	private final IPlayCountRepository playCountRepository;
+	private final ILibraryRepository libraryRepository;
 
 	@Autowired
-    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService, UpdateService updateService, SmartPlaylistService smartPlaylistService, ConvertService convertService, SkipMapper skipMapper, MetadataService metadataService, IPlayRepository playRepository, ISkipRepository skipRepository, IPlayCountRepository playCountRepository) {
+    public TrackService(TrackMapper trackMapper, PlayMapper playMapper, FileService fileService, UpdateService updateService, SmartPlaylistService smartPlaylistService, ConvertService convertService, SkipMapper skipMapper, MetadataService metadataService, IPlayRepository playRepository, ISkipRepository skipRepository, IPlayCountRepository playCountRepository, ILibraryRepository libraryRepository) {
         this.trackMapper = trackMapper;
         this.playMapper = playMapper;
         this.fileService = fileService;
@@ -55,6 +58,7 @@ public class TrackService {
 		this.playRepository = playRepository;
 		this.skipRepository = skipRepository;
 		this.playCountRepository = playCountRepository;
+		this.libraryRepository = libraryRepository;
 	}
 
     /**
@@ -78,13 +82,16 @@ public class TrackService {
     public void upsertTracks(List<DeferredTrack> tracks, SyncResult syncResult, boolean forceUpdates) {
         for (DeferredTrack track : tracks) {
             try {
-                Track existingTrack = getByLocation(track.getLocation());
+            	// we must load not by ID here because we may not know the tracks ID, like if we are syncing from disk
+                Track existingTrack = getByLocationAndLibrary(track.getLocation(), track.getLibrary().getId());
 				if (existingTrack != null && !existingTrack.getDeletedInd()) {
                     if (forceUpdates || !existingTrack.getFileLastModifiedDate().equals(track.getFileLastModifiedDate())) {
                         logger.debug(forceUpdates ? "Updates are being forced, updating {}" : "Existing track has been modified since last sync, updating: {}", existingTrack.getTitle());
                         track.setDateUpdated(new Date());
-                        trackMapper.updateByLocation(track);
-                        convertService.deleteHash(track.getLocation());
+                        // since there is an existing track that we're updating, we should use the existing tracks ID for updates
+                        track.setId(existingTrack.getId());
+                        trackMapper.update(track);
+                        convertService.deleteHash(track.getId());
 						if (syncResult != null) {
 							syncResult.getModifiedTracks().add(track);
 						}
@@ -102,7 +109,7 @@ public class TrackService {
 					}
                 }
             } catch (Exception e) {
-                logger.error(String.format("Failed to insert metadata for track %s", track.getLocation()), e);
+                logger.error(String.format("Failed to insert metadata for track %s", track.getLibraryPath()), e);
 				if (syncResult != null) {
 					syncResult.getFailedTracks().add(track);
 				}
@@ -110,11 +117,22 @@ public class TrackService {
         }
     }
 
+    public List<Track> list() {
+    	return updateService.applyUpdates(trackMapper.list());
+	}
+
     /**
      * Lists all non-deleted tracks, applying the updates that are queued.
+	 * @param libraryId only tracks in this library will be returned. If null, all tracks will be returned.
      */
-    public List<Track> list(){
-        return updateService.applyUpdates(trackMapper.list());
+    public List<Track> list(Long libraryId){
+		List<Track> list = null;
+		if (libraryId == null) {
+			list = trackMapper.list();
+		} else {
+			list = trackMapper.listByLibraryId(libraryId);
+		}
+        return updateService.applyUpdates(list);
     }
 
     public List<Track> listByAlbum(String album, String artist, Long disc){
@@ -127,6 +145,15 @@ public class TrackService {
      */
     public List<Track> listAll(){
         return updateService.applyUpdates(trackMapper.listAll());
+    }
+
+	/**
+	 * Lists all tracks, including those that were marked deleted in the database, applying the updates
+	 * that are queued.
+	 * @param libraryId only tracks in this library will be returned
+	 */
+    public List<Track> listAll(long libraryId){
+        return updateService.applyUpdates(trackMapper.listAllByLibraryId(libraryId));
     }
 
     public List<Track> listWithSmartPlaylist(long playlistId) {
@@ -146,8 +173,8 @@ public class TrackService {
 
     public List<Date> listHistoricalDates(){ return trackMapper.listHistoricalDates(); }
 
-    public Track getByLocation(String location) {
-        return updateService.applyUpdates(trackMapper.getByLocation(location));
+    private Track getByLocationAndLibrary(String location, long libraryId) {
+        return updateService.applyUpdates(trackMapper.getByLocationAndLibrary(location, libraryId));
     }
 
     public Track get(long id){
@@ -208,22 +235,27 @@ public class TrackService {
 		trackMapper.deleteById(id);
 	}
 
-	public Track uploadNewTrack(MultipartFile file) throws IOException {
+	public Track uploadNewTrack(MultipartFile file, long libraryId) throws IOException, LibraryNotFoundException {
+		Optional<Library> libraryOpt = libraryRepository.findById(libraryId);
+		if(!libraryOpt.isPresent()) {
+			throw new LibraryNotFoundException(libraryId);
+		}
 		// write temp track to disk
 		File track = fileService.writeTempTrack(file);
 
 		// scan metadata for this track
-		DeferredTrack tempTrackMetadata = metadataService.parseMetadata(track);
+		DeferredTrack tempTrackMetadata = metadataService.parseMetadata(track, libraryOpt.get());
 
 		File newTrack = fileService.moveTempTrack(track, tempTrackMetadata);
 
-		DeferredTrack trackMetadata = metadataService.parseMetadata(newTrack);
-		upsertTracks(Collections.singletonList(trackMetadata), null);
+		DeferredTrack trackMetadata = metadataService.parseMetadata(newTrack, libraryOpt.get());
+		SyncResult syncResult = new SyncResult();
+		upsertTracks(Collections.singletonList(trackMetadata), syncResult);
 
-		return getByLocation(trackMetadata.getLocation());
+		return get(syncResult.getNewTracks().get(0).getId());
 	}
 
-	public Track replaceExistingTrack(MultipartFile file, long existingId) throws IOException {
+	public Track replaceExistingTrack(MultipartFile file, long existingId, long libraryId) throws IOException, LibraryNotFoundException {
 		// first list of all of the existing plays
 		List<Play> existingTrackPlays = playRepository.findAllBySongId(existingId);
 		logger.debug("Found {} plays for {}", existingTrackPlays.size(), existingId);
@@ -238,7 +270,7 @@ public class TrackService {
 		permanentlyDelete(existingId);
 
 		// create the new track
-		Track newTrack = uploadNewTrack(file);
+		Track newTrack = uploadNewTrack(file, libraryId);
 
 		logger.debug("Inserting {} plays for new track {}", existingTrackPlays.size(), newTrack.getId());
 		for (Play existingTrackPlay : existingTrackPlays) {
@@ -260,18 +292,18 @@ public class TrackService {
      * Delete metadata for all tracks in database which no longer exist on disk.
      * @param actualTracks list of tracks that exist on disk
      */
-    public void deleteOrphanedTracksMetadata(List<DeferredTrack> actualTracks, SyncResult syncResult) {
-        logger.debug("Begin deleted orphaned tracks");
-        List<Track> dbTracks = listAll();
+    public void deleteOrphanedTracksMetadata(List<DeferredTrack> actualTracks, SyncResult syncResult, Library library) {
+        logger.debug("Begin deleting orphaned tracks");
+        List<Track> dbTracks = listAll(library.getId());
         // if a track exists in the database but doesn't exist on disk, then delete it from the db
         for (Track dbTrack : dbTracks){
             boolean doesTrackExistOnDisk = actualTracks.stream().anyMatch(t -> t.id3Equals(dbTrack));
             if(!doesTrackExistOnDisk){
-                logger.debug("Track {} no longer exists on disk, deleting associated metadata ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLocation());
+                logger.debug("Track {} no longer exists on disk, deleting associated metadata ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLibraryPath());
                 permanentlyDeleteTrackMetadata(dbTrack);
                 syncResult.getOrphanedTracks().add(dbTrack);
             } else {
-                logger.trace("Track {} still exists on disk ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLocation());
+                logger.trace("Track {} still exists on disk ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLibraryPath());
                 syncResult.getUnorphanedTracks().add(dbTrack);
             }
         }
@@ -311,8 +343,8 @@ public class TrackService {
     	return get(id);
 	}
 
-	public void updateHashOfTrack(String location, long id) throws IOException {
-		String hash = calculateHash(fileService.getFile(location));
+	public void updateHashOfTrack(String libraryPath, long id) throws IOException {
+		String hash = calculateHash(fileService.getFile(libraryPath));
 		logger.trace("Updating field hash to {} for ID: {}", hash, id);
 		updateField(id, "hash", hash, JDBCType.VARCHAR);
 	}

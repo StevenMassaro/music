@@ -6,7 +6,7 @@
 
     <groupId>com.massaro</groupId>
     <artifactId>Music</artifactId>
-	<version>1.13.03</version>
+	<version>1.14</version>
     <modules>
         <module>music-model</module>
         <module>music-api</module>
@@ -60,27 +60,27 @@
             <dependency>
                 <groupId>com.massaro</groupId>
                 <artifactId>music-model</artifactId>
-				<version>1.13.03</version>
+				<version>1.14</version>
 			</dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-settings</artifactId>
-				<version>1.13.03</version>
+				<version>1.14</version>
             </dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-api</artifactId>
-				<version>1.13.03</version>
+				<version>1.14</version>
 			</dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-service</artifactId>
-				<version>1.13.03</version>
+				<version>1.14</version>
 			</dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-utils</artifactId>
-				<version>1.13.03</version>
+				<version>1.14</version>
 			</dependency>
             <dependency>
                 <groupId>org</groupId>
@@ -236,7 +236,23 @@
             </executions>
             <configuration>
               <jvmTarget>1.8</jvmTarget>
+				<compilerPlugins>
+					<plugin>jpa</plugin>
+					<plugin>no-arg</plugin>
+				</compilerPlugins>
+				<pluginOptions>
+					<option>no-arg:annotation=javax.persistence.Entity</option>
+					<!-- Call instance initializers in the synthetic constructor -->
+					<!-- <option>no-arg:invokeInitializers=true</option> -->
+				</pluginOptions>
             </configuration>
+			  <dependencies>
+				  <dependency>
+					  <groupId>org.jetbrains.kotlin</groupId>
+					  <artifactId>kotlin-maven-noarg</artifactId>
+					  <version>${kotlin.version}</version>
+				  </dependency>
+			  </dependencies>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>

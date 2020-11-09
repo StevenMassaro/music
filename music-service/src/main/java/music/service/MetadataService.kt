@@ -2,6 +2,7 @@ package music.service
 
 import com.google.common.cache.CacheBuilder
 import music.model.DeferredTrack
+import music.model.Library
 import music.model.Track
 import music.settings.PrivateSettings
 import okhttp3.OkHttpClient
@@ -33,8 +34,8 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 		.build<File, AudioFile>()
 
     @Throws(TagException::class, ReadOnlyFileException::class, CannotReadException::class, InvalidAudioFrameException::class, IOException::class)
-    fun getTracks(): List<DeferredTrack> {
-        val files = ArrayList(fileService.listMusicFiles())
+    fun getTracks(library: Library): List<DeferredTrack> {
+        val files = ArrayList(fileService.listMusicFiles(library))
         logger.info("Found {} files in music directory.", files.size)
 
         val tracks = ArrayList<DeferredTrack>()
@@ -42,7 +43,7 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
         for (i in files.indices) {
             val file = files[i]
             logger.debug("Processing file {} of {}: {}", i + 1, files.size, file.name)
-            val parsed = parseMetadata(file)
+            val parsed = parseMetadata(file, library)
 			if (parsed != null){
 				tracks.add(parsed)
 			}
@@ -54,12 +55,35 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 	 * Parse the ID3 tag in the [file] and return the metadata from that file. Will catch all exceptions and return null
 	 * in the event of an exception.
 	 */
-	fun parseMetadata(file:File) : DeferredTrack? {
+	fun parseMetadata(file:File, library:Library) : DeferredTrack? {
 		val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
 		val tag = audioFile.tag
 		val header = audioFile.audioHeader
+		/*
+		* We always want the track location to start with a slash, for backwards compatibility with existing data.
+		* Sometimes the directories are nested enough:
+		* 	c:/whateverfolder/localmusicfilelocation/librarysubfolder/album/artist/track.flac
+		* that after removing the beginning parts of the path we are left with:
+		*   //album/artist/track.flac
+		*
+		* So we remove the first separator. But we not have two slashes there (if the music file is in the root
+		* directory for some reason, so if we remove it and the string no longer starts with a slash, add one
+		*/
+		var location = file.absolutePath
+			.replace(privateSettings.localMusicFileLocation!!, "")
+			.replaceFirst(File.separator, "")
+			.replace(library.subfolder, "")
+		if (!location.startsWith(File.separator)) {
+			location = File.separator + location
+		}
 		return try {
-			DeferredTrack(tag, header, file.absolutePath.replace(privateSettings.localMusicFileLocation!!, ""), file, privateSettings.localMusicFileLocation)
+			DeferredTrack(
+				tag,
+				header,
+				location,
+				file,
+				privateSettings.localMusicFileLocation,
+				library)
 		} catch (e: Exception) {
 			logger.error(String.format("Failed to parse tag for metadata for file %s", file.absolutePath), e)
 			null
@@ -67,16 +91,16 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 	}
 
     /**
-     * Get album art from the file's [location]. Optionally specify the [index] of the album art you wish to retrieve.
-     * Optionally specify whether the [location] is a full path with [isLocationFullPath]. If false, the full path
+     * Get album art from the file's [libraryPath]. Optionally specify the [index] of the album art you wish to retrieve.
+     * Optionally specify whether the [libraryPath] is a full path with [isLocationFullPath]. If false, the full path
      * will be determined automatically.
      */
     @JvmOverloads
-    fun getAlbumArt(location: String, isLocationFullPath: Boolean = false, index: Int = 0): Artwork {
+    fun getAlbumArt(libraryPath: String, isLocationFullPath: Boolean = false, index: Int = 0): Artwork {
         if (isLocationFullPath) {
-            return getAlbumArt(File(location), index)
+            return getAlbumArt(File(libraryPath), index)
         } else {
-            return getAlbumArt(fileService.getFile(location), index)
+            return getAlbumArt(fileService.getFile(libraryPath), index)
         }
     }
 
@@ -95,7 +119,7 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 	 */
 	@Throws(TagException::class, ReadOnlyFileException::class, CannotReadException::class, InvalidAudioFrameException::class, IOException::class)
 	fun updateTrackField(track: Track, field: FieldKey, newValue: String) {
-		val file = fileService.getFile(track.location)
+		val file = fileService.getFile(track.libraryPath)
 		if (file != null && file.exists()) {
 			val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
 			val tag = audioFile.tag
@@ -105,10 +129,10 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 	}
 
 	/**
-	 * Update the artwork of the track at the specified [location], using art downloaded from the [url]. The [url]
+	 * Update the artwork of the track at the specified [libraryPath], using art downloaded from the [url]. The [url]
 	 * should be the direct link to an image.
 	 */
-	fun updateArtwork(location: String, url: String) {
+	fun updateArtwork(libraryPath: String, url: String) {
 		// todo validate that the url actually points to an image
 		val tempArtFile = File.createTempFile("artwork", ".${FilenameUtils.getExtension(url)}")
 		tempArtFile.deleteOnExit()
@@ -125,15 +149,15 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 
 		client.newCall(request).execute().use { IOUtils.copy(it.body!!.byteStream(), tempArtFile.outputStream()) }
 
-		updateArtwork(location, tempArtFile)
+		updateArtwork(libraryPath, tempArtFile)
 		tempArtFile.delete()
 	}
 
 	/**
-	 * Update the artwork of the track at the specified [location], using the [newArt].
+	 * Update the artwork of the track at the specified [libraryPath], using the [newArt].
 	 */
-	fun updateArtwork(location:String, newArt:File){
-		val file = fileService.getFile(location)
+	fun updateArtwork(libraryPath:String, newArt:File){
+		val file = fileService.getFile(libraryPath)
 		if (file != null && file.exists()) {
 			val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
 			val tag = audioFile.tag

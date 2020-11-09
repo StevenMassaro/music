@@ -40,8 +40,9 @@ public class AdminEndpoint {
 	}
 
     @PostMapping("/dbSync")
-    public SyncResult syncTracksToDb(@RequestParam(defaultValue = "false") boolean forceUpdates) throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
-		return syncService.syncTracksToDb(forceUpdates);
+    public SyncResult syncTracksToDb(@RequestParam(defaultValue = "false") boolean forceUpdates,
+									 @RequestParam long libraryId) throws ReadOnlyFileException, CannotReadException, TagException, InvalidAudioFrameException, IOException {
+		return syncService.syncTracksToDb(forceUpdates, libraryId);
 	}
 
 	@GetMapping("/purge/count")

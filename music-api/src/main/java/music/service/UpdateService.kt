@@ -5,15 +5,11 @@ import music.model.HtmlType
 import music.model.ModifyableTags
 import music.model.Track
 import music.model.TrackUpdate
-import music.utils.FieldUtils.calculateHash
 import org.jaudiotagger.tag.FieldKey
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.util.ReflectionUtils
-import java.lang.Exception
-import java.sql.JDBCType
-import kotlin.collections.HashMap
 
 @Service
 class UpdateService @Autowired constructor(
@@ -95,7 +91,7 @@ class UpdateService @Autowired constructor(
 						trackService.updateField(id, it.field, it.newValue, ModifyableTags.valueOf(it.field.toUpperCase()).sqlType);
 						convertService.deleteHash(track.id)
 
-						trackService.updateHashOfTrack(track.location, id)
+						trackService.updateHashOfTrack(track.libraryPath, id)
 					} catch (e: Exception) {
 						logger.error("Failed to apply update to disk: $it", e)
 					}

@@ -1,5 +1,9 @@
 # changelog
 
+## 1.14
+* add support for multiple libraries
+  * note that this is a breaking change to existing systems. all existing files will have to be moved into a subfolder called `Music`, which is the default library. 
+
 ## 1.13.03
 * fix "replacing a track with another track doesn't work properly if the new track has the same exact filename as the old track"
 

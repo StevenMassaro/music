@@ -12,15 +12,19 @@ import java.util.List;
 @Repository
 public interface TrackMapper {
 
-    void updateByLocation(@Param("track") Track track);
+    void update(@Param("track") Track track);
 
     void insert(@Param("track") Track track);
 
-    List<Track> list();
+	List<Track> listByLibraryId(@Param("libraryId") long libraryId);
+
+	List<Track> list();
 
     List<Track> listByAlbum(String album, String artist, Long disc);
 
     List<Track> listAll();
+
+    List<Track> listAllByLibraryId(@Param("libraryId") long libraryId);
 
     List<Track> listWithSmartPlaylist(@Param("dynamicSql") String dynamicSql);
 
@@ -32,7 +36,7 @@ public interface TrackMapper {
 
     Track get(@Param("id") long id);
 
-    Track getByLocation(@Param("location") String location);
+    Track getByLocationAndLibrary(@Param("location") String location, long libraryId);
 
     Track getByTitleArtistAlbum(String title, String artist, String album);
 

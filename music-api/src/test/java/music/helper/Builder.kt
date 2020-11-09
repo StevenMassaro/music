@@ -2,6 +2,7 @@ package music.helper
 
 import music.model.DeferredTrack
 import music.model.Track
+import music.service.TrackServiceIT.seededMusicLibrary
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.springframework.test.util.ReflectionTestUtils
@@ -25,6 +26,7 @@ fun track(location: String = "sample1.flac"): DeferredTrack {
     track.fileLastModifiedDate = Date()
     track.hash = "1234abc"
 	track.duration = 5
+	track.library = seededMusicLibrary
     ReflectionTestUtils.setField(track, "musicFileSource", System.getProperty("java.io.tmpdir"))
     return track
 }
@@ -40,6 +42,7 @@ fun doTrackAssertions(assertId: Boolean, baseline: Track, comparison: Track) {
     assertEquals(baseline.disc_no, comparison.disc_no)
     assertEquals(baseline.genre, comparison.genre)
     assertEquals(baseline.location, comparison.location)
+    assertEquals(baseline.libraryPath, comparison.libraryPath)
     assertEquals(baseline.title, comparison.title)
     assertEquals(baseline.track, comparison.track)
     assertEquals(baseline.year, comparison.year)

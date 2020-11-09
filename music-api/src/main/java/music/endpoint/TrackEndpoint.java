@@ -1,12 +1,12 @@
 package music.endpoint;
 
+import music.exception.LibraryNotFoundException;
 import music.exception.RatingRangeException;
 import music.model.Device;
 import music.model.ModifyableTags;
 import music.model.Track;
 import music.service.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.Diff;
 import org.apache.commons.lang3.builder.DiffResult;
@@ -67,11 +67,12 @@ public class TrackEndpoint {
 	}
 
     @GetMapping
-	public List<Track> list(@RequestParam(required = false, name = "smartPlaylist") Long smartPlaylistId) {
+	public List<Track> list(@RequestParam(required = false, name = "smartPlaylist") Long smartPlaylistId,
+							@RequestParam(required = false) Long libraryId) {
 		if (smartPlaylistId != null) {
 			return trackService.listWithSmartPlaylist(smartPlaylistId);
 		} else {
-			return trackService.list();
+			return trackService.list(libraryId);
 		}
     }
 
@@ -117,7 +118,7 @@ public class TrackEndpoint {
 										   @RequestParam(required = false) String deviceName,
 										   @RequestParam(required = false) Long deviceId) throws IOException {
         Track track = trackService.get(id);
-		String filename = FilenameUtils.getName(track.getLocation());
+		String filename = track.getFilename();
 
 		// todo check that the device is actually a device which requires converting
 		if (StringUtils.isNotEmpty(deviceName)) {
@@ -128,18 +129,19 @@ public class TrackEndpoint {
 			// todo implement
 			return null;
 		} else {
-			Resource file = new InputStreamResource(FileUtils.openInputStream(fileService.getFile(track.getLocation())));
-			return responseEntity(filename, "audio/" + FilenameUtils.getExtension(track.getLocation()).toLowerCase(), file);
+			Resource file = new InputStreamResource(FileUtils.openInputStream(fileService.getFile(track.getLibraryPath())));
+			return responseEntity(filename, "audio/" + track.getExtension().toLowerCase(), file);
 		}
     }
 
     @PostMapping("/upload")
-	public Track uploadTrack(@RequestParam(value = "file", required = false) MultipartFile file,
-							 @RequestParam(value = "existingId", required = false) Long existingId) throws IOException {
+	public Track uploadTrack(@RequestParam MultipartFile file,
+							 @RequestParam(required = false) Long existingId,
+							 @RequestParam long libraryId) throws IOException, LibraryNotFoundException {
 		if (existingId != null) {
-			return trackService.replaceExistingTrack(file, existingId);
+			return trackService.replaceExistingTrack(file, existingId, libraryId);
 		} else {
-			return trackService.uploadNewTrack(file);
+			return trackService.uploadNewTrack(file, libraryId);
 		}
 	}
 
@@ -147,15 +149,15 @@ public class TrackEndpoint {
     public ResponseEntity<Resource> getAlbumArt(@PathVariable long id, @RequestParam(defaultValue = "0") Integer index){
         Track track = trackService.get(id);
 
-        Artwork albumArt = metadataService.getAlbumArt(track.getLocation(), false, index);
+        Artwork albumArt = metadataService.getAlbumArt(track.getLibraryPath(), false, index);
         return responseEntity(null, albumArt.getMimeType(), albumArt.getBinaryData());
     }
 
     @PostMapping("{id}/art")
 	public Track setAlbumArt(@PathVariable long id,
-							 @RequestParam(value = "file", required = false) MultipartFile file,
-							 @RequestParam(value = "url", required = false) String url,
-							 @RequestParam(value = "updateForEntireAlbum") Boolean updateForEntireAlbum) throws IOException {
+							 @RequestParam(required = false) MultipartFile file,
+							 @RequestParam(required = false) String url,
+							 @RequestParam Boolean updateForEntireAlbum) throws IOException {
 		Track track = trackService.get(id);
 		List<Track> tracksToUpdate;
 		if (updateForEntireAlbum) {
@@ -172,18 +174,18 @@ public class TrackEndpoint {
 			FileUtils.copyInputStreamToFile(file.getInputStream(), tempFile);
 			for (int i = 0; i < tracksToUpdate.size(); i++) {
 				Track trackToUpdate = tracksToUpdate.get(i);
-				metadataService.updateArtwork(trackToUpdate.getLocation(), tempFile);
+				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), tempFile);
 				convertService.deleteHash(trackToUpdate.getId());
-				trackService.updateHashOfTrack(trackToUpdate.getLocation(), trackToUpdate.getId());
+				trackService.updateHashOfTrack(trackToUpdate.getLibraryPath(), trackToUpdate.getId());
 				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
 			}
 			tempFile.delete();
 		} else {
 			for (int i = 0; i < tracksToUpdate.size(); i++) {
 				Track trackToUpdate = tracksToUpdate.get(i);
-				metadataService.updateArtwork(trackToUpdate.getLocation(), url);
+				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), url);
 				convertService.deleteHash(trackToUpdate.getId());
-				trackService.updateHashOfTrack(trackToUpdate.getLocation(), trackToUpdate.getId());
+				trackService.updateHashOfTrack(trackToUpdate.getLibraryPath(), trackToUpdate.getId());
 				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
 			}
 		}

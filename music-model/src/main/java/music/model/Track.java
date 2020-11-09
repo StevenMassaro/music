@@ -1,8 +1,10 @@
 package music.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import music.utils.FieldUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.builder.DiffBuilder;
 import org.apache.commons.lang3.builder.DiffResult;
 import org.apache.commons.lang3.builder.Diffable;
@@ -26,7 +28,10 @@ public class Track implements Diffable<Track> {
 
     private long id;
     private String title;
-    private String location;
+	/**
+	 * The non-absolute path of the file. This represents the path of the file within the library.
+	 */
+	private String location;
     private String hash;
     private String album;
     private String artist;
@@ -50,19 +55,13 @@ public class Track implements Diffable<Track> {
     private Date dateCreated;
     private Date dateUpdated;
     private Date fileLastModifiedDate;
+    @JsonIgnore
+    private Library library;
 
     public Track(){
-        //            AudioHeader audioHeader = f.getAudioHeader();
-//            audioHeader.getBitRateAsNumber();
-//            audioHeader.getSampleRateAsNumber();
-//            audioHeader.getFormat();
-//            audioHeader.getTrackLength();
-//            audioHeader.getChannels();
-//            audioHeader.getEncodingType();//            tag.getFields("TRACKNUMBER");
-////            tag.getFields(FieldKey.COMMENT);
     }
 
-    public Track(Tag v2tag, AudioHeader audioHeader, String location, File file, Date fileLastModifiedDate) throws IOException {
+    public Track(Tag v2tag, AudioHeader audioHeader, String location, File file, Date fileLastModifiedDate, Library library) throws IOException {
         this.title = v2tag.getFirst(FieldKey.TITLE);
         this.album = v2tag.getFirst(FieldKey.ALBUM);
         this.artist = v2tag.getFirst(FieldKey.ARTIST);
@@ -74,7 +73,8 @@ public class Track implements Diffable<Track> {
         this.comment = v2tag.getFirst(FieldKey.COMMENT);
         this.location = location;
         this.fileLastModifiedDate = fileLastModifiedDate;
-        if(file != null){
+		this.library = library;
+		if(file != null){
             InputStream inputStream = FileUtils.openInputStream(file);
             this.hash = DigestUtils.sha512Hex(inputStream);
             inputStream.close();
@@ -269,6 +269,14 @@ public class Track implements Diffable<Track> {
 		this.skips = skips;
 	}
 
+	public Library getLibrary() {
+		return library;
+	}
+
+	public void setLibrary(Library library) {
+		this.library = library;
+	}
+
     @Override
     public String toString() {
         return "Track{" +
@@ -318,5 +326,23 @@ public class Track implements Diffable<Track> {
 			}
 		}
 		return diffBuilder.build();
+	}
+
+	/**
+	 * Get the path of the file, including the library subfolder. This appends the library subfolder to the location;
+	 */
+	@JsonIgnore
+	public String getLibraryPath() {
+		return library.getSubfolder() + File.separator + location;
+	}
+
+	@JsonIgnore
+	public String getFilename() {
+    	return FilenameUtils.getName(location);
+	}
+
+	@JsonIgnore
+	public String getExtension() {
+    	return FilenameUtils.getExtension(location);
 	}
 }

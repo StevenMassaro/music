@@ -21,14 +21,14 @@ public class DeferredTrack extends Track {
 
     public DeferredTrack (){}
 
-    public DeferredTrack(Tag v2tag, AudioHeader header, String location, File file, String musicFileSource) throws IOException {
-        super(v2tag, header, location, null, new Date(file.lastModified()));
+    public DeferredTrack(Tag v2tag, AudioHeader header, String location, File file, String musicFileSource, Library library) throws IOException {
+        super(v2tag, header, location, null, new Date(file.lastModified()), library);
         this.musicFileSource = musicFileSource;
     }
 
     @Override
     public String getHash() throws IOException {
-    	return calculateHash(musicFileSource + File.separator + super.getLocation());
+    	return calculateHash(musicFileSource + File.separator + super.getLibraryPath());
     }
 
     @Override

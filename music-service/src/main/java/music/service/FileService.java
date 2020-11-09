@@ -1,6 +1,7 @@
 package music.service;
 
 import music.model.DeferredTrack;
+import music.model.Library;
 import music.model.Track;
 import music.model.TrackNamePattern;
 import music.settings.PrivateSettings;
@@ -9,6 +10,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,9 +33,9 @@ public class FileService {
         this.privateSettings = privateSettings;
     }
 
-    public Collection<File> listMusicFiles() {
+    public Collection<File> listMusicFiles(Library library) {
         SuffixFileFilter caseInsensitiveExtensionFilter = new SuffixFileFilter(privateSettings.getAcceptableExtensions().split(","), IOCase.INSENSITIVE);
-        return FileUtils.listFiles(new File(privateSettings.getLocalMusicFileLocation()), caseInsensitiveExtensionFilter, TrueFileFilter.INSTANCE);
+        return FileUtils.listFiles(new File(privateSettings.getLocalMusicFileLocation(), library.getSubfolder()), caseInsensitiveExtensionFilter, TrueFileFilter.INSTANCE);
     }
 
 	/**
@@ -41,7 +43,7 @@ public class FileService {
 	 */
     public File writeTempTrack(MultipartFile file) throws IOException {
     	// copy file to temp file
-    	File tempTrack = File.createTempFile("tempmusic", "." + FilenameUtils.getExtension(file.getOriginalFilename()));
+    	File tempTrack = File.createTempFile(RandomStringUtils.randomAlphabetic(10), "." + FilenameUtils.getExtension(file.getOriginalFilename()));
     	FileUtils.copyInputStreamToFile(file.getInputStream(), tempTrack);
 
 		return tempTrack;
@@ -74,26 +76,26 @@ public class FileService {
 	 * the placeholder values with the values specified in the deferred track.
 	 */
 	public String generateFilename(DeferredTrack deferredTrack){
-    	String pattern = privateSettings.getTrackNamePattern();
+    	String pattern = deferredTrack.getLibrary().getSubfolder() + File.separator + privateSettings.getTrackNamePattern();
     	for(TrackNamePattern trackNamePattern : TrackNamePattern.values()){
 			Field field = ReflectionUtils.findField(deferredTrack.getClass(), trackNamePattern.toString().toLowerCase());
 			ReflectionUtils.makeAccessible(field);
 			Object value = ReflectionUtils.getField(field, deferredTrack);
     		pattern = pattern.replaceAll(trackNamePattern.toString(), value.toString());
 		}
-    	String extension = FilenameUtils.getExtension(deferredTrack.getLocation());
+    	String extension = deferredTrack.getExtension();
     	return pattern + "." + extension;
 	}
 
-    public File getFile(String location){
-        return new File(privateSettings.getLocalMusicFileLocation() + location);
+    public File getFile(String libraryPath){
+        return new File(privateSettings.getLocalMusicFileLocation(), libraryPath);
     }
 
     public boolean deleteFile(Track track) {
-        logger.debug("Permanently deleting file {}", track.getLocation());
-        boolean fileDeleted = new File(privateSettings.getLocalMusicFileLocation() + track.getLocation()).delete();
+        logger.debug("Permanently deleting file {}", track.getLibraryPath());
+        boolean fileDeleted = new File(privateSettings.getLocalMusicFileLocation() + track.getLibraryPath()).delete();
         if(fileDeleted){
-            String trackDirectory = FilenameUtils.getFullPath(privateSettings.getLocalMusicFileLocation() + track.getLocation());
+            String trackDirectory = FilenameUtils.getFullPath(privateSettings.getLocalMusicFileLocation() + track.getLibraryPath());
             boolean dirDeleted = recursivelyDeleteEmptyDirectories(trackDirectory);
         }
         return fileDeleted;

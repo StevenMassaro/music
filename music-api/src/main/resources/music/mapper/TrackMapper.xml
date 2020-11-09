@@ -8,8 +8,25 @@
 		<include refid="listSql"></include>
     </select>
 
+    <select id="listByLibraryId" resultMap="trackResultMap">
+		<include refid="selectColumns"/>
+		WHERE deletedInd != true
+		<if test="libraryId != null">
+			AND libraryId = #{libraryId}
+		</if>
+		ORDER BY artist,album,disc_no,track
+    </select>
+
     <select id="listAll" resultMap="trackResultMap">
         <include refid="selectColumns"/>
+        ORDER BY artist,album,disc_no,track
+    </select>
+
+    <select id="listAllByLibraryId" resultMap="trackResultMap">
+        <include refid="selectColumns"/>
+		<if test="libraryId != null">
+			WHERE libraryId = #{libraryId}
+		</if>
         ORDER BY artist,album,disc_no,track
     </select>
 
@@ -59,7 +76,7 @@
 
     <sql id="selectColumns">
         SELECT
-        t.id
+		t.id as trackId
         , t.title
         , t."location"
         , t.hash
@@ -80,6 +97,9 @@
         , t.datecreated
         , t.dateupdated
         , t.filelastmodifieddate
+		, l.id as libraryId
+		, l.name as libraryName
+		, l.subfolder as librarySubFolder
 		,
 		(
 		    SELECT Count(p.playdate)
@@ -110,6 +130,7 @@
 
 	<sql id="selectJoin">
 		FROM music.track t
+		INNER JOIN music.library l ON t.libraryId = l.id
 	</sql>
 
     <select id="get" resultMap="trackResultMap">
@@ -117,9 +138,9 @@
         WHERE t.id = #{id}
     </select>
 
-    <select id="getByLocation" resultMap="trackResultMap">
+    <select id="getByLocationAndLibrary" resultMap="trackResultMap">
         <include refid="selectColumns"/>
-        WHERE t.location = #{location}
+        WHERE t.location = #{location} AND t.libraryId = #{libraryId}
     </select>
 
 	<select id="getByTitleArtistAlbum" resultMap="trackResultMap">
@@ -137,19 +158,26 @@
         UPDATE music.track SET deletedInd = #{deletedInd} WHERE id = #{id}
     </update>
 
-    <resultMap id="trackResultMap" type="music.model.Track">
-        <id property="id" column="id"/>
+    <resultMap id="trackResultMap" type="music.model.Track" autoMapping="true">
+		<id property="id" column="trackId"/>
+		<association property="library" resultMap="libraryResultMap"/>
     </resultMap>
 
-    <insert id="insert">
+	<resultMap id="libraryResultMap" type="music.model.Library">
+		<id property="id" column="libraryId" javaType="_long"/>
+		<result property="subfolder" column="librarySubFolder" javaType="String"/>
+		<result property="name" column="libraryName" javaType="String"/>
+	</resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="track.id" keyColumn="id">
         INSERT INTO music.track (title, location, hash, album, artist, album_artist, genre, "year", disc_no, track,
-        rating, comment, deletedInd, bitrate, encoding, sampleRate, duration, fileLastModifiedDate)
+        rating, comment, deletedInd, bitrate, encoding, sampleRate, duration, fileLastModifiedDate, libraryId)
         VALUES(#{track.title}, #{track.location}, #{track.hash}, #{track.album}, #{track.artist}, #{track.album_artist},
         #{track.genre}, #{track.year}, #{track.disc_no}, #{track.track}, #{track.rating}, #{track.comment}, #{track.deletedInd},
-        #{track.bitrate}, #{track.encoding}, #{track.sampleRate}, #{track.duration}, #{track.fileLastModifiedDate})
+        #{track.bitrate}, #{track.encoding}, #{track.sampleRate}, #{track.duration}, #{track.fileLastModifiedDate}, #{track.library.id})
     </insert>
 
-    <update id="updateByLocation">
+    <update id="update">
         UPDATE music.track
         SET
         title = #{track.title},
@@ -168,7 +196,7 @@
         duration = #{track.duration},
         fileLastModifiedDate = #{track.fileLastModifiedDate},
         dateUpdated = #{track.dateUpdated}
-        WHERE location = #{track.location}
+        WHERE id = #{track.id}
     </update>
 
     <update id="setRatingById">
