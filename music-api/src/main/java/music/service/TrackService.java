@@ -259,8 +259,9 @@ public class TrackService {
 		return get(syncResult.getNewTracks().get(0).getId());
 	}
 
-	public Track replaceExistingTrack(MultipartFile file, long existingId, long libraryId) throws IOException, LibraryNotFoundException {
+	public Track replaceExistingTrack(MultipartFile file, long existingId) throws IOException, LibraryNotFoundException {
 		// first list of all of the existing plays
+		Track existingTrack = get(existingId);
 		List<Play> existingTrackPlays = playRepository.findAllBySongId(existingId);
 		logger.debug("Found {} plays for {}", existingTrackPlays.size(), existingId);
 		Optional<PlayCount> optionalExistingPlayCount = playCountRepository.findById(existingId);
@@ -274,7 +275,7 @@ public class TrackService {
 		permanentlyDelete(existingId);
 
 		// create the new track
-		Track newTrack = uploadNewTrack(file, libraryId);
+		Track newTrack = uploadNewTrack(file, existingTrack.getLibrary().getId());
 
 		logger.debug("Inserting {} plays for new track {}", existingTrackPlays.size(), newTrack.getId());
 		for (Play existingTrackPlay : existingTrackPlays) {

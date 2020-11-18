@@ -1,5 +1,6 @@
 package music.endpoint;
 
+import com.google.common.base.Preconditions;
 import music.exception.LibraryNotFoundException;
 import music.exception.RatingRangeException;
 import music.model.Device;
@@ -137,10 +138,12 @@ public class TrackEndpoint {
     @PostMapping("/upload")
 	public Track uploadTrack(@RequestParam MultipartFile file,
 							 @RequestParam(required = false) Long existingId,
-							 @RequestParam long libraryId) throws IOException, LibraryNotFoundException {
+							 @RequestParam(required = false) Long libraryId) throws IOException, LibraryNotFoundException {
+		Preconditions.checkNotNull(file);
 		if (existingId != null) {
-			return trackService.replaceExistingTrack(file, existingId, libraryId);
+			return trackService.replaceExistingTrack(file, existingId);
 		} else {
+			Preconditions.checkNotNull(libraryId);
 			return trackService.uploadNewTrack(file, libraryId);
 		}
 	}

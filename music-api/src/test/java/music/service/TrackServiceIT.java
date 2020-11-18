@@ -117,7 +117,7 @@ public class TrackServiceIT {
 		list = trackService.list();
 
 		MultipartFile replacementTrack = new MockMultipartFile(tempFile2.getName(), tempFile2.getName(), "application/flac", FileUtils.readFileToByteArray(tempFile2));
-		Track newTrack = trackService.replaceExistingTrack(replacementTrack, list.get(0).getId(), seededMusicLibrary.getId());
+		Track newTrack = trackService.replaceExistingTrack(replacementTrack, list.get(0).getId());
 		assertNotEquals(list.get(0).getHash(), newTrack.getHash());
 		assertEquals(list.get(0).getPlays(), newTrack.getPlays());
 		assertEquals(list.get(0).getSkips(), newTrack.getSkips());
