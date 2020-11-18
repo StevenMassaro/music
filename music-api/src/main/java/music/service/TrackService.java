@@ -143,8 +143,8 @@ public class TrackService {
      * Lists all tracks, including those that were marked deleted in the database, applying the updates
      * that are queued.
      */
-    public List<Track> listAll(){
-        return updateService.applyUpdates(trackMapper.listAll());
+    public List<Track> listDeleted(){
+        return updateService.applyUpdates(trackMapper.listDeleted());
     }
 
 	/**
@@ -152,8 +152,8 @@ public class TrackService {
 	 * that are queued.
 	 * @param libraryId only tracks in this library will be returned
 	 */
-    public List<Track> listAll(long libraryId){
-        return updateService.applyUpdates(trackMapper.listAllByLibraryId(libraryId));
+    public List<Track> listDeleted(long libraryId){
+        return updateService.applyUpdates(trackMapper.listDeletedByLibraryId(libraryId));
     }
 
     public List<Track> listWithSmartPlaylist(long playlistId) {
@@ -167,6 +167,10 @@ public class TrackService {
 	 */
 	public long countPurgableTracks(){
     	return trackMapper.countPurgableTracks();
+	}
+
+	public List<Track> listPurgableTracks() {
+		return trackMapper.listPurgableTracks();
 	}
 
     public List<Track> listPlaysByDate(Date date) { return trackMapper.listPlaysByDate(date); }
@@ -294,7 +298,7 @@ public class TrackService {
      */
     public void deleteOrphanedTracksMetadata(List<DeferredTrack> actualTracks, SyncResult syncResult, Library library) {
         logger.debug("Begin deleting orphaned tracks");
-        List<Track> dbTracks = listAll(library.getId());
+        List<Track> dbTracks = list(library.getId());
         // if a track exists in the database but doesn't exist on disk, then delete it from the db
         for (Track dbTrack : dbTracks){
             boolean doesTrackExistOnDisk = actualTracks.stream().anyMatch(t -> t.id3Equals(dbTrack));

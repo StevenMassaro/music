@@ -1,5 +1,8 @@
 # changelog
 
+## 1.14.01
+* support purging individual tracks
+
 ## 1.14
 * add support for multiple libraries
   * note that this is a breaking change to existing systems. all existing files will have to be moved into a subfolder called `Music`, which is the default library. 

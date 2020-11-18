@@ -22,13 +22,15 @@ public interface TrackMapper {
 
     List<Track> listByAlbum(String album, String artist, Long disc);
 
-    List<Track> listAll();
+    List<Track> listDeleted();
 
-    List<Track> listAllByLibraryId(@Param("libraryId") long libraryId);
+    List<Track> listDeletedByLibraryId(@Param("libraryId") long libraryId);
 
     List<Track> listWithSmartPlaylist(@Param("dynamicSql") String dynamicSql);
 
     long countPurgableTracks();
+
+    List<Track> listPurgableTracks();
 
     List<Track> listPlaysByDate(Date date);
 

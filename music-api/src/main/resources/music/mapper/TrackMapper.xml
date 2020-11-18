@@ -17,15 +17,17 @@
 		ORDER BY artist,album,disc_no,track
     </select>
 
-    <select id="listAll" resultMap="trackResultMap">
+    <select id="listDeleted" resultMap="trackResultMap">
         <include refid="selectColumns"/>
+		WHERE deletedInd = true
         ORDER BY artist,album,disc_no,track
     </select>
 
-    <select id="listAllByLibraryId" resultMap="trackResultMap">
+    <select id="listDeletedByLibraryId" resultMap="trackResultMap">
         <include refid="selectColumns"/>
+		WHERE deletedInd = true
 		<if test="libraryId != null">
-			WHERE libraryId = #{libraryId}
+			AND libraryId = #{libraryId}
 		</if>
         ORDER BY artist,album,disc_no,track
     </select>
@@ -44,6 +46,11 @@
 	<select id="countPurgableTracks" resultType="long">
 		SELECT COUNT(*)
 		<include refid="selectJoin"></include>
+		WHERE deletedInd = true
+	</select>
+
+	<select id="listPurgableTracks" resultMap="trackResultMap">
+		<include refid="selectColumns"/>
 		WHERE deletedInd = true
 	</select>
 

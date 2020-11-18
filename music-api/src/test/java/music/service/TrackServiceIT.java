@@ -121,8 +121,8 @@ public class TrackServiceIT {
 		assertNotEquals(list.get(0).getHash(), newTrack.getHash());
 		assertEquals(list.get(0).getPlays(), newTrack.getPlays());
 		assertEquals(list.get(0).getSkips(), newTrack.getSkips());
-		List<Track> tracks = trackService.listAll();
-		assertEquals(1, tracks.size());
+		assertEquals(1, trackService.list().size());
+		assertEquals(0, trackService.listDeleted().size());
 		assertFalse(newTrack.getLocation().contains(seededMusicLibrary.getSubfolder()));
 	}
 
@@ -275,7 +275,7 @@ public class TrackServiceIT {
         List<Track> list = trackService.list();
         assertTrue(list.isEmpty());
 
-        list = trackService.listAll();
+        list = trackService.listDeleted();
         assertEquals(1, list.size());
         doTrackAssertions(false, track, list.get(0));
     }

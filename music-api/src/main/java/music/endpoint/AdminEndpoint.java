@@ -13,6 +13,7 @@ import org.jaudiotagger.tag.TagException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -50,25 +51,47 @@ public class AdminEndpoint {
 		return trackService.countPurgableTracks();
 	}
 
+	@GetMapping("/purge")
+	public List<Track> listPurgableTracks() {
+    	return trackService.listPurgableTracks();
+	}
+
     /**
      * Find all tracks marked deleted in the database and delete those tracks from the file system.
      */
     @DeleteMapping("/purge")
-    public List<Track> purgeDeletedTracks() throws IOException {
-        logger.info("Purging deleted files from disk.");
-        List<Track> allTracks = trackService.listAll();
-        List<Track> deleted = new ArrayList<>();
-        if (allTracks != null) {
-            for (Track track : allTracks) {
-                if (track.getDeletedInd()) {
-                    trackService.permanentlyDelete(track);
-                    deleted.add(track);
-                }
-            }
-        }
-        logger.info(String.format("Deleted %s tracks from the file system.", deleted.size()));
-        return deleted;
+    public List<Track> purgeDeletedTracks(@RequestBody(required = false) List<Long> tracksToDelete) {
+    	List<Track> deleted;
+    	if (CollectionUtils.isEmpty(tracksToDelete)) {
+			logger.info("Purging all deleted files from disk.");
+			List<Track> allTracks = trackService.listDeleted();
+			deleted = doPurge(allTracks);
+		} else {
+    		logger.info("Purging tracks {} from disk.", tracksToDelete);
+    		List<Track> tracks = new ArrayList<>(tracksToDelete.size());
+			for (Long id : tracksToDelete) {
+				tracks.add(trackService.get(id));
+			}
+			deleted = doPurge(tracks);
+		}
+		logger.info("Deleted {} tracks from the file system.", deleted.size());
+		return deleted;
     }
+
+    private List<Track> doPurge(List<Track> tracksToDelete) {
+		List<Track> deleted = new ArrayList<>();
+		if (tracksToDelete != null) {
+			for (Track track : tracksToDelete) {
+				if (track.getDeletedInd()) {
+					trackService.permanentlyDelete(track);
+					deleted.add(track);
+				} else {
+					logger.warn("Track {} is not marked as deleted, but was attempted to be purged. No action taken.", track.getId());
+				}
+			}
+		}
+		return deleted;
+	}
 
     @PostMapping("/update")
     public void applyUpdatesToSongs(){
