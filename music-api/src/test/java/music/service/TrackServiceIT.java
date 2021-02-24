@@ -175,11 +175,14 @@ public class TrackServiceIT {
         Track track = trackService.list().get(0);
 
         assertEquals(0, track.getPlays());
+        assertNull(track.getLastPlayedDate());
 
         trackService.markListened(track.getId(), device.getId());
 
         track = trackService.list().get(0);
         assertEquals(1, track.getPlays());
+        assertNotNull(track.getLastPlayedDate());
+        assertTrue(org.apache.commons.lang3.time.DateUtils.isSameDay(track.getLastPlayedDate(), new Date()));
 
         List<Date> historicalDates = trackService.listHistoricalDates();
         assertEquals(1, historicalDates.size());

@@ -104,6 +104,11 @@
         , t.datecreated
         , t.dateupdated
         , t.filelastmodifieddate
+    	, (
+			SELECT max(p.playdate)
+			FROM music.plays p
+			WHERE p.songid = t.id
+		) AS lastplayeddate
 		, l.id as libraryId
 		, l.name as libraryName
 		, l.subfolder as librarySubFolder

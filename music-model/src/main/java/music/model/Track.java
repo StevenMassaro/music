@@ -55,6 +55,7 @@ public class Track implements Diffable<Track> {
     private Date dateCreated;
     private Date dateUpdated;
     private Date fileLastModifiedDate;
+    private Date lastPlayedDate;
     @JsonIgnore
     private Library library;
 
@@ -261,6 +262,14 @@ public class Track implements Diffable<Track> {
         this.fileLastModifiedDate = fileLastModifiedDate;
     }
 
+	public Date getLastPlayedDate() {
+		return lastPlayedDate;
+	}
+
+	public void setLastPlayedDate(Date lastPlayedDate) {
+		this.lastPlayedDate = lastPlayedDate;
+	}
+
 	public long getSkips() {
 		return skips;
 	}
@@ -296,6 +305,7 @@ public class Track implements Diffable<Track> {
                 ", dateCreated=" + dateCreated +
                 ", dateUpdated=" + dateUpdated +
                 ", fileLastModifiedDate=" + fileLastModifiedDate +
+                ", lastPlayedDate=" + lastPlayedDate +
                 '}';
     }
 
