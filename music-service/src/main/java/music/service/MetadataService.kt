@@ -70,9 +70,9 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 		* directory for some reason, so if we remove it and the string no longer starts with a slash, add one
 		*/
 		var location = file.absolutePath
-			.replace(privateSettings.localMusicFileLocation!!, "")
+			.replaceFirst(privateSettings.localMusicFileLocation!!, "")
 			.replaceFirst(File.separator, "")
-			.replace(library.subfolder, "")
+			.replaceFirst(library.subfolder, "")
 		if (!location.startsWith(File.separator)) {
 			location = File.separator + location
 		}
