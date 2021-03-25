@@ -47,13 +47,16 @@ public class Track implements Diffable<Track> {
 	@Max(10)
     private Byte rating;
     private String comment;
+    @JsonIgnore
     private boolean deletedInd = false;
     private long bitrate;
     private String encoding;
     private int sampleRate;
     private int duration;
     private Date dateCreated;
+    @JsonIgnore
     private Date dateUpdated;
+    @JsonIgnore
     private Date fileLastModifiedDate;
     private Date lastPlayedDate;
     @JsonIgnore
