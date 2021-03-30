@@ -319,15 +319,13 @@ public class TrackService {
      * Mark the track deleted in the database. Does not actually delete the file from the file system.
      */
     public Track markDeleted(long id){
-        Track track = get(id);
         trackMapper.markDeletedById(id, true);
-        return track;
+        return get(id);
     }
 
     public Track markListened(long id, long deviceId){
-        Track track = get(id);
         playMapper.insertPlay(id, new Date(), deviceId, false);
-        return track;
+        return get(id);
     }
 
     /**
@@ -362,7 +360,7 @@ public class TrackService {
 				" exceeds the duration of the track, thus it can be assumed that the entire track was played.");
 		} else {
 			skipMapper.insertSkip(id, new Date(), deviceId, false, secondsPlayed);
-			return track;
+			return get(id);
 		}
 	}
 }
