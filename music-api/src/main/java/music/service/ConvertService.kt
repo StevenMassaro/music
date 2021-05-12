@@ -28,6 +28,32 @@ class ConvertService {
 	@Autowired
 	private lateinit var privateSettings: PrivateSettings
 
+	fun reduceFlacFileSize(track: Track) {
+		// confirm that file is actually a flac
+		track.extension.equals("flac", true);
+
+		// confirm that track hasn't already been converted to level 12
+
+		// convert orig file to flac compression level 12
+		// https://askubuntu.com/a/758299
+		//		ffmpeg -i input.wav -c:a flac -compression_level 12 output.flac
+
+		// convert orig file to wav
+		//		ffmpeg -i orig.flac orig.wav
+
+		// convert compressed-12 file to wav
+		// 		ffmpeg -i output.flac output.wav
+
+		// compare hashes of two wav files (note that this conversion to wav will go to a max of 16 bits, so 24 bit files get dropped down to 16)
+		// https://superuser.com/a/532223
+		//		ffmpeg -loglevel error -i FILE -map 0 -f hash -
+
+		// if they match
+		// delete wav files
+		// replace original file with newly compressed one
+		// mark track as converted to flac type 12
+	}
+
 	fun convertFile(device: Device, track: Track): ByteArray? {
 		try {
 			logger.trace("Converting {}", track.libraryPath)

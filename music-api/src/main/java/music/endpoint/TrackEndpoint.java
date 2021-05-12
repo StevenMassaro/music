@@ -135,6 +135,12 @@ public class TrackEndpoint {
 		}
     }
 
+    @PostMapping("/{id}/convertAndReplace")
+	public void convertAndReplace(@PathVariable long id) {
+    	Track track = trackService.get(id);
+    	convertService.reduceFlacFileSize(track);
+	}
+
     @PostMapping("/upload")
 	public Track uploadTrack(@RequestParam MultipartFile file,
 							 @RequestParam(required = false) Long existingId,
