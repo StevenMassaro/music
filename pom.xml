@@ -6,7 +6,7 @@
 
     <groupId>com.massaro</groupId>
     <artifactId>Music</artifactId>
-	<version>1.14.01</version>
+	<version>1.14.02-flac</version>
     <modules>
         <module>music-model</module>
         <module>music-api</module>
@@ -60,27 +60,27 @@
             <dependency>
                 <groupId>com.massaro</groupId>
                 <artifactId>music-model</artifactId>
-				<version>1.14.01</version>
+				<version>1.14.02-flac</version>
 			</dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-settings</artifactId>
-				<version>1.14.01</version>
+				<version>1.14.02-flac</version>
             </dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-api</artifactId>
-				<version>1.14.01</version>
+				<version>1.14.02-flac</version>
 			</dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-service</artifactId>
-				<version>1.14.01</version>
+				<version>1.14.02-flac</version>
 			</dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-utils</artifactId>
-				<version>1.14.01</version>
+				<version>1.14.02-flac</version>
 			</dependency>
             <dependency>
                 <groupId>org</groupId>
