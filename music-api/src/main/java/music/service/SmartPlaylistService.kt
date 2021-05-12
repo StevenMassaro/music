@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class SmartPlaylistService @Autowired constructor(val playlistMapper: PlaylistMapper){
 
 	fun insert(name: String, dynamicSql: String) {
-		assertSafeSql(dynamicSql, "drop", "select", "delete", "truncate", "insert", "--", ";")
+		assertSafeSql(dynamicSql, "drop", "select", "delete", "update", "truncate", "insert", "--", ";")
 		playlistMapper.insertSmartPlaylist(name, dynamicSql)
 	}
 
