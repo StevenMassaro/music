@@ -37,6 +37,13 @@
 		WHERE ${dynamicSql}
 	</select>
 
+	<select id="listWithPlaylist" resultMap="trackResultMap">
+		SELECT tracks.* FROM (<include refid="listSql"></include>) AS tracks
+		INNER JOIN music.playlisttrack pt ON pt.trackid = tracks.trackId
+		WHERE tracks.trackId IN (SELECT trackId FROM music.playlisttrack pt WHERE pt.playlistId = #{playlistId})
+		ORDER BY pt.sequenceid
+	</select>
+
 	<sql id="listSql">
 		<include refid="selectColumns"/>
 		WHERE deletedInd != true

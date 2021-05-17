@@ -69,9 +69,12 @@ public class TrackEndpoint {
 
     @GetMapping
 	public List<Track> list(@RequestParam(required = false, name = "smartPlaylist") Long smartPlaylistId,
+							@RequestParam(required = false) Long playlist,
 							@RequestParam(required = false) Long libraryId) {
 		if (smartPlaylistId != null) {
 			return trackService.listWithSmartPlaylist(smartPlaylistId);
+		} else if (playlist != null) {
+			return trackService.listWithPlaylist(playlist);
 		} else {
 			return trackService.list(libraryId);
 		}

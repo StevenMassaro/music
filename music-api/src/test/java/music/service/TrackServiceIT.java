@@ -24,6 +24,7 @@ import org.testcontainers.shaded.org.apache.commons.lang.time.DateUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -55,6 +56,9 @@ public class TrackServiceIT {
 	@Autowired
 	private PlayMapper playMapper;
 
+	@Autowired
+	private PlaylistService playlistService;
+
     private File tempFile;
     private File tempFile2;
 
@@ -73,7 +77,7 @@ public class TrackServiceIT {
     	tempFile2 = createTempFile("sample2.flac");
     }
 
-    private File createTempFile(String filename) throws IOException {
+    public static File createTempFile(String filename) throws IOException {
 		String extension = "." + FilenameUtils.getExtension(filename);
 		File dir = new File(System.getProperty("java.io.tmpdir"), seededMusicLibrary.getSubfolder());
 		dir.mkdirs();
@@ -347,5 +351,32 @@ public class TrackServiceIT {
 
 		tracks = trackService.listWithSmartPlaylist(playlists.get(1).getId());
 		assertTrue(tracks.isEmpty());
+	}
+
+	@Test
+	public void testListingTracksInPlaylist() {
+		List<DeferredTrack> fauxtracks = new ArrayList<>(2);
+		fauxtracks.add(track(tempFile.getName()));
+		fauxtracks.add(track(tempFile2.getName()));
+		trackService.upsertTracks(fauxtracks, new SyncResult());
+		List<Track> tracks = trackService.list();
+		assertEquals(2, tracks.size());
+
+		Playlist playlist = playlistService.create("newone");
+		playlistService.addTrack(playlist.getId(), tracks.get(0).getId());
+		playlistService.addTrack(playlist.getId(), tracks.get(1).getId());
+
+		List<Track> playlistTracks = trackService.listWithPlaylist(playlist.getId());
+		assertEquals(2, playlistTracks.size());
+		assertEquals(tracks.get(0).getId(), playlistTracks.get(0).getId());
+		assertEquals(tracks.get(1).getId(), playlistTracks.get(1).getId());
+		assertTrue(playlist.getTrackIds().get(0).getSequenceId() < playlist.getTrackIds().get(1).getSequenceId());
+
+		// confirm that when deleting a track, it is also removed from the playlist
+		trackService.permanentlyDelete(tracks.get(1));
+
+		playlistTracks = trackService.listWithPlaylist(playlist.getId());
+		assertEquals(1, playlistTracks.size());
+		assertEquals(tracks.get(0).getId(), playlistTracks.get(0).getId());
 	}
 }

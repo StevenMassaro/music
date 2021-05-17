@@ -161,6 +161,10 @@ public class TrackService {
     	return trackMapper.listWithSmartPlaylist(smartPlaylist.getDynamicSql());
 	}
 
+	public List<Track> listWithPlaylist(Long playlistId) {
+		return trackMapper.listWithPlaylist(playlistId);
+	}
+
 	/**
 	 * Return the count of tracks that can be purged from the file system (or in other words, they were marked deleted
 	 * in the database).
