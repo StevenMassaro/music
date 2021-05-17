@@ -1,6 +1,6 @@
 package music.repository
 
 import music.model.Playlist
-import org.springframework.data.repository.CrudRepository
+import org.springframework.data.jpa.repository.JpaRepository
 
-interface IPlaylistRepository : CrudRepository<Playlist, Long>
+interface IPlaylistRepository : JpaRepository<Playlist, Long>

@@ -4,6 +4,7 @@ import music.model.Playlist
 import music.model.PlaylistTrack
 import music.repository.IPlaylistRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -13,7 +14,7 @@ class PlaylistService {
 	@Autowired
 	private lateinit var playlistRepository: IPlaylistRepository
 
-	fun list() : List<Playlist> = playlistRepository.findAll().toList();
+	fun list() : List<Playlist> = playlistRepository.findAll(Sort.by(Playlist::name.name)).toList();
 
 	fun create(name:String) : Playlist = playlistRepository.save(Playlist(null, name))
 
