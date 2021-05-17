@@ -21,7 +21,9 @@ class PlaylistService {
 
 	fun addTrack(id: Long, trackId: Long): Playlist {
 		val playlist = getById(id).get();
-		playlist.trackIds.add(PlaylistTrack(id, trackId, null, Date()))
+		val modDate = Date()
+		playlist.trackIds.add(PlaylistTrack(id, trackId, null, modDate))
+		playlist.dateUpdated = modDate
 		return playlistRepository.save(playlist)
 	}
 }
