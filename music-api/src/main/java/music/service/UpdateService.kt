@@ -1,18 +1,20 @@
 package music.service
 
-import music.mapper.UpdateMapper
 import music.model.ModifyableTags
 import music.model.TrackUpdate
+import music.repository.IUpdateRepository
 import org.jaudiotagger.tag.FieldKey
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
+import kotlin.collections.HashMap
 
 @Service
 class UpdateService @Autowired constructor(
-	private val updateMapper: UpdateMapper,
 	private val metadataService: MetadataService,
-	private val convertService: ConvertService
+	private val convertService: ConvertService,
+	private val updateRepository: IUpdateRepository
 ) {
 	private val logger = LoggerFactory.getLogger(UpdateService::class.java)
 
@@ -26,7 +28,14 @@ class UpdateService @Autowired constructor(
      */
     fun queueTrackUpdate(id: Long, field: String, newValue: String) {
         requireNotNull(ModifyableTags.values().find { it.propertyName == field }, { "Supplied field $field is not modifyable." })
-        updateMapper.insertUpdate(id, field, newValue)
+		val trackUpdate: Optional<TrackUpdate> = updateRepository.findBySongIdAndField(id, field)
+		if (trackUpdate.isPresent) {
+			val newUpdate = trackUpdate.get();
+			newUpdate.newValue = newValue
+			updateRepository.saveAndFlush(newUpdate)
+		} else {
+			updateRepository.saveAndFlush(TrackUpdate(null, id, field, newValue, 1))
+		}
     }
 
     /**
@@ -34,7 +43,7 @@ class UpdateService @Autowired constructor(
      */
     private fun list(): Map<Long, List<TrackUpdate>> {
         val updates: MutableMap<Long, MutableList<TrackUpdate>> = HashMap()
-        val dbUpdates = updateMapper.list();
+        val dbUpdates = updateRepository.findAll()
 
         for (dbupdate in dbUpdates) {
             val existing = updates.getOrDefault(dbupdate.songId, mutableListOf())
@@ -47,8 +56,8 @@ class UpdateService @Autowired constructor(
 	/**
 	 * Delete a queued track update by the [id] of the particular update (not the track ID).
 	 */
-	fun deleteUpdateById(id: Long) {
-		updateMapper.deleteById(id)
+	private fun deleteUpdateById(id: Long) {
+		updateRepository.deleteById(id)
 		logger.debug("Deleted queued track update (ID: {})", id)
 	}
 
@@ -56,7 +65,7 @@ class UpdateService @Autowired constructor(
 	 * Delete a queued track update by the [songId] of the particular update.
 	 */
 	fun deleteUpdateBySongId(songId: Long) {
-		updateMapper.deleteByTrackId(songId)
+		updateRepository.deleteBySongId(songId)
 		logger.debug("Deleted queued track update (Song ID: {})", songId)
 	}
 
@@ -74,7 +83,7 @@ class UpdateService @Autowired constructor(
 					try {
 						logger.trace("Applying update to disk: {}", it.toString())
 						metadataService.updateTrackField(track, FieldKey.valueOf(it.field.toUpperCase()), it.newValue)
-						deleteUpdateById(it.id)
+						deleteUpdateById(it.id!!)
 
 						logger.trace("Updating field {} to {} for ID: {}", it.field, it.newValue, id)
 						trackService.updateField(id, it.field, it.newValue, ModifyableTags.valueOf(it.field.toUpperCase()).sqlType);
@@ -94,6 +103,6 @@ class UpdateService @Autowired constructor(
 	 * Count how many updates are queued.
 	 */
 	fun count(): Long {
-		return updateMapper.count()
+		return updateRepository.count()
 	}
 }

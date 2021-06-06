@@ -4,28 +4,14 @@ import music.exception.RatingRangeException;
 import music.mapper.PlayMapper;
 import music.model.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.shaded.org.apache.commons.lang.time.DateUtils;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -34,13 +20,7 @@ import static music.helper.BuilderKt.doTrackAssertions;
 import static music.helper.BuilderKt.track;
 import static org.junit.Assert.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@Transactional
-@ContextConfiguration(initializers = TrackServiceIT.MusicPropertiesInitializer.class)
-public class TrackServiceIT {
-
-	public static final Library seededMusicLibrary = new Library(1, "Music", "Music");
+public class TrackServiceIT extends IntegrationTestBase {
 
     @Autowired
     private TrackService trackService;
@@ -60,43 +40,9 @@ public class TrackServiceIT {
 	@Autowired
 	private PlaylistService playlistService;
 
-    private File tempFile;
-    private File tempFile2;
-
-	public static class MusicPropertiesInitializer
-		implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-		@Override
-		public void initialize(ConfigurableApplicationContext applicationContext) {
-			TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext,
-				"music.file.source=" + System.getProperty("java.io.tmpdir").replace("\\", "\\\\"));
-		}
-	}
-    @Before
-    public void before() throws IOException {
-    	tempFile = createTempFile("sample1.flac");
-    	tempFile2 = createTempFile("sample2.flac");
-    }
-
-    public static File createTempFile(String filename) throws IOException {
-		String extension = "." + FilenameUtils.getExtension(filename);
-		File dir = new File(System.getProperty("java.io.tmpdir"), seededMusicLibrary.getSubfolder());
-		dir.mkdirs();
-		File f = File.createTempFile(filename.replace(extension, ""), extension, dir);
-		FileUtils.copyFile(ResourceUtils.getFile("classpath:" + filename), f);
-		f.deleteOnExit();
-		return f;
-	}
-
-    @After
-    public void after() {
-        FileUtils.deleteQuietly(tempFile);
-    }
-
     @Test
     public void addingTracks() throws IOException {
-        DeferredTrack track = track(tempFile.getName());
-        trackService.upsertTracks(Collections.singletonList(track), new SyncResult());
+        Track track = insertTempFile();
 
         List<Track> list = trackService.list();
         assertEquals(1, list.size());
@@ -105,8 +51,7 @@ public class TrackServiceIT {
 
     @Test
 	public void replacingTrack() throws Exception {
-		DeferredTrack track = track(tempFile.getName());
-		trackService.upsertTracks(Collections.singletonList(track), new SyncResult());
+		Track track = insertTempFile();
 
 		List<Track> list = trackService.list();
 		assertEquals(1, list.size());
@@ -133,15 +78,11 @@ public class TrackServiceIT {
 
 	@Test
 	public void listingTracksByAlbum() throws IOException {
-		DeferredTrack track = track(tempFile.getName());
-		SyncResult syncResult = new SyncResult();
-		trackService.upsertTracks(Collections.singletonList(track), syncResult);
+		Track track = insertTempFile();
 		String newAlbum = "newwwalbum";
-		List<Track> list = trackService.listByAlbum("album", track.getArtist(), track.getDisc_no());
-		assertEquals(1, list.size());
 
-		updateService.queueTrackUpdate(syncResult.getNewTracks().get(0).getId(), ModifyableTags.ALBUM.getPropertyName(), newAlbum);
-		list = trackService.listByAlbum(newAlbum, track.getArtist(), track.getDisc_no());
+		updateService.queueTrackUpdate(track.getId(), ModifyableTags.ALBUM.getPropertyName(), newAlbum);
+		List<Track> list = trackService.listByAlbum(newAlbum, track.getArtist(), track.getDisc_no());
 		assertEquals(1, list.size());
 		track.setAlbum(newAlbum); // need to update the baseline with the new album value or the comparison will fail
 		doTrackAssertions(false, track, list.get(0));
@@ -182,8 +123,7 @@ public class TrackServiceIT {
         // first create a device with which to associate the plays
         Device device = deviceService.getOrInsert("devname");
 
-        trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult());
-        Track track = trackService.list().get(0);
+		Track track = insertTempFile();
 
         assertEquals(0, track.getPlays());
         assertNull(track.getLastPlayedDate());
@@ -214,8 +154,7 @@ public class TrackServiceIT {
 		// first create a device with which to associate the plays
 		Device device = deviceService.getOrInsert("devname");
 
-		trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult());
-		Track track = trackService.list().get(0);
+		Track track = insertTempFile();
 
 		assertEquals(0, track.getPlays());
 
@@ -232,8 +171,7 @@ public class TrackServiceIT {
 	public void skippedTrack() throws Exception {
 		Device device = deviceService.getOrInsert("devname");
 
-		trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult());
-		Track track = trackService.list().get(0);
+		Track track = insertTempFile();
 
 		assertEquals(0, track.getSkips());
 
@@ -247,8 +185,7 @@ public class TrackServiceIT {
 	public void skippedTrack_ExceptionThrownWhenSecondsPlayedEqualsTrackDuration() {
 		Device device = deviceService.getOrInsert("devname");
 
-		trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult());
-		Track track = trackService.list().get(0);
+		Track track = insertTempFile();
 
 		assertEquals(0, track.getSkips());
 
@@ -263,8 +200,7 @@ public class TrackServiceIT {
 	public void skippedTrack_NullSecondsPlayed() throws Exception {
 		Device device = deviceService.getOrInsert("devname");
 
-		trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult());
-		Track track = trackService.list().get(0);
+		Track track = insertTempFile();
 
 		assertEquals(0, track.getSkips());
 
@@ -276,8 +212,7 @@ public class TrackServiceIT {
 
     @Test
     public void deletedTrack() throws IOException {
-        trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult());
-        Track track = trackService.list().get(0);
+		Track track = insertTempFile();
 
         assertFalse(track.getDeletedInd());
 
@@ -296,8 +231,7 @@ public class TrackServiceIT {
 
     @Test
     public void ratingTrack() throws RatingRangeException {
-        trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult());
-        Track track = trackService.list().get(0);
+		Track track = insertTempFile();
 
         assertNull(track.getRating());
 
@@ -310,8 +244,7 @@ public class TrackServiceIT {
 
     @Test
     public void testListingTrackWithUpdates(){
-        trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult());
-        Track track = trackService.list().get(0);
+		Track track = insertTempFile();
 
         String field = ModifyableTags.ALBUM.getPropertyName();
         String newVal = "fart";
@@ -324,8 +257,7 @@ public class TrackServiceIT {
 
     @Test
     public void testListingTrackWithTwoUpdates(){
-        trackService.upsertTracks(Collections.singletonList(track(tempFile.getName())), new SyncResult());
-        Track track = trackService.list().get(0);
+		Track track = insertTempFile();
 
         String field = ModifyableTags.ALBUM.getPropertyName();
         String newVal = "fart";
@@ -339,8 +271,7 @@ public class TrackServiceIT {
 
 	@Test
 	public void testSmartPlaylist() throws IOException {
-		List<DeferredTrack> fauxtracks = Collections.singletonList(track(tempFile.getName()));
-		trackService.upsertTracks(fauxtracks, new SyncResult());
+		Track track = insertTempFile();
 
 		String name = "test";
 		String sql = "CAST(year AS int) > 1990";
@@ -349,7 +280,7 @@ public class TrackServiceIT {
 
 		List<Track> tracks = trackService.listWithSmartPlaylist(playlists.get(0).getId());
 		assertEquals(1, tracks.size());
-		doTrackAssertions(false, fauxtracks.get(0), tracks.get(0));
+		doTrackAssertions(false, track, tracks.get(0));
 
 		name = "test2";
 		sql = "CAST(year AS int) < 1990";
@@ -362,10 +293,8 @@ public class TrackServiceIT {
 
 	@Test
 	public void testListingTracksInPlaylist() {
-		List<DeferredTrack> fauxtracks = new ArrayList<>(2);
-		fauxtracks.add(track(tempFile.getName()));
-		fauxtracks.add(track(tempFile2.getName()));
-		trackService.upsertTracks(fauxtracks, new SyncResult());
+		insertTempFile();
+		insertTempFile2();
 		List<Track> tracks = trackService.list();
 		assertEquals(2, tracks.size());
 
@@ -389,10 +318,8 @@ public class TrackServiceIT {
 
 	@Test
 	public void testListingTracksWithUpdates() {
-		List<DeferredTrack> fauxtracks = new ArrayList<>(1);
-		fauxtracks.add(track(tempFile.getName()));
-		trackService.upsertTracks(fauxtracks, new SyncResult());
-		long trackId = trackService.list().get(0).getId();
+		Track track = insertTempFile();
+		long trackId = track.getId();
 
 		String newAlbum = "newalbum";
 		long newTrack = 12903;
@@ -416,7 +343,7 @@ public class TrackServiceIT {
 
 		Assert.assertEquals(9, updateService.count());
 
-		Track track = trackService.get(trackId);
+		track = trackService.get(trackId);
 		Assert.assertEquals(newAlbum, track.getAlbum());
 		Assert.assertEquals((Long) newTrack, track.getTrack());
 		Assert.assertEquals(newAlbumArtist, track.getAlbum_artist());
