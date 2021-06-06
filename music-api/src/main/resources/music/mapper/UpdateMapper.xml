@@ -5,7 +5,9 @@
 <mapper namespace="music.mapper.UpdateMapper">
     <insert id="insertUpdate">
         INSERT INTO music.trackupdates (songid, field, newvalue, updatetype)
-        VALUES(#{songId}, #{field}, #{newValue}, 1);
+        VALUES(#{songId}, #{field}, #{newValue}, 1)
+        ON CONFLICT (songid, field)
+		DO UPDATE SET newvalue = #{newValue}
     </insert>
 
     <select id="listByTrackId" resultMap="trackUpdateResultMap">
