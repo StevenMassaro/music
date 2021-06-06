@@ -30,7 +30,7 @@ import static music.utils.FieldUtils.calculateHash;
 
 @Service
 public class TrackService {
-    private Logger logger = LoggerFactory.getLogger(TrackService.class);
+    private static final Logger logger = LoggerFactory.getLogger(TrackService.class);
 
     private final TrackMapper trackMapper;
     private final PlayMapper playMapper;
@@ -118,7 +118,7 @@ public class TrackService {
     }
 
     public List<Track> list() {
-    	return updateService.applyUpdates(trackMapper.list());
+    	return trackMapper.list();
 	}
 
     /**
@@ -126,17 +126,15 @@ public class TrackService {
 	 * @param libraryId only tracks in this library will be returned. If null, all tracks will be returned.
      */
     public List<Track> list(Long libraryId){
-		List<Track> list = null;
 		if (libraryId == null) {
-			list = trackMapper.list();
+			return trackMapper.list();
 		} else {
-			list = trackMapper.listByLibraryId(libraryId);
+			return trackMapper.listByLibraryId(libraryId);
 		}
-        return updateService.applyUpdates(list);
-    }
+	}
 
     public List<Track> listByAlbum(String album, String artist, Long disc){
-    	return updateService.applyUpdates(trackMapper.listByAlbum(album, artist, disc));
+    	return trackMapper.listByAlbum(album, artist, disc);
 	}
 
     /**
@@ -144,7 +142,7 @@ public class TrackService {
      * that are queued.
      */
     public List<Track> listDeleted(){
-        return updateService.applyUpdates(trackMapper.listDeleted());
+        return trackMapper.listDeleted();
     }
 
 	/**
@@ -153,7 +151,7 @@ public class TrackService {
 	 * @param libraryId only tracks in this library will be returned
 	 */
     public List<Track> listDeleted(long libraryId){
-        return updateService.applyUpdates(trackMapper.listDeletedByLibraryId(libraryId));
+        return trackMapper.listDeletedByLibraryId(libraryId);
     }
 
     public List<Track> listWithSmartPlaylist(long playlistId) {
@@ -182,11 +180,11 @@ public class TrackService {
     public List<Date> listHistoricalDates(){ return trackMapper.listHistoricalDates(); }
 
     private Track getByLocationAndLibrary(String location, long libraryId) {
-        return updateService.applyUpdates(trackMapper.getByLocationAndLibrary(location, libraryId));
+        return trackMapper.getByLocationAndLibrary(location, libraryId);
     }
 
     public Track get(long id){
-        return updateService.applyUpdates(trackMapper.get(id));
+        return trackMapper.get(id);
     }
 
     public Track get(String title, String artist, String album, List<Track> trackCache) {

@@ -9,27 +9,27 @@
     </select>
 
     <select id="listByLibraryId" resultMap="trackResultMap">
-		<include refid="selectColumns"/>
-		WHERE deletedInd != true
+		SELECT * FROM (<include refid="selectColumns"/>) t
+		WHERE t.deletedInd != true
 		<if test="libraryId != null">
-			AND libraryId = #{libraryId}
+			AND t.libraryId = #{libraryId}
 		</if>
-		ORDER BY artist,album,disc_no,track
+		ORDER BY t.artist, t.album, t.disc_no, t.track
     </select>
 
     <select id="listDeleted" resultMap="trackResultMap">
-        <include refid="selectColumns"/>
-		WHERE deletedInd = true
-        ORDER BY artist,album,disc_no,track
+        SELECT * FROM (<include refid="selectColumns"/>) t
+		WHERE t.deletedInd = true
+        ORDER BY t.artist, t.album, t.disc_no, t.track
     </select>
 
     <select id="listDeletedByLibraryId" resultMap="trackResultMap">
-        <include refid="selectColumns"/>
-		WHERE deletedInd = true
+        SELECT * FROM (<include refid="selectColumns"/>) t
+		WHERE t.deletedInd = true
 		<if test="libraryId != null">
-			AND libraryId = #{libraryId}
+			AND t.libraryId = #{libraryId}
 		</if>
-        ORDER BY artist,album,disc_no,track
+        ORDER BY t.artist, t.album, t.disc_no, t.track
     </select>
 
 	<select id="listWithSmartPlaylist" resultMap="trackResultMap">
@@ -45,9 +45,9 @@
 	</select>
 
 	<sql id="listSql">
-		<include refid="selectColumns"/>
-		WHERE deletedInd != true
-		ORDER BY artist,album,disc_no,track
+		SELECT * FROM (<include refid="selectColumns"/>) t
+		WHERE t.deletedInd != true
+		ORDER BY t.artist, t.album, t.disc_no, t.track
 	</sql>
 
 	<select id="countPurgableTracks" resultType="long">
@@ -70,7 +70,7 @@
 	</select>
 
 	<select id="listByAlbum" resultMap="trackResultMap">
-		<include refid="selectColumns"/>
+		SELECT * FROM (<include refid="selectColumns"/>) t
 		WHERE t.album = #{album}
 		AND t.artist = #{artist}
 		<if test="disc == null">
@@ -91,18 +91,18 @@
     <sql id="selectColumns">
         SELECT
 		t.id as trackId
-        , t.title
+		, COALESCE(tu_title.newvalue, t.title) AS title
         , t."location"
         , t.hash
-        , t.album
-        , t.artist
-        , t.album_artist
-        , t.genre
-        , t."year"
-        , t.disc_no
-        , t.track
+        , COALESCE(tu_album.newvalue, t.album) AS album
+        , COALESCE(tu_artist.newvalue, t.artist) AS artist
+        , COALESCE(tu_album_artist.newvalue, t.album_artist) AS album_artist
+        , COALESCE(tu_genre.newvalue, t.genre) AS genre
+        , COALESCE(tu_year.newvalue, t."year") AS "year"
+        , COALESCE(CAST(tu_disc_no.newvalue AS int), t.disc_no) AS disc_no
+        , COALESCE(CAST(tu_track.newvalue AS int), t.track) AS track
         , t.rating
-        , t."comment"
+        , COALESCE(tu_comment.newvalue, t."comment") AS "comment"
         , t.deletedind
         , t.bitrate
         , t.encoding
@@ -150,6 +150,15 @@
 	<sql id="selectJoin">
 		FROM music.track t
 		INNER JOIN music.library l ON t.libraryId = l.id
+		LEFT OUTER JOIN music.trackupdates tu_title ON t.id = tu_title.songid AND tu_title.field = 'title'
+		LEFT OUTER JOIN music.trackupdates tu_album ON t.id = tu_album.songid AND tu_album.field = 'album'
+		LEFT OUTER JOIN music.trackupdates tu_artist ON t.id = tu_artist.songid AND tu_artist.field = 'artist'
+		LEFT OUTER JOIN music.trackupdates tu_album_artist ON t.id = tu_album_artist.songid AND tu_album_artist.field = 'album_artist'
+		LEFT OUTER JOIN music.trackupdates tu_genre ON t.id = tu_genre.songid AND tu_genre.field = 'genre'
+		LEFT OUTER JOIN music.trackupdates tu_year ON t.id = tu_year.songid AND tu_year.field = 'year'
+		LEFT OUTER JOIN music.trackupdates tu_disc_no ON t.id = tu_disc_no.songid AND tu_disc_no.field = 'disc_no'
+		LEFT OUTER JOIN music.trackupdates tu_track ON t.id = tu_track.songid AND tu_track.field = 'track'
+		LEFT OUTER JOIN music.trackupdates tu_comment ON t.id = tu_comment.songid AND tu_comment.field = 'comment'
 	</sql>
 
     <select id="get" resultMap="trackResultMap">

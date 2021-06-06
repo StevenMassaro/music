@@ -1,21 +1,17 @@
 package music.service
 
 import music.mapper.UpdateMapper
-import music.model.HtmlType
 import music.model.ModifyableTags
-import music.model.Track
 import music.model.TrackUpdate
 import org.jaudiotagger.tag.FieldKey
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.util.ReflectionUtils
 
 @Service
 class UpdateService @Autowired constructor(
 	private val updateMapper: UpdateMapper,
 	private val metadataService: MetadataService,
-	private val fileService: FileService,
 	private val convertService: ConvertService
 ) {
 	private val logger = LoggerFactory.getLogger(UpdateService::class.java)
@@ -31,13 +27,6 @@ class UpdateService @Autowired constructor(
     fun queueTrackUpdate(id: Long, field: String, newValue: String) {
         requireNotNull(ModifyableTags.values().find { it.propertyName == field }, { "Supplied field $field is not modifyable." })
         updateMapper.insertUpdate(id, field, newValue)
-    }
-
-    /**
-     * List all the updates for a given song[id]
-     */
-    private fun listById(id: Long):List<TrackUpdate>{
-        return updateMapper.listByTrackId(id)
     }
 
     /**
@@ -107,51 +96,4 @@ class UpdateService @Autowired constructor(
 	fun count(): Long {
 		return updateMapper.count()
 	}
-
-    /**
-     * Apply updates to the provided [tracks]
-     */
-    fun applyUpdates(tracks: List<Track>): List<Track> {
-        val updates = list()
-
-        tracks.forEach { t ->
-            val trackUpdates = updates.getOrDefault(t.id, emptyList())
-            applyUpdates(t, trackUpdates)
-        }
-
-        return tracks
-    }
-
-    /**
-     * Apply updates to the provided [track]
-     */
-    fun applyUpdates(track: Track?): Track? {
-        if (track != null) {
-            applyUpdates(track, listById(track.id))
-        }
-        return track
-    }
-
-    /**
-     * Apply the provided [updates] to the [track]
-     */
-    private fun applyUpdates(track: Track?, updates: List<TrackUpdate>) {
-        if (track != null) {
-            for (trackUpdate in updates) {
-                // todo find the field using correct name
-                val field = ReflectionUtils.findField(Track::class.java, trackUpdate.field)
-                if (field != null) {
-					val tag = ModifyableTags.valueOf(trackUpdate.field.toUpperCase())
-					ReflectionUtils.makeAccessible(field)
-					if(tag.htmlType == HtmlType.number){
-						ReflectionUtils.setField(field, track, trackUpdate.newValue.toLong())
-					} else {
-						ReflectionUtils.setField(field, track, trackUpdate.newValue)
-					}
-                } else {
-                    logger.error(String.format("Failed to reflectively update field %s on track %s", trackUpdate.field, track.getId()))
-                }
-            }
-        }
-    }
 }

@@ -6,6 +6,7 @@ import music.model.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -133,13 +134,19 @@ public class TrackServiceIT {
 	@Test
 	public void listingTracksByAlbum() throws IOException {
 		DeferredTrack track = track(tempFile.getName());
-		trackService.upsertTracks(Collections.singletonList(track), new SyncResult());
-
+		SyncResult syncResult = new SyncResult();
+		trackService.upsertTracks(Collections.singletonList(track), syncResult);
+		String newAlbum = "newwwalbum";
 		List<Track> list = trackService.listByAlbum("album", track.getArtist(), track.getDisc_no());
 		assertEquals(1, list.size());
+
+		updateService.queueTrackUpdate(syncResult.getNewTracks().get(0).getId(), ModifyableTags.ALBUM.getPropertyName(), newAlbum);
+		list = trackService.listByAlbum(newAlbum, track.getArtist(), track.getDisc_no());
+		assertEquals(1, list.size());
+		track.setAlbum(newAlbum); // need to update the baseline with the new album value or the comparison will fail
 		doTrackAssertions(false, track, list.get(0));
 
-		list = trackService.listByAlbum("otherone", track.getArtist(), track.getDisc_no());
+		list = trackService.listByAlbum("album", track.getArtist(), track.getDisc_no());
 		assertEquals(0, list.size());
 	}
 
@@ -378,5 +385,46 @@ public class TrackServiceIT {
 		playlistTracks = trackService.listWithPlaylist(playlist.getId());
 		assertEquals(1, playlistTracks.size());
 		assertEquals(tracks.get(0).getId(), playlistTracks.get(0).getId());
+	}
+
+	@Test
+	public void testListingTracksWithUpdates() {
+		List<DeferredTrack> fauxtracks = new ArrayList<>(1);
+		fauxtracks.add(track(tempFile.getName()));
+		trackService.upsertTracks(fauxtracks, new SyncResult());
+		long trackId = trackService.list().get(0).getId();
+
+		String newAlbum = "newalbum";
+		long newTrack = 12903;
+		String newAlbumArtist = "newalbumartist";
+		String newArtist = "newartist";
+		String newComment = "newcomment";
+		long newDiscNo = 913082;
+		String newGenre = "newGenre";
+		String newTitle = "newTitle";
+		String newYear = "newyear";
+
+		updateService.queueTrackUpdate(trackId, ModifyableTags.ALBUM.getPropertyName(), newAlbum);
+		updateService.queueTrackUpdate(trackId, ModifyableTags.TRACK.getPropertyName(), String.valueOf(newTrack));
+		updateService.queueTrackUpdate(trackId, ModifyableTags.ALBUM_ARTIST.getPropertyName(), newAlbumArtist);
+		updateService.queueTrackUpdate(trackId, ModifyableTags.ARTIST.getPropertyName(), newArtist);
+		updateService.queueTrackUpdate(trackId, ModifyableTags.COMMENT.getPropertyName(), newComment);
+		updateService.queueTrackUpdate(trackId, ModifyableTags.DISC_NO.getPropertyName(), String.valueOf(newDiscNo));
+		updateService.queueTrackUpdate(trackId, ModifyableTags.GENRE.getPropertyName(), newGenre);
+		updateService.queueTrackUpdate(trackId, ModifyableTags.TITLE.getPropertyName(), newTitle);
+		updateService.queueTrackUpdate(trackId, ModifyableTags.YEAR.getPropertyName(), newYear);
+
+		Assert.assertEquals(9, updateService.count());
+
+		Track track = trackService.get(trackId);
+		Assert.assertEquals(newAlbum, track.getAlbum());
+		Assert.assertEquals((Long) newTrack, track.getTrack());
+		Assert.assertEquals(newAlbumArtist, track.getAlbum_artist());
+		Assert.assertEquals(newArtist, track.getArtist());
+		Assert.assertEquals(newComment, track.getComment());
+		Assert.assertEquals((Long) newDiscNo, track.getDisc_no());
+		Assert.assertEquals(newGenre, track.getGenre());
+		Assert.assertEquals(newTitle, track.getTitle());
+		Assert.assertEquals(newYear, track.getYear());
 	}
 }
