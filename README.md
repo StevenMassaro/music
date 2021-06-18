@@ -7,8 +7,9 @@ This is intended to be the single source of truth when using the associated musi
 I built this after not being able to find another music program that satisfied all of my requirements: ability to allow syncing to other devices (including other computers), single source metadata management (including on the fly play count updates), and no requirement to run on Windows (ahem MediaMonkey).
 
 ## Clients:
+- Docker: https://hub.docker.com/r/stevenmassaro/music-api
 - Web client: https://github.com/StevenMassaro/music-client
-- Android app: URL
+- Android app: URL TBD (currently not on GitHub)
 
 ## Features:
 - ID3 metadata management
