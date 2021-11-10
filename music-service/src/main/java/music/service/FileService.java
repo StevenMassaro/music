@@ -4,7 +4,6 @@ import music.model.DeferredTrack;
 import music.model.Library;
 import music.model.Track;
 import music.model.TrackNamePattern;
-import music.settings.PrivateSettings;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
@@ -13,6 +12,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,21 +21,23 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Objects;
 
 @Service
-public class FileService {
+public class FileService extends AbstractService {
 
-    private final PrivateSettings privateSettings;
+	@Value("${music.acceptable.file.extensions:}")
+	private String acceptableExtensions;
 
     private Logger logger = LoggerFactory.getLogger(FileService.class);
 
-    public FileService(PrivateSettings privateSettings) {
-        this.privateSettings = privateSettings;
-    }
+	@Value("${music.track.name.pattern:}")
+	private String trackNamePattern;
+
 
     public Collection<File> listMusicFiles(Library library) {
-        SuffixFileFilter caseInsensitiveExtensionFilter = new SuffixFileFilter(privateSettings.getAcceptableExtensions().split(","), IOCase.INSENSITIVE);
-        return FileUtils.listFiles(new File(privateSettings.getLocalMusicFileLocation(), library.getSubfolder()), caseInsensitiveExtensionFilter, TrueFileFilter.INSTANCE);
+        SuffixFileFilter caseInsensitiveExtensionFilter = new SuffixFileFilter(acceptableExtensions.split(","), IOCase.INSENSITIVE);
+        return FileUtils.listFiles(new File(Objects.requireNonNull(localMusicFileLocation), library.getSubfolder()), caseInsensitiveExtensionFilter, TrueFileFilter.INSTANCE);
     }
 
 	/**
@@ -59,7 +61,7 @@ public class FileService {
 		String newFilename = FilenameUtils.getName(newFullPath);
 
 		// first make the directories that the track will need, if they don't yet exist
-		File folder = new File(privateSettings.getLocalMusicFileLocation(), newPath);
+		File folder = new File(Objects.requireNonNull(localMusicFileLocation), newPath);
 		folder.mkdirs();
 
 		// then copy the track into those directories
@@ -76,7 +78,7 @@ public class FileService {
 	 * the placeholder values with the values specified in the deferred track.
 	 */
 	public String generateFilename(DeferredTrack deferredTrack){
-    	String pattern = deferredTrack.getLibrary().getSubfolder() + File.separator + privateSettings.getTrackNamePattern();
+    	String pattern = deferredTrack.getLibrary().getSubfolder() + File.separator + trackNamePattern;
     	for(TrackNamePattern trackNamePattern : TrackNamePattern.values()){
 			Field field = ReflectionUtils.findField(deferredTrack.getClass(), trackNamePattern.toString().toLowerCase());
 			ReflectionUtils.makeAccessible(field);
@@ -88,14 +90,14 @@ public class FileService {
 	}
 
     public File getFile(String libraryPath){
-        return new File(privateSettings.getLocalMusicFileLocation(), libraryPath);
+        return new File(Objects.requireNonNull(localMusicFileLocation), libraryPath);
     }
 
     public boolean deleteFile(Track track) {
         logger.debug("Permanently deleting file {}", track.getLibraryPath());
-        boolean fileDeleted = new File(privateSettings.getLocalMusicFileLocation() + track.getLibraryPath()).delete();
+        boolean fileDeleted = new File(Objects.requireNonNull(localMusicFileLocation) + track.getLibraryPath()).delete();
         if(fileDeleted){
-            String trackDirectory = FilenameUtils.getFullPath(privateSettings.getLocalMusicFileLocation() + track.getLibraryPath());
+            String trackDirectory = FilenameUtils.getFullPath(Objects.requireNonNull(localMusicFileLocation) + track.getLibraryPath());
             boolean dirDeleted = recursivelyDeleteEmptyDirectories(trackDirectory);
         }
         return fileDeleted;

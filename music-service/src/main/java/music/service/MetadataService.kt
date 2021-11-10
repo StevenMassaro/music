@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder
 import music.model.DeferredTrack
 import music.model.Library
 import music.model.Track
-import music.settings.PrivateSettings
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.apache.commons.io.FilenameUtils
@@ -27,7 +26,7 @@ import java.util.concurrent.TimeUnit
 
 
 @Service
-class MetadataService @Autowired constructor(val fileService: FileService, val privateSettings: PrivateSettings) {
+class MetadataService @Autowired constructor(private val fileService: FileService) : AbstractService() {
     private val logger = LoggerFactory.getLogger(MetadataService::class.java)
 	private val audioFileCache = CacheBuilder.newBuilder()
 		.maximumSize(50)
@@ -70,7 +69,7 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 		* directory for some reason, so if we remove it and the string no longer starts with a slash, add one
 		*/
 		var location = file.absolutePath
-			.replaceFirst(privateSettings.localMusicFileLocation!!, "")
+			.replaceFirst(localMusicFileLocation, "")
 			.replaceFirst(File.separator, "")
 			.replaceFirst(library.subfolder, "")
 		if (!location.startsWith(File.separator)) {
@@ -82,7 +81,7 @@ class MetadataService @Autowired constructor(val fileService: FileService, val p
 				header,
 				location,
 				file,
-				privateSettings.localMusicFileLocation,
+				localMusicFileLocation,
 				library)
 		} catch (e: Exception) {
 			logger.error(String.format("Failed to parse tag for metadata for file %s", file.absolutePath), e)

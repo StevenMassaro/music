@@ -5,7 +5,7 @@
     <parent>
         <artifactId>Music</artifactId>
         <groupId>com.massaro</groupId>
-		<version>1.16.01</version>
+		<version>1.17</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -46,10 +46,6 @@
             <groupId>com.massaro</groupId>
             <artifactId>music-model</artifactId>
         </dependency>
-		<dependency>
-			<groupId>com.massaro</groupId>
-			<artifactId>music-settings</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>com.massaro</groupId>
 			<artifactId>music-service</artifactId>
@@ -125,6 +121,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.22</version>
 		</dependency>
 	</dependencies>
 

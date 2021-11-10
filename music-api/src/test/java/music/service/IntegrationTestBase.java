@@ -45,7 +45,7 @@ public abstract class IntegrationTestBase {
 		@Override
 		public void initialize(ConfigurableApplicationContext applicationContext) {
 			TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext,
-				"music.file.source=" + System.getProperty("java.io.tmpdir").replace("\\", "\\\\"));
+				"local.music.file.location=" + System.getProperty("java.io.tmpdir").replace("\\", "\\\\"));
 		}
 	}
 	@Before

@@ -3,7 +3,6 @@ package music.service
 import music.mapper.ConvertMapper
 import music.model.Device
 import music.model.Track
-import music.settings.PrivateSettings
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
@@ -11,6 +10,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
 
@@ -25,8 +25,8 @@ class ConvertService {
 	@Autowired
 	private lateinit var convertMapper: ConvertMapper
 
-	@Autowired
-	private lateinit var privateSettings: PrivateSettings
+	@Value("\${music.ffmpeg.path}")
+	private val ffmpegPath: String? = null
 
 	fun convertFile(device: Device, track: Track): ByteArray? {
 		try {
@@ -46,8 +46,8 @@ class ConvertService {
 			logger.trace("Output file: {}", target.absolutePath)
 			target.deleteOnExit()
 
-			val cmdLine = if(StringUtils.isNotEmpty(privateSettings.ffmpegPath) && !privateSettings.ffmpegPath.contains("$") && !privateSettings.ffmpegPath.contains("@")){
-				CommandLine(privateSettings.ffmpegPath)
+			val cmdLine = if(StringUtils.isNotEmpty(ffmpegPath) && !ffmpegPath!!.contains("$") && !ffmpegPath.contains("@")){
+				CommandLine(ffmpegPath)
 			} else { // assume that ffmpeg is on the path
 				CommandLine("ffmpeg")
 			}

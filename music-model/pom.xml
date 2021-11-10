@@ -5,7 +5,7 @@
     <parent>
         <artifactId>Music</artifactId>
         <groupId>com.massaro</groupId>
-        <version>1.16.01</version>
+        <version>1.17</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -44,6 +44,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.massaro</groupId>
+			<artifactId>music-utils</artifactId>
 		</dependency>
     </dependencies>
 </project>

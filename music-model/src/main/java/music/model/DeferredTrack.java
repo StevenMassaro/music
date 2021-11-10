@@ -7,7 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-import static music.utils.FieldUtils.calculateHash;
+import static music.utils.HashUtils.calculateHash;
+
 
 /**
  * A track object, where the calculation of the hash is deferred until it is requested. On the first sync performed

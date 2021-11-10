@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static music.utils.FieldUtils.calculateHash;
+import static music.utils.HashUtils.calculateHash;
 
 @Service
 public class TrackService {

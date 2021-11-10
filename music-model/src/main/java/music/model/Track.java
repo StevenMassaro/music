@@ -1,7 +1,6 @@
 package music.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import music.utils.FieldUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -72,8 +71,8 @@ public class Track implements Diffable<Track> {
         this.album_artist = v2tag.getFirst(FieldKey.ALBUM_ARTIST);
         this.genre = v2tag.getFirst(FieldKey.GENRE);
         this.year = v2tag.getFirst(FieldKey.YEAR);
-        this.disc_no = FieldUtils.getLongOrNull(v2tag, FieldKey.DISC_NO);
-        this.track = FieldUtils.getLongOrNull(v2tag, FieldKey.TRACK);
+        this.disc_no = getLongOrNull(v2tag, FieldKey.DISC_NO);
+        this.track = getLongOrNull(v2tag, FieldKey.TRACK);
         this.comment = v2tag.getFirst(FieldKey.COMMENT);
         this.location = location;
         this.fileLastModifiedDate = fileLastModifiedDate;
@@ -357,5 +356,10 @@ public class Track implements Diffable<Track> {
 	@JsonIgnore
 	public String getExtension() {
     	return FilenameUtils.getExtension(location);
+	}
+
+	private static Long getLongOrNull(Tag tag, FieldKey fieldKey){
+		String val = tag.getFirst(fieldKey);
+		return (val == null || val.isEmpty()) ? null : Long.valueOf(val);
 	}
 }
