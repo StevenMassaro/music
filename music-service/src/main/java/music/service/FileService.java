@@ -97,7 +97,9 @@ public class FileService extends AbstractService {
         if(fileDeleted){
             String trackDirectory = FilenameUtils.getFullPath(Objects.requireNonNull(localMusicFileLocation) + track.getLibraryPath());
             boolean dirDeleted = recursivelyDeleteEmptyDirectories(trackDirectory);
-        }
+        } else {
+        	log.warn("Failed to delete file {}", track.getLibraryPath());
+		}
         return fileDeleted;
     }
 
