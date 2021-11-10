@@ -84,7 +84,7 @@ class MetadataService @Autowired constructor(private val fileService: FileServic
 				localMusicFileLocation,
 				library)
 		} catch (e: Exception) {
-			logger.error(String.format("Failed to parse tag for metadata for file %s", file.absolutePath), e)
+			logger.error("Failed to parse tag for metadata for file {}", file.absolutePath, e)
 			null
 		}
 	}

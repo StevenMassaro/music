@@ -1,5 +1,6 @@
 package music.service;
 
+import lombok.extern.log4j.Log4j2;
 import music.exception.LibraryNotFoundException;
 import music.exception.RatingRangeException;
 import music.mapper.PlayMapper;
@@ -10,8 +11,6 @@ import music.repository.ILibraryRepository;
 import music.repository.IPlayCountRepository;
 import music.repository.IPlayRepository;
 import music.repository.ISkipRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -29,9 +28,8 @@ import java.util.Optional;
 import static music.utils.HashUtils.calculateHash;
 
 @Service
+@Log4j2
 public class TrackService {
-    private static final Logger logger = LoggerFactory.getLogger(TrackService.class);
-
     private final TrackMapper trackMapper;
     private final PlayMapper playMapper;
     private final FileService fileService;
@@ -86,7 +84,7 @@ public class TrackService {
                 Track existingTrack = getByLocationAndLibrary(track.getLocation(), track.getLibrary().getId());
 				if (existingTrack != null && !existingTrack.getDeletedInd()) {
                     if (forceUpdates || !existingTrack.getFileLastModifiedDate().equals(track.getFileLastModifiedDate())) {
-                        logger.debug(forceUpdates ? "Updates are being forced, updating {}" : "Existing track has been modified since last sync, updating: {}", existingTrack.getTitle());
+                        log.debug(forceUpdates ? "Updates are being forced, updating {}" : "Existing track has been modified since last sync, updating: {}", existingTrack.getTitle());
                         track.setDateUpdated(new Date());
                         // since there is an existing track that we're updating, we should use the existing tracks ID for updates
                         track.setId(existingTrack.getId());
@@ -96,20 +94,20 @@ public class TrackService {
 							syncResult.getModifiedTracks().add(track);
 						}
                     } else {
-                        logger.debug(String.format("Existing track has same modified date as last sync, skipping: %s", existingTrack.getTitle()));
+                        log.debug("Existing track has same modified date as last sync, skipping: {}", existingTrack.getTitle());
 						if (syncResult != null) {
 							syncResult.getUnmodifiedTracks().add(track);
 						}
                     }
                 } else {
-                    logger.debug(String.format("No existing track found, inserting new metadata for %s", track.getTitle()));
+                    log.debug("No existing track found, inserting new metadata for {}", track.getTitle());
                     trackMapper.insert(track);
 					if (syncResult != null) {
 						syncResult.getNewTracks().add(track);
 					}
                 }
             } catch (Exception e) {
-                logger.error(String.format("Failed to insert metadata for track %s", track.getLibraryPath()), e);
+                log.error("Failed to insert metadata for track {}", track.getLibraryPath(), e);
 				if (syncResult != null) {
 					syncResult.getFailedTracks().add(track);
 				}
@@ -212,7 +210,7 @@ public class TrackService {
      * Deletes the track from the file system and deletes any relevant metadata from the database.
      */
     public Track permanentlyDelete(Track track) {
-    	logger.debug("Permanently deleting track {}", track.getId());
+    	log.debug("Permanently deleting track {}", track.getId());
         fileService.deleteFile(track);
         permanentlyDeleteTrackMetadata(track);
         return track;
@@ -229,7 +227,7 @@ public class TrackService {
 	 * Delete the metadata for a track, in the order necessary to prevent foreign key errors.
 	 */
 	private void permanentlyDeleteTrackMetadata(long id) {
-		logger.debug("Permanently deleting all track metadata for {}", id);
+		log.debug("Permanently deleting all track metadata for {}", id);
 		playMapper.deletePlayCounts(id);
 		playMapper.deletePlays(id);
 
@@ -265,13 +263,13 @@ public class TrackService {
 		// first list of all of the existing plays
 		Track existingTrack = get(existingId);
 		List<Play> existingTrackPlays = playRepository.findAllBySongId(existingId);
-		logger.debug("Found {} plays for {}", existingTrackPlays.size(), existingId);
+		log.debug("Found {} plays for {}", existingTrackPlays.size(), existingId);
 		Optional<PlayCount> optionalExistingPlayCount = playCountRepository.findById(existingId);
 		if(optionalExistingPlayCount.isPresent()) {
-			logger.debug("Play count also present for {} to be migrated", existingId);
+			log.debug("Play count also present for {} to be migrated", existingId);
 		}
 		List<Skip> existingTrackSkips = skipRepository.findAllBySongId(existingId);
-		logger.debug("Found {} skips for {}", existingTrackSkips.size(), existingId);
+		log.debug("Found {} skips for {}", existingTrackSkips.size(), existingId);
 
 		// delete the existing track
 		permanentlyDelete(existingId);
@@ -279,16 +277,16 @@ public class TrackService {
 		// create the new track
 		Track newTrack = uploadNewTrack(file, existingTrack.getLibrary().getId());
 
-		logger.debug("Inserting {} plays for new track {}", existingTrackPlays.size(), newTrack.getId());
+		log.debug("Inserting {} plays for new track {}", existingTrackPlays.size(), newTrack.getId());
 		for (Play existingTrackPlay : existingTrackPlays) {
 			playMapper.insertPlay(newTrack.getId(), existingTrackPlay.getPlayDate(), existingTrackPlay.getDeviceId(), existingTrackPlay.isImported());
 		}
 		if (optionalExistingPlayCount.isPresent()) {
-			logger.debug("Inserting play count for new track {}", newTrack.getId());
+			log.debug("Inserting play count for new track {}", newTrack.getId());
 			PlayCount pc = optionalExistingPlayCount.get();
 			playMapper.upsertPlayCount(newTrack.getId(), pc.getDeviceId(), pc.getPlayCount(), pc.isImported());
 		}
-		logger.debug("Inserting {} skips for new track {}", existingTrackSkips.size(), newTrack.getId());
+		log.debug("Inserting {} skips for new track {}", existingTrackSkips.size(), newTrack.getId());
 		for (Skip existingTrackSkip : existingTrackSkips) {
 			skipMapper.insertSkip(newTrack.getId(), existingTrackSkip.getSkipDate(), existingTrackSkip.getDeviceId(), existingTrackSkip.isImported(), existingTrackSkip.getSecondsPlayed());
 		}
@@ -300,21 +298,21 @@ public class TrackService {
      * @param actualTracks list of tracks that exist on disk
      */
     public void deleteOrphanedTracksMetadata(List<DeferredTrack> actualTracks, SyncResult syncResult, Library library) {
-        logger.debug("Begin deleting orphaned tracks");
+        log.debug("Begin deleting orphaned tracks");
         List<Track> dbTracks = list(library.getId());
         // if a track exists in the database but doesn't exist on disk, then delete it from the db
         for (Track dbTrack : dbTracks){
             boolean doesTrackExistOnDisk = actualTracks.stream().anyMatch(t -> t.id3Equals(dbTrack));
             if(!doesTrackExistOnDisk){
-                logger.debug("Track {} no longer exists on disk, deleting associated metadata ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLibraryPath());
+                log.debug("Track {} no longer exists on disk, deleting associated metadata ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLibraryPath());
                 permanentlyDeleteTrackMetadata(dbTrack);
                 syncResult.getOrphanedTracks().add(dbTrack);
             } else {
-                logger.trace("Track {} still exists on disk ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLibraryPath());
+                log.trace("Track {} still exists on disk ({} - {}; {})", dbTrack.getId(), dbTrack.getTitle(), dbTrack.getArtist(), dbTrack.getLibraryPath());
                 syncResult.getUnorphanedTracks().add(dbTrack);
             }
         }
-        logger.debug("Finished deleted orphaned tracks");
+        log.debug("Finished deleted orphaned tracks");
     }
 
     /**
@@ -350,12 +348,12 @@ public class TrackService {
 
 	public void updateHashOfTrack(String libraryPath, long id) throws IOException {
 		String hash = calculateHash(fileService.getFile(libraryPath));
-		logger.trace("Updating field hash to {} for ID: {}", hash, id);
+		log.trace("Updating field hash to {} for ID: {}", hash, id);
 		updateField(id, "hash", hash, JDBCType.VARCHAR);
 	}
 
 	public Track markSkipped(long id, long deviceId, Double secondsPlayed) throws Exception {
-		logger.debug("Marking {} as skipped on device {}", id, deviceId);
+		log.debug("Marking {} as skipped on device {}", id, deviceId);
 		Track track = get(id);
 		if (secondsPlayed != null && secondsPlayed >= track.getDuration()) {
 			throw new Exception("This skip record is being ignored, because the number of seconds played before skipping" +

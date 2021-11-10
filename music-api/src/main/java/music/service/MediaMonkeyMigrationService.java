@@ -1,12 +1,11 @@
 package music.service;
 
+import lombok.extern.log4j.Log4j2;
 import music.exception.RatingRangeException;
 import music.exception.TaskInProgressException;
 import music.mapper.PlayMapper;
 import music.model.*;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.UncategorizedSQLException;
@@ -17,13 +16,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
+@Log4j2
 public class MediaMonkeyMigrationService implements MigrationService {
 
-    private Logger logger = LoggerFactory.getLogger(MediaMonkeyMigrationService.class);
 	private AtomicBoolean currentlyMigrating = new AtomicBoolean(false);
 
     private final String SONG_TITLE = "SongTitle";
@@ -87,16 +87,16 @@ public class MediaMonkeyMigrationService implements MigrationService {
                         playMapper.insertPlay(track.getId(), mediaMonkeyPlay.getDateAsDelphi(), device.getId(), true);
                         migrationResult.getPlays().getSuccessful().add(mediaMonkeyPlay);
                     } catch (DuplicateKeyException | UncategorizedSQLException exception) {
-                        logger.debug(String.format("Already imported MediaMonkey track %s", songTitle), exception);
+                        log.debug("Already imported MediaMonkey track {}", songTitle, exception);
                         migrationResult.getPlays().getAlreadyImported().add(mediaMonkeyPlay);
                     }
                 } else {
-                    logger.debug(String.format("No matching track found for MediaMonkey track %s", songTitle));
+                    log.debug("No matching track found for MediaMonkey track {}", songTitle);
                     migrationResult.getPlays().getFailed().add(mediaMonkeyPlay);
                 }
             }
         } catch (SQLException e) {
-            logger.error("Failed to connect to MediaMonkey database", e);
+            log.error("Failed to connect to MediaMonkey database", e);
         }
     }
 
@@ -124,16 +124,16 @@ public class MediaMonkeyMigrationService implements MigrationService {
                         playMapper.upsertPlayCount(track.getId(), device.getId(), playCount, true);
                         migrationResult.getPlayCounts().getSuccessful().add(mediaMonkeyPlay);
                     } catch (DuplicateKeyException |UncategorizedSQLException e) {
-                        logger.debug(String.format("Already imported MediaMonkey track %s", songTitle), e);
+                        log.debug("Already imported MediaMonkey track {}", songTitle, e);
                         migrationResult.getPlayCounts().getAlreadyImported().add(mediaMonkeyPlay);
                     }
                 } else {
-                    logger.debug(String.format("No matching track found for MediaMonkey track %s", songTitle));
+                    log.debug("No matching track found for MediaMonkey track {}", songTitle);
                     migrationResult.getPlayCounts().getFailed().add(mediaMonkeyPlay);
                 }
             }
         } catch (SQLException e) {
-            logger.error("Failed to connect to MediaMonkey database", e);
+            log.error("Failed to connect to MediaMonkey database", e);
         }
     }
 
@@ -191,19 +191,19 @@ public class MediaMonkeyMigrationService implements MigrationService {
                         trackService.setRating(track.getId(), mediaMonkeyRating.getNormalizedRating());
                         migrationResult.getRatings().getSuccessful().add(mediaMonkeyRating);
                     } catch (DuplicateKeyException |UncategorizedSQLException e) {
-                        logger.debug(String.format("Already imported MediaMonkey track %s", songTitle), e);
+                        log.debug("Already imported MediaMonkey track {}", songTitle, e);
                         migrationResult.getRatings().getAlreadyImported().add(mediaMonkeyRating);
                     } catch (RatingRangeException e) {
-                        logger.error(String.format("Track %s rating of %s is outside allowable range.", track.getId(), rating), e);
+                        log.error("Track {} rating of {} is outside allowable range.", track.getId(), rating, e);
                         migrationResult.getRatings().getFailed().add(mediaMonkeyRating);
                     }
                 } else {
-                    logger.debug(String.format("No matching track found for MediaMonkey track %s", songTitle));
+                    log.debug("No matching track found for MediaMonkey track {}", songTitle);
                     migrationResult.getRatings().getFailed().add(mediaMonkeyRating);
                 }
             }
         } catch (SQLException e) {
-            logger.error("Failed to connect to MediaMonkey database", e);
+            log.error("Failed to connect to MediaMonkey database", e);
         }
     }
 
@@ -214,7 +214,7 @@ public class MediaMonkeyMigrationService implements MigrationService {
         File temporaryDatabase = File.createTempFile("mediamonkey", ".db");
         FileUtils.copyInputStreamToFile(file.getInputStream(), temporaryDatabase);
 
-        logger.debug(String.format("Temporary database location: %s", temporaryDatabase.getAbsolutePath()));
+        log.debug("Temporary database location: {}", temporaryDatabase.getAbsolutePath());
 
         temporaryDatabase.deleteOnExit();
         return temporaryDatabase;

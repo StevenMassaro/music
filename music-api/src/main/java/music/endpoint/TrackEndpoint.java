@@ -1,6 +1,7 @@
 package music.endpoint;
 
 import com.google.common.base.Preconditions;
+import lombok.extern.log4j.Log4j2;
 import music.exception.LibraryNotFoundException;
 import music.exception.RatingRangeException;
 import music.model.Device;
@@ -12,8 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.Diff;
 import org.apache.commons.lang3.builder.DiffResult;
 import org.jaudiotagger.tag.datatype.Artwork;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -35,10 +34,8 @@ import static music.utils.EndpointUtils.responseEntity;
 
 @RestController
 @RequestMapping("/track")
+@Log4j2
 public class TrackEndpoint {
-
-	private Logger logger = LoggerFactory.getLogger(TrackEndpoint.class);
-
     private final FileService fileService;
 
     private final TrackService trackService;
@@ -99,7 +96,7 @@ public class TrackEndpoint {
     	Track existing = trackService.get(track.getId());
 		DiffResult diff = existing.diff(track);
 		for(Diff<?> d: diff.getDiffs()) {
-			logger.trace("Applying track update: {}, from {} to {}", d.getFieldName(), d.getLeft(), d.getRight());
+			log.trace("Applying track update: {}, from {} to {}", d.getFieldName(), d.getLeft(), d.getRight());
 			updateService.queueTrackUpdate(track.getId(), d.getFieldName(), d.getRight().toString());
 		}
 		return trackService.get(track.getId());

@@ -1,5 +1,6 @@
 package music.service;
 
+import lombok.extern.log4j.Log4j2;
 import music.model.DeferredTrack;
 import music.model.Library;
 import music.model.Track;
@@ -10,8 +11,6 @@ import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
@@ -24,12 +23,11 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Service
+@Log4j2
 public class FileService extends AbstractService {
 
 	@Value("${music.acceptable.file.extensions:}")
 	private String acceptableExtensions;
-
-    private Logger logger = LoggerFactory.getLogger(FileService.class);
 
 	@Value("${music.track.name.pattern:}")
 	private String trackNamePattern;
@@ -94,7 +92,7 @@ public class FileService extends AbstractService {
     }
 
     public boolean deleteFile(Track track) {
-        logger.debug("Permanently deleting file {}", track.getLibraryPath());
+        log.debug("Permanently deleting file {}", track.getLibraryPath());
         boolean fileDeleted = new File(Objects.requireNonNull(localMusicFileLocation) + track.getLibraryPath()).delete();
         if(fileDeleted){
             String trackDirectory = FilenameUtils.getFullPath(Objects.requireNonNull(localMusicFileLocation) + track.getLibraryPath());
@@ -110,10 +108,10 @@ public class FileService extends AbstractService {
     public boolean recursivelyDeleteEmptyDirectories(String directory) {
         boolean wasDirectoryDeleted = new File(directory).delete();
         if (wasDirectoryDeleted) {
-            logger.debug(String.format("Directory %s is empty and was deleted", directory));
+            log.debug("Directory {} is empty and was deleted", directory);
             return recursivelyDeleteEmptyDirectories(FilenameUtils.getFullPath(directory.substring(0, directory.length() - 1)));
         } else {
-            logger.debug(String.format("Directory %s is not empty and was not deleted", directory));
+            log.debug("Directory {} is not empty and was not deleted", directory);
         }
         return wasDirectoryDeleted;
     }
