@@ -39,6 +39,13 @@ public class FileService extends AbstractService {
     }
 
 	/**
+	 * List all files in the libraries directory, including files which do not match the acceptable extensions list.
+	 */
+	public Collection<File> listAllFiles(Library library) {
+    	return FileUtils.listFiles(new File(Objects.requireNonNull(localMusicFileLocation), library.getSubfolder()), null ,true);
+	}
+
+	/**
 	 * Write the supplied file to the temporary directory.
 	 */
     public File writeTempTrack(MultipartFile file) throws IOException {

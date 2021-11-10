@@ -1,9 +1,12 @@
 package music.endpoint;
 
 import lombok.extern.log4j.Log4j2;
+import music.model.Library;
 import music.model.SyncResult;
 import music.model.Track;
 import music.model.TrackUpdate;
+import music.repository.ILibraryRepository;
+import music.service.FileService;
 import music.service.SyncService;
 import music.service.TrackService;
 import music.service.UpdateService;
@@ -15,8 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -25,16 +30,18 @@ import java.util.Map;
 @Log4j2
 public class AdminEndpoint {
 	private final TrackService trackService;
-
 	private final SyncService syncService;
-
 	private final UpdateService updateService;
+	private final FileService fileService;
+	private final ILibraryRepository libraryRepository;
 
     @Autowired
-	public AdminEndpoint(TrackService trackService, SyncService syncService, UpdateService updateService) {
+	public AdminEndpoint(TrackService trackService, SyncService syncService, UpdateService updateService, FileService fileService, ILibraryRepository libraryRepository) {
 		this.trackService = trackService;
 		this.syncService = syncService;
 		this.updateService = updateService;
+		this.fileService = fileService;
+		this.libraryRepository = libraryRepository;
 	}
 
     @PostMapping("/dbSync")
@@ -100,5 +107,28 @@ public class AdminEndpoint {
     @GetMapping("/update/count")
 	public long countUpdates(){
     	return updateService.count();
+	}
+
+	/**
+	 * Generate a list of files which exist on disk but which are not in the database. These files are invisible to
+	 * the application and could possibly be deleted.
+	 */
+	@GetMapping("orphanedFiles")
+	public List<File> listOrphanedFiles() {
+		List<Library> libraries = libraryRepository.findAll();
+		List<File> orphanedFiles = new ArrayList<>();
+		for (Library library : libraries) {
+			log.debug("Looking for orphaned files in library {}", library.getName());
+			Collection<File> files = fileService.listAllFiles(library);
+			List<Track> tracks = trackService.list(library.getId());
+			for (File file : files) {
+				log.trace("Checking if file {} is orphaned", file.getAbsolutePath());
+				// this is probably not the best way to find if there are any matches, doing an exact check on path would be better
+				if (tracks.stream().noneMatch(track -> file.getAbsolutePath().contains(track.getLocation()))){
+					orphanedFiles.add(file);
+				}
+			}
+		}
+		return orphanedFiles;
 	}
 }
