@@ -101,10 +101,11 @@ public class FileService extends AbstractService {
 
     public boolean deleteFile(Track track) {
         log.debug("Permanently deleting file {}", track.getLibraryPath());
-		File fileToDelete = new File(Objects.requireNonNull(localMusicFileLocation) + track.getLibraryPath());
+		File fileToDelete = new File(Objects.requireNonNull(localMusicFileLocation), track.getLibraryPath());
 		boolean fileDeleted = fileToDelete.delete();
         if(fileDeleted){
-            String trackDirectory = FilenameUtils.getFullPath(Objects.requireNonNull(localMusicFileLocation) + track.getLibraryPath());
+        	log.trace("Successfully deleted file {}", track.getLibraryPath());
+            String trackDirectory = FilenameUtils.getFullPath(fileToDelete.getAbsolutePath());
             boolean dirDeleted = recursivelyDeleteEmptyDirectories(trackDirectory);
         } else {
         	log.warn("Failed to delete file {}", track.getLibraryPath());

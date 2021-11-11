@@ -341,7 +341,7 @@ public class Track implements Diffable<Track> {
 	}
 
 	/**
-	 * Get the path of the file, including the library subfolder. This appends the library subfolder to the location;
+	 * Get the path of the file, including the library subfolder. This appends the library subfolder to the location.
 	 */
 	@JsonIgnore
 	public String getLibraryPath() {
