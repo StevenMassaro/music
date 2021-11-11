@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -100,12 +101,18 @@ public class FileService extends AbstractService {
 
     public boolean deleteFile(Track track) {
         log.debug("Permanently deleting file {}", track.getLibraryPath());
-        boolean fileDeleted = new File(Objects.requireNonNull(localMusicFileLocation) + track.getLibraryPath()).delete();
+		File fileToDelete = new File(Objects.requireNonNull(localMusicFileLocation) + track.getLibraryPath());
+		boolean fileDeleted = fileToDelete.delete();
         if(fileDeleted){
             String trackDirectory = FilenameUtils.getFullPath(Objects.requireNonNull(localMusicFileLocation) + track.getLibraryPath());
             boolean dirDeleted = recursivelyDeleteEmptyDirectories(trackDirectory);
         } else {
         	log.warn("Failed to delete file {}", track.getLibraryPath());
+        	try {
+				Files.delete(fileToDelete.toPath());
+			} catch (IOException e) {
+				log.warn("Failed to delete file {} on second try", track.getLibraryPath(), e);
+			}
 		}
         return fileDeleted;
     }
