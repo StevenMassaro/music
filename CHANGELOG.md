@@ -1,5 +1,8 @@
 # changelog
 
+## 1.17.1
+* stream unconverted files directly from disk in /stream endpoint
+
 ## 1.14.01
 * support purging individual tracks
 

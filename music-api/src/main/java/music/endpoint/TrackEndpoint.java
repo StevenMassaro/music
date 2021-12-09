@@ -9,20 +9,23 @@ import music.model.ModifyableTags;
 import music.model.Track;
 import music.service.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.Diff;
 import org.apache.commons.lang3.builder.DiffResult;
 import org.jaudiotagger.tag.datatype.Artwork;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -113,26 +116,33 @@ public class TrackEndpoint {
     	return Arrays.asList(ModifyableTags.values());
 	}
 
-    @GetMapping("/{id}/stream")
+    @GetMapping(value = "/{id}/stream", params = "deviceName")
 	public ResponseEntity<Resource> stream(@PathVariable long id,
-										   @RequestParam(required = false) String deviceName,
-										   @RequestParam(required = false) Long deviceId) throws IOException {
+										   @RequestParam String deviceName) {
         Track track = trackService.get(id);
 		String filename = track.getFilename();
 
 		// todo check that the device is actually a device which requires converting
-		if (StringUtils.isNotEmpty(deviceName)) {
-			Device device = deviceService.getDeviceByName(deviceName);
-			byte[] convertedFile = convertService.convertFile(device, track);
-			return responseEntity(filename, "audio/" + device.getFormat(), convertedFile);
-		} else if (deviceId != null) {
-			// todo implement
-			return null;
-		} else {
-			Resource file = new InputStreamResource(FileUtils.openInputStream(fileService.getFile(track.getLibraryPath())));
-			return responseEntity(filename, "audio/" + track.getExtension().toLowerCase(), file);
-		}
+		Device device = deviceService.getDeviceByName(deviceName);
+		byte[] convertedFile = convertService.convertFile(device, track);
+		return responseEntity(filename, "audio/" + device.getFormat(), convertedFile);
     }
+
+	@GetMapping(value = "/{id}/stream")
+	public ResponseEntity<StreamingResponseBody> stream(@PathVariable long id,
+														final HttpServletResponse response) throws IOException {
+		Track track = trackService.get(id);
+		File file = fileService.getFile(track.getLibraryPath());
+		String mimeType = Files.probeContentType(file.toPath());
+		response.setContentType(mimeType);
+		response.setHeader(
+			"Content-Disposition",
+			"attachment;filename=" + file.getName());
+
+		StreamingResponseBody stream = out -> IOUtils.copy(FileUtils.openInputStream(file), response.getOutputStream());
+
+		return new ResponseEntity<>(stream, HttpStatus.OK);
+	}
 
     @PostMapping("/upload")
 	public Track uploadTrack(@RequestParam MultipartFile file,
