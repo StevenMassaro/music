@@ -87,9 +87,19 @@ public class FileService extends AbstractService {
     	String pattern = deferredTrack.getLibrary().getSubfolder() + File.separator + trackNamePattern;
     	for(TrackNamePattern trackNamePattern : TrackNamePattern.values()){
 			Field field = ReflectionUtils.findField(deferredTrack.getClass(), trackNamePattern.toString().toLowerCase());
-			ReflectionUtils.makeAccessible(field);
-			Object value = ReflectionUtils.getField(field, deferredTrack);
-    		pattern = pattern.replaceAll(trackNamePattern.toString(), value.toString());
+			if (field != null) {
+				ReflectionUtils.makeAccessible(field);
+				Object value = ReflectionUtils.getField(field, deferredTrack);
+				String trackNamePatternString = trackNamePattern.toString();
+				if (value != null) {
+					log.trace("Replacing {} with value {}", trackNamePatternString, value);
+					pattern = pattern.replaceAll(trackNamePattern.toString(), value.toString());
+				} else {
+					value = "Unknown";
+					log.trace("Replacing {} with value {}", trackNamePatternString, value);
+					pattern = pattern.replaceAll(trackNamePattern.toString(), value.toString());
+				}
+			}
 		}
     	String extension = deferredTrack.getExtension();
     	return pattern + "." + extension;
