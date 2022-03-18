@@ -129,6 +129,7 @@ public class AdminEndpoint {
 				}
 			}
 		}
+		log.debug("Orphaned files {}", orphanedFiles);
 		return orphanedFiles;
 	}
 }
