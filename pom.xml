@@ -115,12 +115,6 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
-                <version>5.3.21</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>1.17.2</version>
