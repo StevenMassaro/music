@@ -259,38 +259,58 @@ public class TrackService {
 		return get(syncResult.getNewTracks().get(0).getId());
 	}
 
+
+	public Track copyMetadata(long fromId, long toId) {
+		Track existingTrack = get(fromId);
+
+		// first list of all of the existing plays
+		List<Play> existingTrackPlays = playRepository.findAllBySongId(fromId);
+		log.debug("Found {} plays for {}", existingTrackPlays.size(), fromId);
+		Optional<PlayCount> optionalExistingPlayCount = playCountRepository.findById(fromId);
+		if(optionalExistingPlayCount.isPresent()) {
+			log.debug("Play count also present for {} to be migrated", fromId);
+		}
+		List<Skip> existingTrackSkips = skipRepository.findAllBySongId(fromId);
+		log.debug("Found {} skips for {}", existingTrackSkips.size(), fromId);
+
+		log.debug("Inserting {} plays for new track {}", existingTrackPlays.size(), toId);
+		for (Play existingTrackPlay : existingTrackPlays) {
+			playMapper.insertPlay(toId, existingTrackPlay.getPlayDate(), existingTrackPlay.getDeviceId(), existingTrackPlay.isImported());
+		}
+		if (optionalExistingPlayCount.isPresent()) {
+			log.debug("Inserting play count for new track {}", toId);
+			PlayCount pc = optionalExistingPlayCount.get();
+			playMapper.upsertPlayCount(toId, pc.getDeviceId(), pc.getPlayCount(), pc.isImported());
+		}
+		log.debug("Inserting {} skips for new track {}", existingTrackSkips.size(), toId);
+		for (Skip existingTrackSkip : existingTrackSkips) {
+			skipMapper.insertSkip(toId, existingTrackSkip.getSkipDate(), existingTrackSkip.getDeviceId(), existingTrackSkip.isImported(), existingTrackSkip.getSecondsPlayed());
+		}
+		Byte existingTrackRating = existingTrack.getRating();
+		if (existingTrackRating != null) {
+			try {
+				setRating(toId, existingTrackRating);
+			} catch (RatingRangeException e) {
+				log.error("Failed to set rating of {} on track {}", existingTrackRating, toId, e);
+			}
+		}
+
+		return get(toId);
+	}
+
 	public Track replaceExistingTrack(MultipartFile file, long existingId) throws IOException, LibraryNotFoundException {
 		// first list of all of the existing plays
 		Track existingTrack = get(existingId);
-		List<Play> existingTrackPlays = playRepository.findAllBySongId(existingId);
-		log.debug("Found {} plays for {}", existingTrackPlays.size(), existingId);
-		Optional<PlayCount> optionalExistingPlayCount = playCountRepository.findById(existingId);
-		if(optionalExistingPlayCount.isPresent()) {
-			log.debug("Play count also present for {} to be migrated", existingId);
-		}
-		List<Skip> existingTrackSkips = skipRepository.findAllBySongId(existingId);
-		log.debug("Found {} skips for {}", existingTrackSkips.size(), existingId);
-
-		// delete the existing track
-		permanentlyDelete(existingId);
 
 		// create the new track
 		Track newTrack = uploadNewTrack(file, existingTrack.getLibrary().getId());
 
-		log.debug("Inserting {} plays for new track {}", existingTrackPlays.size(), newTrack.getId());
-		for (Play existingTrackPlay : existingTrackPlays) {
-			playMapper.insertPlay(newTrack.getId(), existingTrackPlay.getPlayDate(), existingTrackPlay.getDeviceId(), existingTrackPlay.isImported());
-		}
-		if (optionalExistingPlayCount.isPresent()) {
-			log.debug("Inserting play count for new track {}", newTrack.getId());
-			PlayCount pc = optionalExistingPlayCount.get();
-			playMapper.upsertPlayCount(newTrack.getId(), pc.getDeviceId(), pc.getPlayCount(), pc.isImported());
-		}
-		log.debug("Inserting {} skips for new track {}", existingTrackSkips.size(), newTrack.getId());
-		for (Skip existingTrackSkip : existingTrackSkips) {
-			skipMapper.insertSkip(newTrack.getId(), existingTrackSkip.getSkipDate(), existingTrackSkip.getDeviceId(), existingTrackSkip.isImported(), existingTrackSkip.getSecondsPlayed());
-		}
-		return get(newTrack.getId());
+		newTrack = copyMetadata(existingId, newTrack.getId());
+
+		// delete the existing track
+		permanentlyDelete(existingId);
+
+		return newTrack;
 	}
 
     /**
