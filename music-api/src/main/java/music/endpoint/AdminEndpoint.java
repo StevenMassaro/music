@@ -20,10 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController()
 @RequestMapping("/admin")
@@ -58,6 +55,19 @@ public class AdminEndpoint {
 	@GetMapping("/purge")
 	public List<Track> listPurgableTracks() {
     	return trackService.listPurgableTracks();
+	}
+
+	/**
+	 * Permanently delete a track, and transfer the deleted tracks plays, skips and rating to
+	 * another track that will be preserved.
+	 * @param idToDelete the ID of the track to delete
+	 * @param existingId the ID of the track that will receive all of the metadata from the deleted track.
+	 *                   This track will not be deleted.
+	 */
+	@DeleteMapping("/purge/{idToDelete}/into/{existingId}")
+	public List<Track> purgeInto(@PathVariable long idToDelete, @PathVariable long existingId) {
+		trackService.copyMetadata(idToDelete, existingId);
+		return purgeDeletedTracks(Collections.singletonList(idToDelete));
 	}
 
     /**
