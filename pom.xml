@@ -6,7 +6,7 @@
 
     <groupId>com.massaro</groupId>
     <artifactId>Music</artifactId>
-	<version>1.17.1</version>
+	<version>1.17.2</version>
     <modules>
         <module>music-model</module>
         <module>music-api</module>
@@ -57,22 +57,22 @@
             <dependency>
                 <groupId>com.massaro</groupId>
                 <artifactId>music-model</artifactId>
-				<version>1.17.1</version>
+				<version>1.17.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-api</artifactId>
-				<version>1.17.1</version>
+				<version>1.17.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-service</artifactId>
-				<version>1.17.1</version>
+				<version>1.17.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.massaro</groupId>
 				<artifactId>music-utils</artifactId>
-				<version>1.17.1</version>
+				<version>1.17.2</version>
 			</dependency>
             <dependency>
                 <groupId>org</groupId>
@@ -112,12 +112,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-test</artifactId>
                 <version>2.7.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
-                <version>5.3.21</version>
                 <scope>test</scope>
             </dependency>
             <dependency>

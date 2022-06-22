@@ -62,6 +62,7 @@ public class TrackServiceIT extends IntegrationTestBase {
 		trackService.markListened(list.get(0).getId(), device.getId());
 		playMapper.upsertPlayCount(list.get(0).getId(), device.getId(), 7, true);
 		trackService.markSkipped(list.get(0).getId(), device.getId(), null);
+		trackService.setRating(list.get(0).getId(), (byte) 6);
 
 		// get updates on play counts and skip counts
 		list = trackService.list();
@@ -71,6 +72,7 @@ public class TrackServiceIT extends IntegrationTestBase {
 		assertNotEquals(list.get(0).getHash(), newTrack.getHash());
 		assertEquals(list.get(0).getPlays(), newTrack.getPlays());
 		assertEquals(list.get(0).getSkips(), newTrack.getSkips());
+		assertEquals(list.get(0).getRating(), newTrack.getRating());
 		assertEquals(1, trackService.list().size());
 		assertEquals(0, trackService.listDeleted().size());
 		assertFalse(newTrack.getLocation().contains(seededMusicLibrary.getSubfolder()));
