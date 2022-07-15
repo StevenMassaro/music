@@ -31,6 +31,11 @@ jobs:
             - name: Extract Maven project version
               run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
               id: project
+            - name: Set up QEMU
+              uses: docker/setup-qemu-action@v1
+              with:
+                image: tonistiigi/binfmt:latest
+                platforms: arm64,arm
             - name: Show extracted Maven project version
               run: echo ${{ steps.project.outputs.version }}
             - name: Set up Docker Buildx
@@ -45,6 +50,7 @@ jobs:
             - name: Build image and push to Docker Hub
               uses: docker/build-push-action@v2
               with:
+                  platforms: linux/arm64,linux/amd64
                   context: .
                   tags: |
                       stevenmassaro/music-api:latest
