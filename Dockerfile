@@ -1,5 +1,5 @@
-FROM openjdk:13-alpine
+FROM eclipse-temurin:17-jre
 EXPOSE 8080
-RUN apk add --no-cache ffmpeg
+RUN apt-get update && apt-get install ffmpeg -y
 ADD /music-api/target/music-api.jar music-api.jar
 ENTRYPOINT ["java","-jar","music-api.jar"]
