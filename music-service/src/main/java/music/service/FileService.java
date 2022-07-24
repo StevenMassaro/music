@@ -14,12 +14,13 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -49,10 +50,10 @@ public class FileService extends AbstractService {
 	/**
 	 * Write the supplied file to the temporary directory.
 	 */
-    public File writeTempTrack(MultipartFile file) throws IOException {
+    public File writeTempTrack(InputStream inputStream, String extension) throws IOException {
     	// copy file to temp file
-    	File tempTrack = File.createTempFile(RandomStringUtils.randomAlphabetic(10), "." + FilenameUtils.getExtension(file.getOriginalFilename()));
-    	FileUtils.copyInputStreamToFile(file.getInputStream(), tempTrack);
+    	File tempTrack = File.createTempFile(RandomStringUtils.randomAlphabetic(10), "." + extension);
+    	FileUtils.copyInputStreamToFile(inputStream, tempTrack);
 
 		return tempTrack;
 	}
@@ -84,7 +85,7 @@ public class FileService extends AbstractService {
 	 * the placeholder values with the values specified in the deferred track.
 	 */
 	public String generateFilename(DeferredTrack deferredTrack){
-    	String pattern = deferredTrack.getLibrary().getSubfolder() + File.separator + trackNamePattern;
+    	String pattern = Paths.get(deferredTrack.getLibrary().getSubfolder(), trackNamePattern).toString();
     	for(TrackNamePattern trackNamePattern : TrackNamePattern.values()){
 			Field field = ReflectionUtils.findField(deferredTrack.getClass(), trackNamePattern.toString().toLowerCase());
 			if (field != null) {
@@ -102,7 +103,8 @@ public class FileService extends AbstractService {
 			}
 		}
     	String extension = deferredTrack.getExtension();
-    	return pattern + "." + extension;
+    	// remove illegal characters from generated filename
+    	return (pattern + "." + extension).replaceAll("[^a-zA-Z0-9\\\\.\\-_/\\s]", "");
 	}
 
     public File getFile(String libraryPath){

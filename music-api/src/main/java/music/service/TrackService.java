@@ -11,6 +11,7 @@ import music.repository.ILibraryRepository;
 import music.repository.IPlayCountRepository;
 import music.repository.IPlayRepository;
 import music.repository.ISkipRepository;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.JDBCType;
 import java.sql.SQLType;
 import java.util.Collections;
@@ -239,13 +241,17 @@ public class TrackService {
 		trackMapper.deleteById(id);
 	}
 
-	public Track uploadNewTrack(MultipartFile file, long libraryId) throws IOException, LibraryNotFoundException {
+	public Track uploadNewTrack(MultipartFile file, long libraryId) throws Exception {
+		return uploadNewTrack(file.getInputStream(), FilenameUtils.getExtension(file.getOriginalFilename()), libraryId);
+	}
+
+	public Track uploadNewTrack(InputStream inputStream, String fileExtension, long libraryId) throws Exception {
 		Optional<Library> libraryOpt = libraryRepository.findById(libraryId);
 		if(!libraryOpt.isPresent()) {
 			throw new LibraryNotFoundException(libraryId);
 		}
 		// write temp track to disk
-		File track = fileService.writeTempTrack(file);
+		File track = fileService.writeTempTrack(inputStream, fileExtension);
 
 		// scan metadata for this track
 		DeferredTrack tempTrackMetadata = metadataService.parseMetadata(track, libraryOpt.get());
@@ -256,7 +262,16 @@ public class TrackService {
 		SyncResult syncResult = new SyncResult();
 		upsertTracks(Collections.singletonList(trackMetadata), syncResult);
 
-		return get(syncResult.getNewTracks().get(0).getId());
+		// todo, is this change in return handling safe to make with the UI? can we make the UI display these error messages inline in the file upload modal?
+		if (!syncResult.getNewTracks().isEmpty()) {
+			return get(syncResult.getNewTracks().get(0).getId());
+		} else if (!syncResult.getFailedTracks().isEmpty()) {
+			throw new Exception("Failed to upload track.");
+		} else if (!syncResult.getModifiedTracks().isEmpty()) {
+			throw new Exception("Track already existed.");
+		} else {
+			return null;
+		}
 	}
 
 
@@ -298,7 +313,7 @@ public class TrackService {
 		return get(toId);
 	}
 
-	public Track replaceExistingTrack(MultipartFile file, long existingId) throws IOException, LibraryNotFoundException {
+	public Track replaceExistingTrack(MultipartFile file, long existingId) throws Exception {
 		// first list of all of the existing plays
 		Track existingTrack = get(existingId);
 

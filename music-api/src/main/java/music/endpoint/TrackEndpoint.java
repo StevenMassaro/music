@@ -2,7 +2,6 @@ package music.endpoint;
 
 import com.google.common.base.Preconditions;
 import lombok.extern.log4j.Log4j2;
-import music.exception.LibraryNotFoundException;
 import music.exception.RatingRangeException;
 import music.model.Device;
 import music.model.ModifyableTags;
@@ -147,7 +146,7 @@ public class TrackEndpoint {
     @PostMapping("/upload")
 	public Track uploadTrack(@RequestParam MultipartFile file,
 							 @RequestParam(required = false) Long existingId,
-							 @RequestParam(required = false) Long libraryId) throws IOException, LibraryNotFoundException {
+							 @RequestParam(required = false) Long libraryId) throws Exception {
 		Preconditions.checkNotNull(file);
 		if (existingId != null) {
 			return trackService.replaceExistingTrack(file, existingId);

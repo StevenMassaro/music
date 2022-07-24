@@ -21,6 +21,7 @@ I built this after not being able to find another music program that satisfied a
 - (basic) websocket implementation for live updates of long running tasks
 - "smart" playlists which update on the fly as track metadata changes
 - metadata changes are cached, and written to disk at a later time (when requested) - to avoid unnecessary hard drive spin ups as metadata is modified
+- local folder monitoring, where newly added files are automatically uploaded
 
 ## OpenAPI specifications
 URL TODO
