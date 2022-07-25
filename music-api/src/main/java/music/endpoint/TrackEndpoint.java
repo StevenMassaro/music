@@ -13,9 +13,12 @@ import org.apache.commons.lang3.builder.Diff;
 import org.apache.commons.lang3.builder.DiffResult;
 import org.jaudiotagger.tag.datatype.Artwork;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -128,19 +131,23 @@ public class TrackEndpoint {
     }
 
 	@GetMapping(value = "/{id}/stream")
-	public ResponseEntity<StreamingResponseBody> stream(@PathVariable long id,
-														final HttpServletResponse response) throws IOException {
+	public ResponseEntity<Resource> stream(@PathVariable long id) throws IOException {
 		Track track = trackService.get(id);
 		File file = fileService.getFile(track.getLibraryPath());
 		String mimeType = Files.probeContentType(file.toPath());
-		response.setContentType(mimeType);
-		response.setHeader(
-			"Content-Disposition",
-			"attachment;filename=" + file.getName());
 
-		StreamingResponseBody stream = out -> IOUtils.copy(FileUtils.openInputStream(file), response.getOutputStream());
+		HttpHeaders header = new HttpHeaders();
+		header.add(HttpHeaders.CONTENT_TYPE, mimeType);
+		header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + file.getName() + "\"");
+		header.add("Cache-Control", "no-cache, no-store, must-revalidate");
+		header.add("Pragma", "no-cache");
+		header.add("Expires", "0");
 
-		return new ResponseEntity<>(stream, HttpStatus.OK);
+		return ResponseEntity.ok()
+			.headers(header)
+			.contentLength(file.length())
+			.contentType(MediaType.parseMediaType(mimeType))
+			.body(new FileSystemResource(file));
 	}
 
     @PostMapping("/upload")
