@@ -24,7 +24,10 @@ I built this after not being able to find another music program that satisfied a
 - local folder monitoring, where newly added files are automatically uploaded
 
 ## OpenAPI specifications
-URL TODO
+
+[http://localhost:8080/Music/v2/api-docs](http://localhost:8080/Music/v2/api-docs)
+
+[http://localhost:8080/Music/swagger-ui/index.html](http://localhost:8080/Music/swagger-ui/index.html)
 
 ## Reverse proxy via nginx
 ```
