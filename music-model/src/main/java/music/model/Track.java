@@ -15,6 +15,7 @@ import org.springframework.util.ReflectionUtils;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,7 @@ import java.util.Objects;
 
 public class Track implements Diffable<Track> {
 
+	@NotNull
     private long id;
     private String title;
 	/**
