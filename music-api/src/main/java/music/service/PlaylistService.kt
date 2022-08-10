@@ -16,7 +16,7 @@ class PlaylistService {
 
 	fun list() : List<Playlist> = playlistRepository.findAll(Sort.by(Playlist::name.name)).toList();
 
-	fun create(name:String) : Playlist = playlistRepository.save(Playlist(null, name))
+	fun create(name:String) : Playlist = playlistRepository.save(Playlist(-1, name))
 
 	fun getById(id: Long) : Optional<Playlist> = playlistRepository.findById(id)
 

@@ -7,7 +7,7 @@ import javax.persistence.*
 open class Playlist(
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	open var id: Long? = null,
+	open var id: Long = -1,
 	open var name: String,
 	@OneToMany(cascade = arrayOf(CascadeType.ALL))
 	@JoinColumn(name="playlistId", referencedColumnName="id")

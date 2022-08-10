@@ -46,7 +46,7 @@ public class Track implements Diffable<Track> {
 
     @Min(0)
 	@Max(10)
-    private Byte rating;
+    private Integer rating;
     private String comment;
     @JsonIgnore
     private boolean deletedInd = false;
@@ -186,11 +186,11 @@ public class Track implements Diffable<Track> {
         this.plays = plays;
     }
 
-    public Byte getRating() {
+    public Integer getRating() {
         return rating;
     }
 
-    public void setRating(Byte rating) {
+    public void setRating(Integer rating) {
         this.rating = rating;
     }
 
