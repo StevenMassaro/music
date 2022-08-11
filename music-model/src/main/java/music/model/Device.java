@@ -5,6 +5,7 @@ import java.util.Date;
 
 public class Device {
 
+	@NotNull
     private long id;
     @NotNull
     private String name;

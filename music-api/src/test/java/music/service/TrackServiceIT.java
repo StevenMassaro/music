@@ -237,11 +237,11 @@ public class TrackServiceIT extends IntegrationTestBase {
 
         assertNull(track.getRating());
 
-        byte rating = 3;
+        Integer rating = 3;
         trackService.setRating(track.getId(), rating);
 
         track = trackService.get(track.getId());
-        assertEquals(rating, (byte)track.getRating());
+        assertEquals(rating, track.getRating());
     }
 
     @Test

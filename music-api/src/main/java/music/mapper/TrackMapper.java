@@ -46,7 +46,7 @@ public interface TrackMapper {
 
     void markDeletedById(@Param("id")long id, @Param("deletedInd") boolean deletedInd);
 
-    void setRatingById(long id, byte rating);
+    void setRatingById(long id, int rating);
 
     void updateFieldById(long id, String field, Object newValue, String type);
 
