@@ -15,6 +15,7 @@ import org.springframework.util.ReflectionUtils;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,7 @@ import java.util.Objects;
 
 public class Track implements Diffable<Track> {
 
+	@NotNull
     private long id;
     private String title;
 	/**
@@ -44,7 +46,7 @@ public class Track implements Diffable<Track> {
 
     @Min(0)
 	@Max(10)
-    private Byte rating;
+    private Integer rating;
     private String comment;
     @JsonIgnore
     private boolean deletedInd = false;
@@ -184,11 +186,11 @@ public class Track implements Diffable<Track> {
         this.plays = plays;
     }
 
-    public Byte getRating() {
+    public Integer getRating() {
         return rating;
     }
 
-    public void setRating(Byte rating) {
+    public void setRating(Integer rating) {
         this.rating = rating;
     }
 

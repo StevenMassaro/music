@@ -8,7 +8,6 @@ import music.model.ModifyableTags;
 import music.model.Track;
 import music.service.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.Diff;
 import org.apache.commons.lang3.builder.DiffResult;
 import org.jaudiotagger.tag.datatype.Artwork;
@@ -17,14 +16,11 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -108,7 +104,7 @@ public class TrackEndpoint {
 	}
 
 	@PatchMapping("/{id}/rating/{rating}")
-	public Track updateRating(@PathVariable long id, @PathVariable byte rating) throws RatingRangeException {
+	public Track updateRating(@PathVariable long id, @PathVariable int rating) throws RatingRangeException {
     	trackService.setRating(id, rating);
     	return trackService.get(id);
 	}

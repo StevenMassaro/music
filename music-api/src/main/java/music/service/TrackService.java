@@ -301,7 +301,7 @@ public class TrackService {
 		for (Skip existingTrackSkip : existingTrackSkips) {
 			skipMapper.insertSkip(toId, existingTrackSkip.getSkipDate(), existingTrackSkip.getDeviceId(), existingTrackSkip.isImported(), existingTrackSkip.getSecondsPlayed());
 		}
-		Byte existingTrackRating = existingTrack.getRating();
+		Integer existingTrackRating = existingTrack.getRating();
 		if (existingTrackRating != null) {
 			try {
 				setRating(toId, existingTrackRating);
@@ -368,7 +368,7 @@ public class TrackService {
      * @param rating the rating of the song, between 0 and 10 (inclusive)
      * @throws RatingRangeException if the supplied rating is outside the allowable range
      */
-    public void setRating(long id, byte rating) throws RatingRangeException {
+    public void setRating(long id, int rating) throws RatingRangeException {
         if(rating > 10 || rating < 0){
             throw new RatingRangeException(String.format("Rating %s is outside range of [0-10]", rating));
         } else {
