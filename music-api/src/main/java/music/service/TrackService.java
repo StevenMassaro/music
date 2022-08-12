@@ -3,6 +3,7 @@ package music.service;
 import lombok.extern.log4j.Log4j2;
 import music.exception.LibraryNotFoundException;
 import music.exception.RatingRangeException;
+import music.exception.TrackAlreadyExistsException;
 import music.mapper.PlayMapper;
 import music.mapper.SkipMapper;
 import music.mapper.TrackMapper;
@@ -268,7 +269,7 @@ public class TrackService {
 		} else if (!syncResult.getFailedTracks().isEmpty()) {
 			throw new Exception("Failed to upload track.");
 		} else if (!syncResult.getModifiedTracks().isEmpty()) {
-			throw new Exception("Track already existed.");
+			throw new TrackAlreadyExistsException();
 		} else {
 			return null;
 		}

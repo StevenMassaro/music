@@ -3,6 +3,7 @@ package music.endpoint;
 import com.google.common.base.Preconditions;
 import lombok.extern.log4j.Log4j2;
 import music.exception.RatingRangeException;
+import music.exception.TrackAlreadyExistsException;
 import music.model.Device;
 import music.model.ModifyableTags;
 import music.model.Track;
@@ -16,6 +17,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -147,15 +149,19 @@ public class TrackEndpoint {
 	}
 
     @PostMapping("/upload")
-	public Track uploadTrack(@RequestParam MultipartFile file,
+	public ResponseEntity<Track> uploadTrack(@RequestParam MultipartFile file,
 							 @RequestParam(required = false) Long existingId,
 							 @RequestParam(required = false) Long libraryId) throws Exception {
 		Preconditions.checkNotNull(file);
 		if (existingId != null) {
-			return trackService.replaceExistingTrack(file, existingId);
+			return new ResponseEntity<>(trackService.replaceExistingTrack(file, existingId), HttpStatus.CREATED);
 		} else {
 			Preconditions.checkNotNull(libraryId);
-			return trackService.uploadNewTrack(file, libraryId);
+			try {
+				return new ResponseEntity<>(trackService.uploadNewTrack(file, libraryId), HttpStatus.CREATED);
+			} catch (TrackAlreadyExistsException e) {
+				return new ResponseEntity<>(HttpStatus.CONFLICT);
+			}
 		}
 	}
 
