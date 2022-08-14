@@ -3,7 +3,6 @@ package music.endpoint;
 import com.google.common.base.Preconditions;
 import lombok.extern.log4j.Log4j2;
 import music.exception.RatingRangeException;
-import music.exception.TrackAlreadyExistsException;
 import music.model.Device;
 import music.model.ModifyableTags;
 import music.model.Track;
@@ -149,19 +148,16 @@ public class TrackEndpoint {
 	}
 
     @PostMapping("/upload")
-	public ResponseEntity<Track> uploadTrack(@RequestParam MultipartFile file,
+	@ResponseStatus(HttpStatus.CREATED)
+	public Track uploadTrack(@RequestParam MultipartFile file,
 							 @RequestParam(required = false) Long existingId,
 							 @RequestParam(required = false) Long libraryId) throws Exception {
 		Preconditions.checkNotNull(file);
 		if (existingId != null) {
-			return new ResponseEntity<>(trackService.replaceExistingTrack(file, existingId), HttpStatus.CREATED);
+			return trackService.replaceExistingTrack(file, existingId);
 		} else {
 			Preconditions.checkNotNull(libraryId);
-			try {
-				return new ResponseEntity<>(trackService.uploadNewTrack(file, libraryId), HttpStatus.CREATED);
-			} catch (TrackAlreadyExistsException e) {
-				return new ResponseEntity<>(HttpStatus.CONFLICT);
-			}
+			return trackService.uploadNewTrack(file, libraryId);
 		}
 	}
 
