@@ -1,5 +1,6 @@
 package music.service
 
+import music.exception.TrackAlreadyExistsException
 import music.model.Playlist
 import music.model.PlaylistTrack
 import music.repository.IPlaylistRepository
@@ -21,10 +22,15 @@ class PlaylistService {
 	fun getById(id: Long) : Optional<Playlist> = playlistRepository.findById(id)
 
 	fun addTrack(id: Long, trackId: Long): Playlist {
-		val playlist = getById(id).get();
+		val playlist = getById(id).get()
 		val modDate = Date()
-		playlist.trackIds.add(PlaylistTrack(id, trackId, null, modDate))
-		playlist.dateUpdated = modDate
-		return playlistRepository.save(playlist)
+		val newPlaylistTrack = PlaylistTrack(id, trackId, null, modDate)
+		if (playlist.trackIds.contains(newPlaylistTrack)) {
+			throw TrackAlreadyExistsException()
+		} else {
+			playlist.trackIds.add(newPlaylistTrack)
+			playlist.dateUpdated = modDate
+			return playlistRepository.save(playlist)
+		}
 	}
 }

@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 public class PlaylistTrack implements Serializable {
@@ -58,5 +59,18 @@ public class PlaylistTrack implements Serializable {
 	}
 
 	public PlaylistTrack() {
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		PlaylistTrack that = (PlaylistTrack) o;
+		return playlistId == that.playlistId && trackId == that.trackId;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(playlistId, trackId);
 	}
 }

@@ -1,5 +1,6 @@
 package music.service;
 
+import music.exception.TrackAlreadyExistsException;
 import music.model.Playlist;
 import music.model.Track;
 import org.apache.commons.lang3.time.DateUtils;
@@ -46,5 +47,9 @@ public class PlaylistServiceIT extends IntegrationTestBase {
 
 		List<Playlist> list = playlistService.list();
 		assertNotNull(list);
+
+		assertThrows(TrackAlreadyExistsException.class, () -> {
+			playlistService.addTrack(playlist.getId(), track.getId());
+		});
 	}
 }
