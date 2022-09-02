@@ -168,7 +168,7 @@
 
     <select id="getByLocationAndLibrary" resultMap="trackResultMap">
         <include refid="selectColumns"/>
-        WHERE t.location = #{location} AND t.libraryId = #{libraryId}
+        WHERE trim(t.location) = #{location} AND t.libraryId = #{libraryId}
     </select>
 
 	<select id="getByTitleArtistAlbum" resultMap="trackResultMap">
