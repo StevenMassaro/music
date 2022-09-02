@@ -36,6 +36,7 @@ public class DeferredTrack extends Track {
     public String toString() {
         return "DeferredTrack{" +
                 "musicFileSource='" + musicFileSource + '\'' +
+				"track='" + super.toString() + '\'' +
                 '}';
     }
 }
