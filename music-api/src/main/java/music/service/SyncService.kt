@@ -35,6 +35,7 @@ class SyncService @Autowired constructor(private val metadataService: MetadataSe
 			trackService.upsertTracks(files, syncResult, forceUpdates)
 			trackService.deleteOrphanedTracksMetadata(files, syncResult, library)
 			logger.info("Finished database sync")
+			logger.debug("Sync results: {}", syncResult)
 			return syncResult
 		} finally {
 			currentlySyncing.set(false)
