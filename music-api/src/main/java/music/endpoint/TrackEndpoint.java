@@ -219,6 +219,7 @@ public class TrackEndpoint {
 			Track track1 = byId.get();
 			track1.setAlbumArtSource(albumArtSource);
 			track1.setDateUpdated(new Date());
+			track1.setAlbumArtDateUpdated(new Date());
 			trackRepository.save(track1);
 		}
 	}

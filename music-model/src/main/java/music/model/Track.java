@@ -72,6 +72,8 @@ public class Track implements Diffable<Track> {
     private Library library;
     @JsonIgnore
 	private String albumArtSource;
+    @JsonIgnore
+	private Date albumArtDateUpdated;
 
     public Track(){
     }
@@ -306,6 +308,14 @@ public class Track implements Diffable<Track> {
 
 	public void setAlbumArtSource(String albumArtSource) {
 		this.albumArtSource = albumArtSource;
+	}
+
+	public Date getAlbumArtDateUpdated() {
+		return albumArtDateUpdated;
+	}
+
+	public void setAlbumArtDateUpdated(Date albumArtDateUpdated) {
+		this.albumArtDateUpdated = albumArtDateUpdated;
 	}
 
 	@Override
