@@ -62,7 +62,7 @@ public class FileService extends AbstractService {
 	 * Move the temporary track into a dynamically generated folder, determined by using the pattern specified in
 	 * the application properties and replacing those placeholder values with the actual values from the file's ID3 tag.
 	 */
-	public File moveTempTrack(File tempTrack, DeferredTrack metadata) throws IOException {
+	public File moveTempTrack(File tempTrack, DeferredTrack metadata) throws Exception {
 		String newFullPath = generateFilename(metadata); // includes filename at end of path
 		String newPath = FilenameUtils.getPath(newFullPath); // just the path, no filename
 		String newFilename = FilenameUtils.getName(newFullPath);
@@ -84,24 +84,33 @@ public class FileService extends AbstractService {
 	 * Generate the filename (including folders) using the pattern specified in the application.properties, replacing
 	 * the placeholder values with the values specified in the deferred track.
 	 */
-	public String generateFilename(DeferredTrack deferredTrack){
+	public String generateFilename(DeferredTrack deferredTrack) throws Exception {
     	String pattern = Paths.get(deferredTrack.getLibrary().getSubfolder(), trackNamePattern).toString();
+    	int successfulReplaces = 0;
+    	int failedReplaces = 0;
     	for(TrackNamePattern trackNamePattern : TrackNamePattern.values()){
 			Field field = ReflectionUtils.findField(deferredTrack.getClass(), trackNamePattern.toString().toLowerCase());
 			if (field != null) {
 				ReflectionUtils.makeAccessible(field);
 				Object value = ReflectionUtils.getField(field, deferredTrack);
 				String trackNamePatternString = trackNamePattern.toString();
-				if (value != null) {
+				if (value != null && ((!(value instanceof String)) || !((String) value).isEmpty())) {
 					log.trace("Replacing {} with value {}", trackNamePatternString, value);
 					pattern = pattern.replaceAll(trackNamePattern.toString(), value.toString());
+					successfulReplaces++;
 				} else {
 					value = "Unknown";
 					log.trace("Replacing {} with value {}", trackNamePatternString, value);
 					pattern = pattern.replaceAll(trackNamePattern.toString(), value.toString());
+					failedReplaces++;
 				}
 			}
 		}
+
+    	if (successfulReplaces == 0 && failedReplaces > 0) {
+    		throw new Exception("Failed to generate a filename from the metadata from the track. This usually occurs when the uploaded track has no metadata.");
+		}
+
     	String extension = deferredTrack.getExtension();
     	// remove illegal characters from generated filename
     	return (pattern + "." + extension).replaceAll("[^a-zA-Z0-9\\\\.\\-_/\\s]", "");
