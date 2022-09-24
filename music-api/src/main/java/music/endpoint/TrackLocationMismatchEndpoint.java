@@ -5,7 +5,6 @@ import music.model.MismatchedTrackLocation;
 import music.model.Track;
 import music.service.FileService;
 import music.service.TrackService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +30,7 @@ public class TrackLocationMismatchEndpoint {
 		List<Track> tracks = trackService.list();
 		List<MismatchedTrackLocation> mismatchedTracks = new ArrayList<>();
 		for (Track track : tracks) {
-			String currentLocation = track.getLocation();
+			String currentLocation = track.getLibraryPath();
 			String intendedLocation = fileService.generateFilename(track);
 			if (!currentLocation.equals(intendedLocation)) {
 				mismatchedTracks.add(new MismatchedTrackLocation(track.getId(), currentLocation, intendedLocation));
