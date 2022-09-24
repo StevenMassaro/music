@@ -13,6 +13,7 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.springframework.util.ReflectionUtils;
 
+import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -25,9 +26,11 @@ import java.util.Date;
 import java.util.Objects;
 
 
+@Entity
 public class Track implements Diffable<Track> {
 
 	@NotNull
+	@Id
     private long id;
     private String title;
 	/**
@@ -42,7 +45,9 @@ public class Track implements Diffable<Track> {
     private String year;
     private Long disc_no;
     private Long track;
+    @Transient
     private long plays;
+    @Transient
     private long skips;
 
     @Min(0)
@@ -60,9 +65,16 @@ public class Track implements Diffable<Track> {
     private Date dateUpdated;
     @JsonIgnore
     private Date fileLastModifiedDate;
+    @Transient
     private Date lastPlayedDate;
     @JsonIgnore
+	@OneToOne(targetEntity = Library.class)
+	@JoinColumn(name = "libraryid")
     private Library library;
+    @JsonIgnore
+	private String albumArtSource;
+    @JsonIgnore
+	private Date albumArtDateUpdated;
 
     public Track(){
     }
@@ -291,28 +303,53 @@ public class Track implements Diffable<Track> {
 		this.library = library;
 	}
 
-    @Override
-    public String toString() {
-        return "Track{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", location='" + location + '\'' +
-                ", hash='" + hash + '\'' +
-                ", album='" + album + '\'' +
-                ", artist='" + artist + '\'' +
-                ", album_artist='" + album_artist + '\'' +
-                ", genre='" + genre + '\'' +
-                ", year='" + year + '\'' +
-                ", disc_no=" + disc_no +
-                ", track=" + track +
-                ", comment='" + comment + '\'' +
-                ", deletedInd=" + deletedInd +
-                ", dateCreated=" + dateCreated +
-                ", dateUpdated=" + dateUpdated +
-                ", fileLastModifiedDate=" + fileLastModifiedDate +
-                ", lastPlayedDate=" + lastPlayedDate +
-                '}';
-    }
+	public String getAlbumArtSource() {
+		return albumArtSource;
+	}
+
+	public void setAlbumArtSource(String albumArtSource) {
+		this.albumArtSource = albumArtSource;
+	}
+
+	public Date getAlbumArtDateUpdated() {
+		return albumArtDateUpdated;
+	}
+
+	public void setAlbumArtDateUpdated(Date albumArtDateUpdated) {
+		this.albumArtDateUpdated = albumArtDateUpdated;
+	}
+
+	@Override
+	public String toString() {
+		return "Track{" +
+			"id=" + id +
+			", title='" + title + '\'' +
+			", location='" + location + '\'' +
+			", hash='" + hash + '\'' +
+			", album='" + album + '\'' +
+			", artist='" + artist + '\'' +
+			", album_artist='" + album_artist + '\'' +
+			", genre='" + genre + '\'' +
+			", year='" + year + '\'' +
+			", disc_no=" + disc_no +
+			", track=" + track +
+			", plays=" + plays +
+			", skips=" + skips +
+			", rating=" + rating +
+			", comment='" + comment + '\'' +
+			", deletedInd=" + deletedInd +
+			", bitrate=" + bitrate +
+			", encoding='" + encoding + '\'' +
+			", sampleRate=" + sampleRate +
+			", duration=" + duration +
+			", dateCreated=" + dateCreated +
+			", dateUpdated=" + dateUpdated +
+			", fileLastModifiedDate=" + fileLastModifiedDate +
+			", lastPlayedDate=" + lastPlayedDate +
+			", library=" + library +
+			", albumArtSource='" + albumArtSource + '\'' +
+			'}';
+	}
 
     public boolean id3Equals(Object o) {
         if (this == o) return true;

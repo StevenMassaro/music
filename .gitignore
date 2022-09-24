@@ -4,3 +4,4 @@ MM.DB
 *.iml
 .idea/*
 target/
+.flattened-pom.xml
