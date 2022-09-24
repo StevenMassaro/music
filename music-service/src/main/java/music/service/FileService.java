@@ -84,7 +84,7 @@ public class FileService extends AbstractService {
 	 * Generate the filename (including folders) using the pattern specified in the application.properties, replacing
 	 * the placeholder values with the values specified in the deferred track.
 	 */
-	public String generateFilename(DeferredTrack deferredTrack){
+	public String generateFilename(Track deferredTrack){
     	String pattern = Paths.get(deferredTrack.getLibrary().getSubfolder(), trackNamePattern).toString();
     	for(TrackNamePattern trackNamePattern : TrackNamePattern.values()){
 			Field field = ReflectionUtils.findField(deferredTrack.getClass(), trackNamePattern.toString().toLowerCase());
