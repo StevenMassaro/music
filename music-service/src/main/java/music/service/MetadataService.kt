@@ -51,13 +51,9 @@ class MetadataService @Autowired constructor(private val fileService: FileServic
     }
 
 	/**
-	 * Parse the ID3 tag in the [file] and return the metadata from that file. Will catch all exceptions and return null
-	 * in the event of an exception.
+	 * Given a [file], generate a location from the file's absolute path and [library].
 	 */
-	fun parseMetadata(file:File, library:Library) : DeferredTrack? {
-		val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
-		val tag = audioFile.tag
-		val header = audioFile.audioHeader
+	fun generateLocationFromFilePath(file: File, library: Library) : String {
 		/*
 		* We always want the track location to start with a slash, for backwards compatibility with existing data.
 		* Sometimes the directories are nested enough:
@@ -75,6 +71,18 @@ class MetadataService @Autowired constructor(private val fileService: FileServic
 		if (!location.startsWith(File.separator)) {
 			location = File.separator + location
 		}
+		return location
+	}
+
+	/**
+	 * Parse the ID3 tag in the [file] and return the metadata from that file. Will catch all exceptions and return null
+	 * in the event of an exception.
+	 */
+	fun parseMetadata(file:File, library:Library) : DeferredTrack? {
+		val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
+		val tag = audioFile.tag
+		val header = audioFile.audioHeader
+		val location = generateLocationFromFilePath(file, library)
 		return try {
 			DeferredTrack(
 				tag,

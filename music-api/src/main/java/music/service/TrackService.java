@@ -122,6 +122,10 @@ public class TrackService {
     	return trackMapper.list();
 	}
 
+	public void update(Track track) {
+    	trackMapper.update(track);
+	}
+
     /**
      * Lists all non-deleted tracks, applying the updates that are queued.
 	 * @param libraryId only tracks in this library will be returned. If null, all tracks will be returned.
