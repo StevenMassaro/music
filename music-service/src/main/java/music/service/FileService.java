@@ -1,7 +1,6 @@
 package music.service;
 
 import lombok.extern.log4j.Log4j2;
-import music.model.DeferredTrack;
 import music.model.Library;
 import music.model.Track;
 import music.model.TrackNamePattern;
@@ -62,7 +61,7 @@ public class FileService extends AbstractService {
 	 * Move the temporary track into a dynamically generated folder, determined by using the pattern specified in
 	 * the application properties and replacing those placeholder values with the actual values from the file's ID3 tag.
 	 */
-	public File moveTempTrack(File tempTrack, DeferredTrack metadata) throws Exception {
+	public File moveTempTrack(File tempTrack, Track metadata) throws Exception {
 		String newFullPath = generateFilename(metadata); // includes filename at end of path
 		String newPath = FilenameUtils.getPath(newFullPath); // just the path, no filename
 		String newFilename = FilenameUtils.getName(newFullPath);
@@ -139,15 +138,28 @@ public class FileService extends AbstractService {
         return fileDeleted;
     }
 
+	/**
+	 * Deletes the supplied directory if it is empty. If it is empty, goes one directory up and repeats process until
+	 * a nonempty directory is found, then stops.
+	 * NOTE that delete is called on the supplied File, regardless of whether it is a directory or a file.
+	 */
+	public boolean recursivelyDeleteEmptyDirectories(String directory) {
+		return recursivelyDeleteEmptyDirectories(new File(directory));
+	}
+
     /**
      * Deletes the supplied directory if it is empty. If it is empty, goes one directory up and repeats process until
      * a nonempty directory is found, then stops.
+	 * NOTE that delete is called on the supplied File, regardless of whether it is a directory or a file.
      */
-    public boolean recursivelyDeleteEmptyDirectories(String directory) {
-        boolean wasDirectoryDeleted = new File(directory).delete();
+    public boolean recursivelyDeleteEmptyDirectories(File directory) {
+    	if (directory == null) {
+    		return false;
+		}
+        boolean wasDirectoryDeleted = directory.delete();
         if (wasDirectoryDeleted) {
             log.debug("Directory {} is empty and was deleted", directory);
-            return recursivelyDeleteEmptyDirectories(FilenameUtils.getFullPath(directory.substring(0, directory.length() - 1)));
+            return recursivelyDeleteEmptyDirectories(directory.getParentFile());
         } else {
             log.debug("Directory {} is not empty and was not deleted", directory);
         }
