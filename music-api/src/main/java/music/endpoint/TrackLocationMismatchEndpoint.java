@@ -1,6 +1,7 @@
 package music.endpoint;
 
 import lombok.extern.log4j.Log4j2;
+import music.model.Library;
 import music.model.MismatchedTrackLocation;
 import music.model.Track;
 import music.model.TrackLocationMismatchResponseWrapper;
@@ -19,6 +20,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This endpoint exposes tools for moving tracks to the correct location, as determined by
+ * {@link MetadataService#generateLocationFromFilePath(File, Library)}. In previous versions, applying metadata changes
+ * did not cause the file to move location, even if it should move. That issue can be resolved with these tools.
+ */
 @RestController
 @RequestMapping("/track-location-mismatch")
 @Log4j2
@@ -64,7 +70,9 @@ public class TrackLocationMismatchEndpoint {
 		List<MismatchedTrackLocation> list = list().getData();
 		List<Track> moved = new ArrayList<>(list.size());
 		Map<Track, Exception> errors = new LinkedHashMap<>();
-		for (MismatchedTrackLocation mismatchedTrackLocation : list) {
+		for (int i = 0; i < list.size(); i++) {
+			log.debug("Processing mismatched track {}/{}", i, list.size());
+			MismatchedTrackLocation mismatchedTrackLocation = list.get(i);
 			String currentLocation = mismatchedTrackLocation.getCurrentLocation();
 			long trackId = mismatchedTrackLocation.getTrackId();
 			Track track = trackService.get(trackId);

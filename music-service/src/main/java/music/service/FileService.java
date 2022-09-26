@@ -66,6 +66,8 @@ public class FileService extends AbstractService {
 		String newPath = FilenameUtils.getPath(newFullPath); // just the path, no filename
 		String newFilename = FilenameUtils.getName(newFullPath);
 
+		log.debug("Moving file {} to {}", tempTrack, newFullPath);
+
 		// first make the directories that the track will need, if they don't yet exist
 		File folder = new File(Objects.requireNonNull(localMusicFileLocation), newPath);
 		folder.mkdirs();
