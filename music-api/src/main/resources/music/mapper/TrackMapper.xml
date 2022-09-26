@@ -111,6 +111,8 @@
         , t.datecreated
         , t.dateupdated
         , t.filelastmodifieddate
+		, t.albumArtSource
+		, t.albumArtDateUpdated
     	, (
 			SELECT max(p.playdate)
 			FROM music.plays p
@@ -223,7 +225,12 @@
         sampleRate = #{track.sampleRate},
         duration = #{track.duration},
         fileLastModifiedDate = #{track.fileLastModifiedDate},
-        dateUpdated = #{track.dateUpdated}
+        dateUpdated = #{track.dateUpdated},
+		albumArtSource = #{track.albumArtSource},
+		albumArtDateUpdated = #{track.albumArtDateUpdated},
+		rating = #{track.rating},
+		deletedInd = #{track.deletedInd},
+		location = #{track.location}
         WHERE id = #{track.id}
     </update>
 
