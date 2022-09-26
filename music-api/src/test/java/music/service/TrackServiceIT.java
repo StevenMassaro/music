@@ -7,14 +7,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.platform.commons.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
 
 import static music.helper.BuilderKt.doTrackAssertions;
 import static music.helper.BuilderKt.track;
@@ -119,6 +119,82 @@ public class TrackServiceIT extends IntegrationTestBase {
         assertEquals(bitrate, list.get(0).getBitrate());
         assertNotNull(list.get(0).getDateUpdated());
     }
+
+	/**
+	 * This test uses reflection to set random values for all of the properties in the Track.java class. It then
+	 * updates the track in the database and loads it again. In theory, this will prevent the developer from
+	 * accidentally forgetting to add a property to the select or update statements in the TrackMapper.xml file.
+	 */
+	@Test
+	public void allFieldsAreUpdatedAndQueried() throws IllegalAccessException {
+    	Track track = insertTempFile();
+
+		List<Field> fields = ReflectionUtils.findFields(Track.class, (Field x) -> !Arrays.asList(
+			"location", // setting this to a random value causes the hash calculation of the file to fail, because no file exists at the random location
+			"id", // shouldn't be modified
+			"plays", // is calculated
+			"skips", // is calculated
+			"lastPlayedDate", // is calculated
+			"library", // too lazy to set up another library and transfer the song to the new library
+			"dateCreated", // shouldn't be modified
+			"hash" // shouldn't be modified
+		).contains(x.getName()), ReflectionUtils.HierarchyTraversalMode.TOP_DOWN);
+		assertFalse(fields.isEmpty());
+
+		String newStringVal = "randomvalue";
+		Date newDateVal = new Date(2015, Calendar.FEBRUARY, 1);
+		int newIntVal = 10212;
+		boolean newBooleanVal = true;
+		long newLongVal = 29381029L;
+
+		List<Field> unmatchedUnchangedFields = new ArrayList<>();
+		for (Field field : fields) {
+			Class<?> type = field.getType();
+			org.springframework.util.ReflectionUtils.makeAccessible(field);
+			if (type.isAssignableFrom(String.class)) {
+				field.set(track, newStringVal);
+			} else if (type.isAssignableFrom(Date.class)) {
+				field.set(track, newDateVal);
+			} else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
+				field.set(track, newBooleanVal);
+			} else if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(int.class)) {
+				field.set(track, newIntVal);
+			} else if (type.isAssignableFrom(Long.class) || type.isAssignableFrom(long.class)) {
+				field.set(track, newLongVal);
+			} else {
+				unmatchedUnchangedFields.add(field);
+			}
+		}
+
+		assertTrue("There were some fields that weren't updated but needed to be: " + unmatchedUnchangedFields, unmatchedUnchangedFields.isEmpty());
+
+		// do update
+		trackService.update(track);
+
+		// see what fields are different
+		Track afterUpdating = trackService.get(track.getId());
+
+		for (Field field : fields) {
+			Class<?> type = field.getType();
+			org.springframework.util.ReflectionUtils.makeAccessible(field);
+			Object actualValue = org.springframework.util.ReflectionUtils.getField(field, afterUpdating);
+			Object expectedValue = null;
+			if (type.isAssignableFrom(String.class)) {
+				expectedValue = newStringVal;
+			} else if (type.isAssignableFrom(Date.class)) {
+				expectedValue = newDateVal;
+			} else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
+				expectedValue = newBooleanVal;
+			} else if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(int.class)) {
+				expectedValue = newIntVal;
+			} else if (type.isAssignableFrom(Long.class) || type.isAssignableFrom(long.class)) {
+				expectedValue = newLongVal;
+			} else {
+				fail("Encountered a field type that has no comparison defined for it.");
+			}
+			assertEquals("The field " + field.getName() + " was not updated", expectedValue, actualValue);
+		}
+	}
 
     @Test
     public void listenedTrack() throws IOException {

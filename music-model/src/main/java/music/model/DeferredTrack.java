@@ -5,6 +5,7 @@ import org.jaudiotagger.tag.Tag;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Date;
 
 import static music.utils.HashUtils.calculateHash;
@@ -29,7 +30,7 @@ public class DeferredTrack extends Track {
 
     @Override
     public String getHash() throws IOException {
-    	return calculateHash(musicFileSource + File.separator + super.getLibraryPath());
+    	return calculateHash(Paths.get(musicFileSource, super.getLibraryPath()).toString());
     }
 
     @Override
