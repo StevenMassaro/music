@@ -6,7 +6,6 @@ import music.exception.RatingRangeException;
 import music.model.Device;
 import music.model.ModifyableTags;
 import music.model.Track;
-import music.repository.ITrackRepository;
 import music.service.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.Diff;
@@ -27,7 +26,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static music.utils.EndpointUtils.responseEntity;
@@ -50,12 +52,10 @@ public class TrackEndpoint {
 
 	private final TrackWebsocket trackWebsocket;
 
-	private final ITrackRepository trackRepository;
-
     private final String DATE_FORMAT = "yyyy-MM-dd";
 
     @Autowired
-	public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService, MetadataService metadataService, DeviceService deviceService, ConvertService convertService, TrackWebsocket trackWebsocket, ITrackRepository trackRepository) {
+	public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService, MetadataService metadataService, DeviceService deviceService, ConvertService convertService, TrackWebsocket trackWebsocket) {
         this.fileService = fileService;
         this.trackService = trackService;
         this.updateService = updateService;
@@ -63,7 +63,6 @@ public class TrackEndpoint {
 		this.deviceService = deviceService;
 		this.convertService = convertService;
 		this.trackWebsocket = trackWebsocket;
-		this.trackRepository = trackRepository;
 	}
 
     @GetMapping
@@ -194,7 +193,7 @@ public class TrackEndpoint {
 				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), tempFile);
 				convertService.deleteHash(trackToUpdate.getId());
 				trackService.updateHashOfTrack(trackToUpdate.getLibraryPath(), trackToUpdate.getId());
-				updateAlbumArtSource(trackToUpdate.getId(), file.getOriginalFilename());
+				updateAlbumArtSource(trackToUpdate, file.getOriginalFilename());
 				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
 			}
 			tempFile.delete();
@@ -205,7 +204,7 @@ public class TrackEndpoint {
 				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), url);
 				convertService.deleteHash(trackToUpdate.getId());
 				trackService.updateHashOfTrack(trackToUpdate.getLibraryPath(), trackToUpdate.getId());
-				updateAlbumArtSource(trackToUpdate.getId(), url);
+				updateAlbumArtSource(trackToUpdate, url);
 				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
 			}
 		}
@@ -213,15 +212,11 @@ public class TrackEndpoint {
     	return trackService.get(id);
 	}
 
-	private void updateAlbumArtSource(long id, String albumArtSource) {
-		Optional<Track> byId = trackRepository.findById(id);
-		if (byId.isPresent()) {
-			Track track1 = byId.get();
-			track1.setAlbumArtSource(albumArtSource);
-			track1.setDateUpdated(new Date());
-			track1.setAlbumArtDateUpdated(new Date());
-			trackRepository.save(track1);
-		}
+	private void updateAlbumArtSource(Track track, String albumArtSource) {
+		track.setAlbumArtSource(albumArtSource);
+		track.setDateUpdated(new Date());
+		track.setAlbumArtDateUpdated(new Date());
+		trackService.update(track);
 	}
 
     @PostMapping("/{id}/listened")
