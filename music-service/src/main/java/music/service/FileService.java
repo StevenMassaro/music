@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.regex.Matcher;
 
 @Service
 @Log4j2
@@ -97,12 +98,12 @@ public class FileService extends AbstractService {
 				String trackNamePatternString = trackNamePattern.toString();
 				if (value != null && ((!(value instanceof String)) || !((String) value).isEmpty())) {
 					log.trace("Replacing {} with value {}", trackNamePatternString, value);
-					pattern = pattern.replaceAll(trackNamePattern.toString(), value.toString());
+					pattern = pattern.replaceAll(trackNamePattern.toString(), Matcher.quoteReplacement(value.toString()));
 					successfulReplaces++;
 				} else {
 					value = "Unknown";
 					log.trace("Replacing {} with value {}", trackNamePatternString, value);
-					pattern = pattern.replaceAll(trackNamePattern.toString(), value.toString());
+					pattern = pattern.replaceAll(trackNamePattern.toString(), Matcher.quoteReplacement(value.toString()));
 					failedReplaces++;
 				}
 			}

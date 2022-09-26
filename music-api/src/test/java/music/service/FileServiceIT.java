@@ -1,5 +1,6 @@
 package music.service;
 
+import music.model.DeferredTrack;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static music.helper.BuilderKt.track;
+import static org.junit.Assert.*;
 
 public class FileServiceIT extends IntegrationTestBase {
 
@@ -38,5 +39,15 @@ public class FileServiceIT extends IntegrationTestBase {
 		fileService.recursivelyDeleteEmptyDirectories(file);
 		assertFalse(file.exists());
 		assertFalse(file.getParentFile().exists());
+	}
+
+	@Test
+	public void testSpecialCharactersInFilenameGeneration() throws Exception {
+		DeferredTrack track = track();
+		track.setArtist("Joey Bada$$");
+		track.setAlbum("B4.DA.A$$");
+
+		String s = fileService.generateFilename(track);
+		assertEquals("Music\\Joey Bada\\B4.DA.A\\3 - title.flac", s);
 	}
 }
