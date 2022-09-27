@@ -10,5 +10,10 @@ data class Library(
 	val id: Long,
 	@JsonIgnore
 	val subfolder: String,
-	val name: String
+	val name: String,
+	/**
+	 * /ARTIST/ALBUM/TRACK - TITLE
+	 */
+	@JsonIgnore
+	val trackNamePattern: String
 )

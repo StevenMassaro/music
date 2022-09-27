@@ -37,7 +37,7 @@ public abstract class IntegrationTestBase {
 
 	public File tempFile;
 	public File tempFile2;
-	public static final Library seededMusicLibrary = new Library(1, "Music", "Music");
+	public static final Library seededMusicLibrary = new Library(1, "Music", "Music", "/ARTIST/ALBUM/TRACK - TITLE");
 
 	public static class MusicPropertiesInitializer
 		implements ApplicationContextInitializer<ConfigurableApplicationContext> {

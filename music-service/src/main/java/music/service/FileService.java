@@ -31,10 +31,6 @@ public class FileService extends AbstractService {
 	@Value("${music.acceptable.file.extensions:}")
 	private String acceptableExtensions;
 
-	@Value("${music.track.name.pattern:}")
-	private String trackNamePattern;
-
-
     public Collection<File> listMusicFiles(Library library) {
         SuffixFileFilter caseInsensitiveExtensionFilter = new SuffixFileFilter(acceptableExtensions.split(","), IOCase.INSENSITIVE);
         return FileUtils.listFiles(new File(Objects.requireNonNull(localMusicFileLocation), library.getSubfolder()), caseInsensitiveExtensionFilter, TrueFileFilter.INSTANCE);
@@ -87,7 +83,7 @@ public class FileService extends AbstractService {
 	 * the placeholder values with the values specified in the deferred track.
 	 */
 	public String generateFilename(Track deferredTrack) throws Exception {
-    	String pattern = Paths.get(deferredTrack.getLibrary().getSubfolder(), trackNamePattern).toString();
+    	String pattern = Paths.get(deferredTrack.getLibrary().getSubfolder(), deferredTrack.getLibrary().getTrackNamePattern()).toString();
     	int successfulReplaces = 0;
     	int failedReplaces = 0;
     	for(TrackNamePattern trackNamePattern : TrackNamePattern.values()){

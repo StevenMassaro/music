@@ -121,6 +121,7 @@
 		, l.id as libraryId
 		, l.name as libraryName
 		, l.subfolder as librarySubFolder
+		, l.trackNamePattern as trackNamePattern
 		,
 		(
 		    SELECT Count(p.playdate)
@@ -197,6 +198,7 @@
 		<id property="id" column="libraryId" javaType="_long"/>
 		<result property="subfolder" column="librarySubFolder" javaType="String"/>
 		<result property="name" column="libraryName" javaType="String"/>
+		<result property="trackNamePattern" column="trackNamePattern" javaType="String"/>
 	</resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="track.id" keyColumn="id">
