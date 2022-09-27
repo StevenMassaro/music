@@ -15,10 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This endpoint exposes tools for moving tracks to the correct location, as determined by
@@ -45,12 +42,18 @@ public class TrackLocationMismatchEndpoint {
 		List<Track> tracks = trackService.list();
 		List<MismatchedTrackLocation> mismatchedTracks = new ArrayList<>();
 		Map<Track, Exception> errors = new LinkedHashMap<>();
+		Set<String> seenNewLocations = new HashSet<>();
 		for (Track track : tracks) {
 			try {
 				String currentLocation = track.getLibraryPath();
 				String intendedLocation = fileService.generateFilename(track);
 				if (!currentLocation.equals(intendedLocation)) {
-					mismatchedTracks.add(new MismatchedTrackLocation(track.getId(), currentLocation, intendedLocation));
+					if (seenNewLocations.contains(intendedLocation)) {
+						errors.put(track, new Exception("This track is being skipped because another track with the same correct location is already in the list. It would overwrite another file if we tried to move it. Perhaps the track name pattern for this library needs to be adjusted to introduce more uniqueness into the filenames."));
+					} else {
+						mismatchedTracks.add(new MismatchedTrackLocation(track.getId(), currentLocation, intendedLocation));
+						seenNewLocations.add(intendedLocation);
+					}
 				} else {
 					log.trace("Track {} is in the correct location", track.getId());
 				}
