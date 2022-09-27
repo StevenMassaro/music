@@ -1,5 +1,5 @@
 package music.model
 
 enum class TrackNamePattern {
-	ALBUM, ARTIST, TITLE, TRACK;
+	ALBUM, ARTIST, TITLE, TRACK, DISC_NO;
 }
