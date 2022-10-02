@@ -94,12 +94,12 @@ public class FileService extends AbstractService {
 				String trackNamePatternString = trackNamePattern.toString();
 				if (value != null && ((!(value instanceof String)) || !((String) value).isEmpty())) {
 					log.trace("Replacing {} with value {}", trackNamePatternString, value);
-					pattern = pattern.replaceAll(trackNamePattern.toString(), Matcher.quoteReplacement(value.toString()));
+					pattern = replaceStringInPattern(pattern, trackNamePatternString, value);
 					successfulReplaces++;
 				} else {
 					value = "Unknown";
 					log.trace("Replacing {} with value {}", trackNamePatternString, value);
-					pattern = pattern.replaceAll(trackNamePattern.toString(), Matcher.quoteReplacement(value.toString()));
+					pattern = replaceStringInPattern(pattern, trackNamePatternString, value);
 					failedReplaces++;
 				}
 			}
@@ -110,8 +110,11 @@ public class FileService extends AbstractService {
 		}
 
     	String extension = deferredTrack.getExtension();
-    	// remove illegal characters from generated filename
-    	return (pattern + "." + extension).replaceAll("[^a-zA-Z0-9\\\\.\\-_/\\s]", "");
+    	return pattern + "." + extension;
+	}
+
+	private String replaceStringInPattern(String pattern, String matcher, Object value) {
+		return pattern.replaceAll(matcher, Matcher.quoteReplacement(value.toString()).replaceAll("[^a-zA-Z0-9.\\-_\\s]", ""));
 	}
 
     public File getFile(String libraryPath){

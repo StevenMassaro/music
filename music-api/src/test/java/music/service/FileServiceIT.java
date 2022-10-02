@@ -45,7 +45,7 @@ public class FileServiceIT extends IntegrationTestBase {
 	public void testSpecialCharactersInFilenameGeneration() throws Exception {
 		DeferredTrack track = track();
 		track.setArtist("Joey Bada$$");
-		track.setAlbum("B4.DA.A$$");
+		track.setAlbum("B4.D/A.\\A$$");
 
 		String s = fileService.generateFilename(track);
 		assertEquals("Music\\Joey Bada\\B4.DA.A\\3 - title.flac", s);
