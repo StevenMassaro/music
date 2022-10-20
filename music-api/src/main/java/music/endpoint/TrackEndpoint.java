@@ -157,7 +157,7 @@ public class TrackEndpoint {
 			return trackService.replaceExistingTrack(file, existingId);
 		} else {
 			Preconditions.checkNotNull(libraryId);
-			return trackService.uploadNewTrack(file, libraryId);
+			return trackService.uploadNewTrack(file, libraryId, false);
 		}
 	}
 

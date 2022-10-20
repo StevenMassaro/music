@@ -244,11 +244,15 @@ public class TrackService {
 		trackMapper.deleteById(id);
 	}
 
-	public Track uploadNewTrack(MultipartFile file, long libraryId) throws Exception {
-		return uploadNewTrack(file.getInputStream(), FilenameUtils.getExtension(file.getOriginalFilename()), libraryId);
+	public Track uploadNewTrack(MultipartFile file, long libraryId, boolean replacingExistingTrack) throws Exception {
+		return uploadNewTrack(file.getInputStream(), FilenameUtils.getExtension(file.getOriginalFilename()), libraryId, replacingExistingTrack);
 	}
 
 	public Track uploadNewTrack(InputStream inputStream, String fileExtension, long libraryId) throws Exception {
+		return uploadNewTrack(inputStream, fileExtension, libraryId, false);
+	}
+
+	public Track uploadNewTrack(InputStream inputStream, String fileExtension, long libraryId, boolean replacingExistingTrack) throws Exception {
 		Optional<Library> libraryOpt = libraryRepository.findById(libraryId);
 		if(!libraryOpt.isPresent()) {
 			throw new LibraryNotFoundException(libraryId);
@@ -270,7 +274,9 @@ public class TrackService {
 			return get(syncResult.getNewTracks().get(0).getId());
 		} else if (!syncResult.getFailedTracks().isEmpty()) {
 			throw new Exception("Failed to upload track.");
-		} else if (!syncResult.getModifiedTracks().isEmpty()) {
+		} else if (replacingExistingTrack && !syncResult.getModifiedTracks().isEmpty()) {
+			return get(syncResult.getModifiedTracks().get(0).getId());
+		} else if (!replacingExistingTrack && !syncResult.getModifiedTracks().isEmpty()) {
 			throw new TrackAlreadyExistsException();
 		} else {
 			return null;
@@ -321,7 +327,7 @@ public class TrackService {
 		Track existingTrack = get(existingId);
 
 		// create the new track
-		Track newTrack = uploadNewTrack(file, existingTrack.getLibrary().getId());
+		Track newTrack = uploadNewTrack(file, existingTrack.getLibrary().getId(), true);
 
 		newTrack = copyMetadata(existingId, newTrack.getId());
 
