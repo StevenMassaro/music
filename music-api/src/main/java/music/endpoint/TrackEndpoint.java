@@ -191,7 +191,6 @@ public class TrackEndpoint {
 			for (int i = 0; i < tracksToUpdate.size(); i++) {
 				Track trackToUpdate = tracksToUpdate.get(i);
 				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), tempFile);
-				convertService.deleteHash(trackToUpdate.getId());
 				trackService.updateHashOfTrack(trackToUpdate.getLibraryPath(), trackToUpdate.getId());
 				updateAlbumArtSource(trackToUpdate, file.getOriginalFilename());
 				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
@@ -202,7 +201,6 @@ public class TrackEndpoint {
 				// todo don't download the image for each iteration
 				Track trackToUpdate = tracksToUpdate.get(i);
 				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), url);
-				convertService.deleteHash(trackToUpdate.getId());
 				trackService.updateHashOfTrack(trackToUpdate.getLibraryPath(), trackToUpdate.getId());
 				updateAlbumArtSource(trackToUpdate, url);
 				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());

@@ -87,8 +87,6 @@ class UpdateService @Autowired constructor(
 
 						logger.trace("Updating field {} to {} for ID: {}", it.field, it.newValue, id)
 						trackService.updateField(id, it.field, it.newValue, ModifyableTags.valueOf(it.field.toUpperCase()).sqlType);
-						convertService.deleteHash(track.id)
-
 						trackService.updateHashOfTrack(track.libraryPath, id)
 					} catch (e: Exception) {
 						logger.error("Failed to apply update to disk: $it", e)

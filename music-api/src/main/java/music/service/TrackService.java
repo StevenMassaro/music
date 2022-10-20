@@ -92,7 +92,6 @@ public class TrackService {
                         // since there is an existing track that we're updating, we should use the existing tracks ID for updates
                         track.setId(existingTrack.getId());
                         trackMapper.update(track);
-                        convertService.deleteHash(track.getId());
 						if (syncResult != null) {
 							syncResult.getModifiedTracks().add(track);
 						}
@@ -241,7 +240,6 @@ public class TrackService {
 		skipMapper.deleteSkipCounts(id);
 		skipMapper.deleteBySongId(id);
 
-		convertService.deleteHash(id);
 		updateService.deleteUpdateBySongId(id);
 		trackMapper.deleteById(id);
 	}

@@ -1,9 +1,7 @@
 package music.service
 
-import music.mapper.ConvertMapper
 import music.model.Device
 import music.model.Track
-import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.io.FileUtils
@@ -21,9 +19,6 @@ class ConvertService {
 
 	@Autowired
 	private lateinit var fileService: FileService
-
-	@Autowired
-	private lateinit var convertMapper: ConvertMapper
 
 	@Value("\${music.ffmpeg.path}")
 	private val ffmpegPath: String? = null
@@ -72,9 +67,6 @@ class ConvertService {
 			logger.debug("ffmpeg exit value: $exitValue")
 
 			if (exitValue == 0) {
-				// store hash in database for this device
-				upsertHash(device.id, track.id, DigestUtils.sha512Hex(target.inputStream()))
-
 				val fileBytes = FileUtils.readFileToByteArray(target)
 				FileUtils.deleteQuietly(sourceTemp)
 				FileUtils.deleteQuietly(target)
@@ -87,16 +79,4 @@ class ConvertService {
 			return null
 		}
 	}
-
-	fun getHash(deviceName: String, trackId: Long): String? = convertMapper.getHashForDeviceAndTrack(trackId, deviceName)
-
-	private fun upsertHash(deviceId: Long, trackId: Long, hash: String) = convertMapper.upsertHash(trackId, deviceId, hash)
-
-	/**
-	 * Delete all the hashes that correspond to the specified [trackId]. This should be used
-	 * when making a change to the song file (which would result in a new hash being calculated).
-	 */
-	fun deleteHash(trackId: Long) = convertMapper.deleteHash(trackId)
-
-	fun deleteHash(location: String) = convertMapper.deleteHashByLocation(location)
 }
