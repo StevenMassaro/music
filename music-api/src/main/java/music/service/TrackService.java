@@ -390,10 +390,11 @@ public class TrackService {
     	return get(id);
 	}
 
-	public void updateHashOfTrack(String libraryPath, long id) throws IOException {
+	public void updateHashOfTrack(String libraryPath, Track track) throws IOException {
 		String hash = calculateHash(fileService.getFile(libraryPath));
-		log.trace("Updating field hash to {} for ID: {}", hash, id);
-		updateField(id, "hash", hash, JDBCType.VARCHAR);
+		log.trace("Updating field hash to {} for ID: {}", hash, track.getId());
+		track.setHash(hash);
+		update(track);
 	}
 
 	public Track markSkipped(long id, long deviceId, Double secondsPlayed) throws Exception {
