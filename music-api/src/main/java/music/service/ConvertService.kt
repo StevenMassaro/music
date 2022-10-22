@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class ConvertService {
+class ConvertService : AbstractService() {
 
 	private val logger = LoggerFactory.getLogger(ConvertService::class.java)
 
@@ -34,7 +34,7 @@ class ConvertService {
 			 */
 			val sourceTemp = File.createTempFile("source", ".${track.extension}")
 			sourceTemp.deleteOnExit()
-			FileUtils.copyFile(fileService.getFile(track.libraryPath), sourceTemp)
+			FileUtils.copyFile(track.getFile(localMusicFileLocation), sourceTemp)
 
 			// todo, figure out a way to convert the file into memory rather than on disk (likely not possible due to using ffmpeg)
 			val target = File.createTempFile("example", ".${device.format}")

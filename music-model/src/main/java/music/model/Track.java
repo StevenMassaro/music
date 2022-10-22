@@ -25,6 +25,8 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Objects;
 
+import static music.utils.HashUtils.calculateHash;
+
 
 @Entity
 public class Track implements Diffable<Track> {
@@ -401,5 +403,19 @@ public class Track implements Diffable<Track> {
 	private static Long getLongOrNull(Tag tag, FieldKey fieldKey){
 		String val = tag.getFirst(fieldKey);
 		return (val == null || val.isEmpty()) ? null : Long.valueOf(val);
+	}
+
+	/**
+	 * Recalculate the hash of this file, by looking at the file on disk. Set's the hash field of this object to newly
+	 * calculated value.
+	 * @param localMusicFileLocation
+	 */
+	public void recalculateHash(String localMusicFileLocation) throws IOException {
+		String hash = calculateHash(getFile(localMusicFileLocation));
+		setHash(hash);
+	}
+
+	public File getFile(String localMusicFileLocation) {
+		return new File(Objects.requireNonNull(localMusicFileLocation), getLibraryPath());
 	}
 }

@@ -16,4 +16,8 @@ open class TrackUpdate(
 	override fun toString(): String {
 		return "TrackUpdate(id=$id, songId=$songId, field='$field', newValue='$newValue', updateType=$updateType)"
 	}
+
+	fun getModifyableTag(): ModifyableTags? {
+		return ModifyableTags.values().find { mt -> mt.propertyName == field }
+	}
 }

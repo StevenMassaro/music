@@ -117,6 +117,10 @@ public class FileService extends AbstractService {
 		return pattern.replaceAll(matcher, Matcher.quoteReplacement(value.toString()).replaceAll("[^a-zA-Z0-9.\\-_\\s]", ""));
 	}
 
+	/**
+	 * Use {@link Track#getFile(java.lang.String)} instead.
+	 */
+	@Deprecated
     public File getFile(String libraryPath){
         return new File(Objects.requireNonNull(localMusicFileLocation), libraryPath);
     }

@@ -48,7 +48,5 @@ public interface TrackMapper {
 
     void setRatingById(long id, int rating);
 
-    void updateFieldById(long id, String field, Object newValue, String type);
-
 	List<Track> listWithPlaylist(Long playlistId);
 }

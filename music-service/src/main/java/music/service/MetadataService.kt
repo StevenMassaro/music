@@ -126,7 +126,7 @@ class MetadataService @Autowired constructor(private val fileService: FileServic
 	 */
 	@Throws(TagException::class, ReadOnlyFileException::class, CannotReadException::class, InvalidAudioFrameException::class, IOException::class)
 	fun updateTrackField(track: Track, field: FieldKey, newValue: String) {
-		val file = fileService.getFile(track.libraryPath)
+		val file = track.getFile(localMusicFileLocation)
 		if (file != null && file.exists()) {
 			val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
 			val tag = audioFile.tag

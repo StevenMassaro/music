@@ -55,7 +55,7 @@
     <properties>
         <java.version>1.8</java.version>
         <kotlin.version>1.7.20</kotlin.version>
-		<revision>1.18</revision>
+		<revision>1.18.1</revision>
     </properties>
 
     <dependencyManagement>

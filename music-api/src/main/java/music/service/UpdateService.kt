@@ -15,7 +15,7 @@ class UpdateService @Autowired constructor(
 	private val metadataService: MetadataService,
 	private val convertService: ConvertService,
 	private val updateRepository: IUpdateRepository
-) {
+) : AbstractService() {
 	private val logger = LoggerFactory.getLogger(UpdateService::class.java)
 
     /**
@@ -81,13 +81,15 @@ class UpdateService @Autowired constructor(
 				val track = trackService.get(id)
 				trackUpdates.forEach {
 					try {
+						val modifyableTag = it.getModifyableTag()!!
 						logger.trace("Applying update to disk: {}", it.toString())
 						metadataService.updateTrackField(track, FieldKey.valueOf(it.field.toUpperCase()), it.newValue)
 						deleteUpdateById(it.id!!)
 
 						logger.trace("Updating field {} to {} for ID: {}", it.field, it.newValue, id)
-						trackService.updateField(id, it.field, it.newValue, ModifyableTags.valueOf(it.field.toUpperCase()).sqlType);
-						trackService.updateHashOfTrack(track.libraryPath, track)
+						modifyableTag.updateModel(track, it.newValue)
+						track.recalculateHash(localMusicFileLocation)
+						trackService.update(track)
 					} catch (e: Exception) {
 						logger.error("Failed to apply update to disk: $it", e)
 					}

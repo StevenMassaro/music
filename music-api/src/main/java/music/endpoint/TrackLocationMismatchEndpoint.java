@@ -25,7 +25,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/track-location-mismatch")
 @Log4j2
-public class TrackLocationMismatchEndpoint {
+public class TrackLocationMismatchEndpoint extends AbstractEndpoint {
 
 	private final TrackService trackService;
 	private final FileService fileService;
@@ -80,7 +80,7 @@ public class TrackLocationMismatchEndpoint {
 			long trackId = mismatchedTrackLocation.getTrackId();
 			Track track = trackService.get(trackId);
 			try {
-				File currentFile = fileService.getFile(track.getLibraryPath());
+				File currentFile = track.getFile(localMusicFileLocation);
 				if (!currentFile.exists()) {
 					throw new FileNotFoundException(currentLocation + " does not exist.");
 				}

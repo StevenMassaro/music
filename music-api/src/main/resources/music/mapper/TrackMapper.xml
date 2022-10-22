@@ -241,10 +241,4 @@
         SET rating = #{rating}
         WHERE id = #{id}
     </update>
-
-	<update id="updateFieldById">
-		UPDATE music.track
-		SET ${field} = CAST(#{newValue} AS ${type})
-		WHERE id = #{id}
-	</update>
 </mapper>

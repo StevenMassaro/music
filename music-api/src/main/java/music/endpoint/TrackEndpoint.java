@@ -37,10 +37,8 @@ import static music.utils.EndpointUtils.responseEntity;
 @RestController
 @RequestMapping("/track")
 @Log4j2
-public class TrackEndpoint {
-    private final FileService fileService;
-
-    private final TrackService trackService;
+public class TrackEndpoint extends AbstractEndpoint {
+	private final TrackService trackService;
 
     private final UpdateService updateService;
 
@@ -55,9 +53,8 @@ public class TrackEndpoint {
     private final String DATE_FORMAT = "yyyy-MM-dd";
 
     @Autowired
-	public TrackEndpoint(FileService fileService, TrackService trackService, UpdateService updateService, MetadataService metadataService, DeviceService deviceService, ConvertService convertService, TrackWebsocket trackWebsocket) {
-        this.fileService = fileService;
-        this.trackService = trackService;
+	public TrackEndpoint(TrackService trackService, UpdateService updateService, MetadataService metadataService, DeviceService deviceService, ConvertService convertService, TrackWebsocket trackWebsocket) {
+		this.trackService = trackService;
         this.updateService = updateService;
         this.metadataService = metadataService;
 		this.deviceService = deviceService;
@@ -130,7 +127,7 @@ public class TrackEndpoint {
 	@GetMapping(value = "/{id}/stream")
 	public ResponseEntity<Resource> stream(@PathVariable long id) throws IOException {
 		Track track = trackService.get(id);
-		File file = fileService.getFile(track.getLibraryPath());
+		File file = track.getFile(localMusicFileLocation);
 		String mimeType = Files.probeContentType(file.toPath());
 
 		HttpHeaders header = new HttpHeaders();
@@ -191,7 +188,7 @@ public class TrackEndpoint {
 			for (int i = 0; i < tracksToUpdate.size(); i++) {
 				Track trackToUpdate = tracksToUpdate.get(i);
 				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), tempFile);
-				trackService.updateHashOfTrack(trackToUpdate.getLibraryPath(), trackToUpdate);
+				track.recalculateHash(localMusicFileLocation);
 				updateAlbumArtSource(trackToUpdate, file.getOriginalFilename());
 				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
 			}
@@ -201,7 +198,7 @@ public class TrackEndpoint {
 				// todo don't download the image for each iteration
 				Track trackToUpdate = tracksToUpdate.get(i);
 				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), url);
-				trackService.updateHashOfTrack(trackToUpdate.getLibraryPath(), trackToUpdate);
+				track.recalculateHash(localMusicFileLocation);
 				updateAlbumArtSource(trackToUpdate, url);
 				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
 			}

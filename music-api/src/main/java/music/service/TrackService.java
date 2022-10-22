@@ -19,16 +19,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.sql.JDBCType;
-import java.sql.SQLType;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
-import static music.utils.HashUtils.calculateHash;
 
 @Service
 @Log4j2
@@ -384,18 +379,6 @@ public class TrackService {
             trackMapper.setRatingById(id, rating);
         }
     }
-
-    public Track updateField(long id, String field, Object newValue, SQLType type){
-    	trackMapper.updateFieldById(id, field, newValue, type.getName());
-    	return get(id);
-	}
-
-	public void updateHashOfTrack(String libraryPath, Track track) throws IOException {
-		String hash = calculateHash(fileService.getFile(libraryPath));
-		log.trace("Updating field hash to {} for ID: {}", hash, track.getId());
-		track.setHash(hash);
-		update(track);
-	}
 
 	public Track markSkipped(long id, long deviceId, Double secondsPlayed) throws Exception {
 		log.debug("Marking {} as skipped on device {}", id, deviceId);
