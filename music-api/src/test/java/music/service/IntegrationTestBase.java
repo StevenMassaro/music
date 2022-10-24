@@ -4,6 +4,7 @@ import music.model.DeferredTrack;
 import music.model.Library;
 import music.model.SyncResult;
 import music.model.Track;
+import music.repository.ILibraryRepository;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.After;
@@ -25,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static music.helper.BuilderKt.track;
+import static org.junit.Assert.assertNotEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -34,10 +36,13 @@ public abstract class IntegrationTestBase {
 
 	@Autowired
 	private TrackService trackService;
+	@Autowired
+	private ILibraryRepository libraryRepository;
 
 	public File tempFile;
 	public File tempFile2;
 	public static final Library seededMusicLibrary = new Library(1, "Music", "Music", "/ARTIST/ALBUM/TRACK - TITLE");
+	public static Library otherLibrary = null;
 
 	public static class MusicPropertiesInitializer
 		implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -52,6 +57,8 @@ public abstract class IntegrationTestBase {
 	public void before() throws IOException {
 		tempFile = createTempFile("sample1.flac");
 		tempFile2 = createTempFile("sample2.flac");
+		otherLibrary = libraryRepository.save(new Library(-1, "Random", "Random", "/ARTIST/ALBUM/TRACK - TITLE"));
+		assertNotEquals(-1, otherLibrary.getId());
 	}
 
 	public static File createTempFile(String filename) throws IOException {

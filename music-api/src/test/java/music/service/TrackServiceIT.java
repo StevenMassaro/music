@@ -9,9 +9,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -39,6 +41,12 @@ public class TrackServiceIT extends IntegrationTestBase {
 
 	@Autowired
 	private PlaylistService playlistService;
+
+	/**
+	 * The path where the music files are stored.
+	 */
+	@Value("${local.music.file.location}")
+	public String localMusicFileLocation;
 
     @Test
     public void addingTracks() throws IOException {
@@ -126,8 +134,10 @@ public class TrackServiceIT extends IntegrationTestBase {
 	 * accidentally forgetting to add a property to the select or update statements in the TrackMapper.xml file.
 	 */
 	@Test
-	public void allFieldsAreUpdatedAndQueried() throws IllegalAccessException {
+	public void allFieldsAreUpdatedAndQueried() throws Exception {
     	Track track = insertTempFile();
+    	// doing this so that I don't have a DeferredTrack for later processing. A deferred track causes the hash to be recomputed on update by looking at the disk.
+    	track = trackService.get(track.getId());
 
 		List<Field> fields = ReflectionUtils.findFields(Track.class, (Field x) -> !Arrays.asList(
 			"location", // setting this to a random value causes the hash calculation of the file to fail, because no file exists at the random location
@@ -135,7 +145,6 @@ public class TrackServiceIT extends IntegrationTestBase {
 			"plays", // is calculated
 			"skips", // is calculated
 			"lastPlayedDate", // is calculated
-			"library", // too lazy to set up another library and transfer the song to the new library
 			"dateCreated", // shouldn't be modified
 			"hash" // shouldn't be modified
 		).contains(x.getName()), ReflectionUtils.HierarchyTraversalMode.TOP_DOWN);
@@ -161,6 +170,8 @@ public class TrackServiceIT extends IntegrationTestBase {
 				field.set(track, newIntVal);
 			} else if (type.isAssignableFrom(Long.class) || type.isAssignableFrom(long.class)) {
 				field.set(track, newLongVal);
+			} else if (type.isAssignableFrom(Library.class)) {
+				field.set(track, otherLibrary);
 			} else {
 				unmatchedUnchangedFields.add(field);
 			}
@@ -189,6 +200,8 @@ public class TrackServiceIT extends IntegrationTestBase {
 				expectedValue = newIntVal;
 			} else if (type.isAssignableFrom(Long.class) || type.isAssignableFrom(long.class)) {
 				expectedValue = newLongVal;
+			} else if (type.isAssignableFrom(Library.class)) {
+				expectedValue = otherLibrary;
 			} else {
 				fail("Encountered a field type that has no comparison defined for it.");
 			}
@@ -431,5 +444,19 @@ public class TrackServiceIT extends IntegrationTestBase {
 		Assert.assertEquals(newGenre, track.getGenre());
 		Assert.assertEquals(newTitle, track.getTitle());
 		Assert.assertEquals(newYear, track.getYear());
+	}
+
+	@Test
+	public void moveTrackToLibrary() throws Exception {
+		Track track = insertTempFile();
+		assertEquals(1, track.getLibrary().getId());
+		File existing = track.getFile(localMusicFileLocation);
+		assertTrue(existing.exists());
+
+		Track moved = trackService.moveTrackToLibrary(track.getId(), otherLibrary.getId());
+		assertEquals(otherLibrary.getId(), moved.getLibrary().getId());
+		File movedFile = moved.getFile(localMusicFileLocation);
+		assertTrue(movedFile.exists());
+		assertFalse(existing.exists());
 	}
 }

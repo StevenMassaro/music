@@ -101,6 +101,11 @@ public class TrackEndpoint extends AbstractEndpoint {
 		return trackService.get(track.getId());
 	}
 
+	@PatchMapping("/{trackId}/library/{libraryId}")
+	public Track moveTrackToLibrary(@PathVariable long trackId, @PathVariable long libraryId) throws Exception {
+    	return trackService.moveTrackToLibrary(trackId, libraryId);
+	}
+
 	@PatchMapping("/{id}/rating/{rating}")
 	public Track updateRating(@PathVariable long id, @PathVariable int rating) throws RatingRangeException {
     	trackService.setRating(id, rating);

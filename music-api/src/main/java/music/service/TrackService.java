@@ -27,7 +27,7 @@ import java.util.Optional;
 
 @Service
 @Log4j2
-public class TrackService {
+public class TrackService extends AbstractService {
     private final TrackMapper trackMapper;
     private final PlayMapper playMapper;
     private final FileService fileService;
@@ -391,4 +391,32 @@ public class TrackService {
 			return get(id);
 		}
 	}
+
+	/**
+	 * Move a track to a new library.
+	 * @param id the track ID to move
+	 * @param libraryId the new library to move to
+	 * @return the moved track
+	 * @throws Exception if the move process fails
+	 */
+    public Track moveTrackToLibrary(long id, long libraryId) throws Exception {
+		Track existingTrack = get(id);
+		Optional<Library> libraryOptional = libraryRepository.findById(libraryId);
+		if (!libraryOptional.isPresent()) {
+			throw new Exception("Library ID " + libraryId + " not found");
+		}
+		Library library = libraryOptional.get();
+		// remember where the file is now
+		File existingFile = existingTrack.getFile(localMusicFileLocation);
+		log.debug("Existing track at location {} is being moved to library ID {}", existingFile.getAbsolutePath(), libraryId);
+		// update the library ID in database
+		existingTrack.setLibrary(library);
+		// move file to new location
+		File movedFile = fileService.moveTempTrack(existingFile, existingTrack);
+		// update the location in database
+		String newLocation = metadataService.generateLocationFromFilePath(movedFile, library);
+		existingTrack.setLocation(newLocation);
+		update(existingTrack);
+		return get(id);
+    }
 }

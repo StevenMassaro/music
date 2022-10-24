@@ -232,7 +232,8 @@
 		albumArtDateUpdated = #{track.albumArtDateUpdated},
 		rating = #{track.rating},
 		deletedInd = #{track.deletedInd},
-		location = #{track.location}
+		location = #{track.location},
+        libraryId = #{track.library.id}
         WHERE id = #{track.id}
     </update>
 
