@@ -171,11 +171,7 @@ public class TrackEndpoint extends AbstractEndpoint {
         return responseEntity(null, albumArt.getMimeType(), albumArt.getBinaryData());
     }
 
-    @PostMapping("{id}/art")
-	public Track setAlbumArt(@PathVariable long id,
-							 @RequestParam(required = false) MultipartFile file,
-							 @RequestParam(required = false) String url,
-							 @RequestParam Boolean updateForEntireAlbum) throws IOException {
+	private List<Track> determineTracksToUpdateAlbumArt(long id, Boolean updateForEntireAlbum) {
 		Track track = trackService.get(id);
 		List<Track> tracksToUpdate;
 		if (updateForEntireAlbum) {
@@ -186,6 +182,16 @@ public class TrackEndpoint extends AbstractEndpoint {
 
 		trackWebsocket.sendAlbumArtModificationMessage(track.getAlbum(), -1, tracksToUpdate.size());
 
+		return tracksToUpdate;
+	}
+
+    @PostMapping("{id}/art")
+	public Track setAlbumArt(@PathVariable long id,
+							 @RequestParam(required = false) MultipartFile file,
+							 @RequestParam(required = false) String url,
+							 @RequestParam Boolean updateForEntireAlbum) throws IOException {
+		List<Track> tracksToUpdate = determineTracksToUpdateAlbumArt(id, updateForEntireAlbum);
+
 		if (file != null) {
 			// todo, probably shouldn't assume that all images are jpegs. Maybe it doesn't matter.
 			File tempFile = File.createTempFile("temp", ".jpg");
@@ -193,7 +199,7 @@ public class TrackEndpoint extends AbstractEndpoint {
 			for (int i = 0; i < tracksToUpdate.size(); i++) {
 				Track trackToUpdate = tracksToUpdate.get(i);
 				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), tempFile);
-				track.recalculateHash(localMusicFileLocation);
+				trackToUpdate.recalculateHash(localMusicFileLocation);
 				updateAlbumArtSource(trackToUpdate, file.getOriginalFilename());
 				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
 			}
@@ -203,7 +209,7 @@ public class TrackEndpoint extends AbstractEndpoint {
 				// todo don't download the image for each iteration
 				Track trackToUpdate = tracksToUpdate.get(i);
 				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), url);
-				track.recalculateHash(localMusicFileLocation);
+				trackToUpdate.recalculateHash(localMusicFileLocation);
 				updateAlbumArtSource(trackToUpdate, url);
 				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
 			}
