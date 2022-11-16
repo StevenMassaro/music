@@ -168,8 +168,7 @@ class MetadataService @Autowired constructor(private val fileService: FileServic
 		if (file != null && file.exists()) {
 			val audioFile = audioFileCache.get(file) { AudioFileIO.read(file) }
 			val tag = audioFile.tag
-			val art = Artwork()
-			art.setFromFile(newArt)
+			val art = Artwork.createArtworkFromFile(newArt)
 			tag.setField(art)
 			audioFile.commit()
 		}
