@@ -8,9 +8,13 @@ import music.model.ModifyableTags;
 import music.model.Track;
 import music.service.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.Diff;
 import org.apache.commons.lang3.builder.DiffResult;
 import org.jaudiotagger.tag.datatype.Artwork;
+import org.jaudiotagger.tag.id3.valuepair.ImageFormats;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -193,9 +197,18 @@ public class TrackEndpoint extends AbstractEndpoint {
 		List<Track> tracksToUpdate = determineTracksToUpdateAlbumArt(id, updateForEntireAlbum);
 
 		if (file != null) {
-			// todo, probably shouldn't assume that all images are jpegs. Maybe it doesn't matter.
-			File tempFile = File.createTempFile("temp", ".jpg");
-			FileUtils.copyInputStreamToFile(file.getInputStream(), tempFile);
+			String originalExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+			File tempFile;
+			if (StringUtils.isEmpty(originalExtension)) {
+				byte[] fileContents = IOUtils.toByteArray(file.getInputStream());
+				String mimeType = ImageFormats.getMimeTypeForBinarySignature(fileContents);
+				originalExtension = "." + mimeType.replace("image/", "");
+				tempFile = File.createTempFile("temp", originalExtension);
+				FileUtils.writeByteArrayToFile(tempFile, fileContents);
+			} else {
+				tempFile = File.createTempFile("temp", "." + originalExtension);
+				FileUtils.copyInputStreamToFile(file.getInputStream(), tempFile);
+			}
 			for (int i = 0; i < tracksToUpdate.size(); i++) {
 				Track trackToUpdate = tracksToUpdate.get(i);
 				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), tempFile);
