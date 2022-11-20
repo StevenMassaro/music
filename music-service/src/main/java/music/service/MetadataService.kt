@@ -4,10 +4,6 @@ import com.google.common.cache.CacheBuilder
 import music.model.DeferredTrack
 import music.model.Library
 import music.model.Track
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.apache.commons.io.FilenameUtils
-import org.apache.commons.io.IOUtils
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.audio.exceptions.CannotReadException
@@ -22,7 +18,6 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.io.IOException
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 
 @Service
@@ -133,31 +128,6 @@ class MetadataService @Autowired constructor(private val fileService: FileServic
 			tag.setField(field, newValue)
 			audioFile.commit()
 		}
-	}
-
-	/**
-	 * Update the artwork of the track at the specified [libraryPath], using art downloaded from the [url]. The [url]
-	 * should be the direct link to an image.
-	 */
-	fun updateArtwork(libraryPath: String, url: String) {
-		// todo validate that the url actually points to an image
-		val tempArtFile = File.createTempFile("artwork", ".${FilenameUtils.getExtension(url)}")
-		tempArtFile.deleteOnExit()
-
-		val client = OkHttpClient().newBuilder()
-			.connectTimeout(5, TimeUnit.SECONDS)
-			.callTimeout(15, TimeUnit.SECONDS)
-			.readTimeout(15, TimeUnit.SECONDS)
-			.writeTimeout(15, TimeUnit.SECONDS)
-			.build()
-		val request = Request.Builder()
-			.url(url)
-			.build()
-
-		client.newCall(request).execute().use { IOUtils.copy(it.body!!.byteStream(), tempArtFile.outputStream()) }
-
-		updateArtwork(libraryPath, tempArtFile)
-		tempArtFile.delete()
 	}
 
 	/**

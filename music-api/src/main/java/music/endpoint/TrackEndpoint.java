@@ -53,17 +53,19 @@ public class TrackEndpoint extends AbstractEndpoint {
 	private final ConvertService convertService;
 
 	private final TrackWebsocket trackWebsocket;
+	private final FileService fileService;
 
     private final String DATE_FORMAT = "yyyy-MM-dd";
 
     @Autowired
-	public TrackEndpoint(TrackService trackService, UpdateService updateService, MetadataService metadataService, DeviceService deviceService, ConvertService convertService, TrackWebsocket trackWebsocket) {
+	public TrackEndpoint(TrackService trackService, UpdateService updateService, MetadataService metadataService, DeviceService deviceService, ConvertService convertService, TrackWebsocket trackWebsocket, FileService fileService) {
 		this.trackService = trackService;
         this.updateService = updateService;
         this.metadataService = metadataService;
 		this.deviceService = deviceService;
 		this.convertService = convertService;
 		this.trackWebsocket = trackWebsocket;
+		this.fileService = fileService;
 	}
 
     @GetMapping
@@ -201,34 +203,43 @@ public class TrackEndpoint extends AbstractEndpoint {
 			File tempFile;
 			if (StringUtils.isEmpty(originalExtension)) {
 				byte[] fileContents = IOUtils.toByteArray(file.getInputStream());
-				String mimeType = ImageFormats.getMimeTypeForBinarySignature(fileContents);
-				originalExtension = "." + mimeType.replace("image/", "");
-				tempFile = File.createTempFile("temp", originalExtension);
-				FileUtils.writeByteArrayToFile(tempFile, fileContents);
+				tempFile = createFileFromByteArray(fileContents);
 			} else {
 				tempFile = File.createTempFile("temp", "." + originalExtension);
 				FileUtils.copyInputStreamToFile(file.getInputStream(), tempFile);
 			}
 			for (int i = 0; i < tracksToUpdate.size(); i++) {
 				Track trackToUpdate = tracksToUpdate.get(i);
-				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), tempFile);
-				trackToUpdate.recalculateHash(localMusicFileLocation);
-				updateAlbumArtSource(trackToUpdate, file.getOriginalFilename());
-				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
+				updateAlbumArt(trackToUpdate, tempFile, file.getOriginalFilename(), i, tracksToUpdate.size());
 			}
 			tempFile.delete();
 		} else {
+			byte[] fileBytes = fileService.downloadFileFromUrl(url);
+			File artworkFile = createFileFromByteArray(fileBytes);
 			for (int i = 0; i < tracksToUpdate.size(); i++) {
-				// todo don't download the image for each iteration
 				Track trackToUpdate = tracksToUpdate.get(i);
-				metadataService.updateArtwork(trackToUpdate.getLibraryPath(), url);
-				trackToUpdate.recalculateHash(localMusicFileLocation);
-				updateAlbumArtSource(trackToUpdate, url);
-				trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, tracksToUpdate.size());
+				updateAlbumArt(trackToUpdate, artworkFile, url, i, tracksToUpdate.size());
 			}
+			artworkFile.delete();
 		}
 
     	return trackService.get(id);
+	}
+
+	private void updateAlbumArt(Track trackToUpdate, File artworkFile, String albumArtSource, int i, int max) throws IOException {
+		metadataService.updateArtwork(trackToUpdate.getLibraryPath(), artworkFile);
+		trackToUpdate.recalculateHash(localMusicFileLocation);
+		updateAlbumArtSource(trackToUpdate, albumArtSource);
+		trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, max);
+	}
+
+	private File createFileFromByteArray(byte[] fileContents) throws IOException {
+		String mimeType = ImageFormats.getMimeTypeForBinarySignature(fileContents);
+		String extension = "." + mimeType.replace("image/", "");
+		File tempFile = File.createTempFile("temp", extension);
+		tempFile.deleteOnExit();
+		FileUtils.writeByteArrayToFile(tempFile, fileContents);
+		return tempFile;
 	}
 
 	private void updateAlbumArtSource(Track track, String albumArtSource) {

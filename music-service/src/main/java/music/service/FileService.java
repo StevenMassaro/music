@@ -4,6 +4,9 @@ import lombok.extern.log4j.Log4j2;
 import music.model.Library;
 import music.model.Track;
 import music.model.TrackNamePattern;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
@@ -22,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
 @Service
@@ -171,4 +175,31 @@ public class FileService extends AbstractService {
         }
         return wasDirectoryDeleted;
     }
+
+	/**
+	 * Update the artwork of the track at the specified [libraryPath], using art downloaded from the [url]. The [url]
+	 * should be the direct link to an image.
+	 */
+	public byte[] downloadFileFromUrl(String url) throws IOException {
+		File tempArtFile = File.createTempFile("artwork", "." + FilenameUtils.getExtension(url));
+		tempArtFile.deleteOnExit();
+
+		OkHttpClient client = new OkHttpClient().newBuilder()
+			.connectTimeout(5, TimeUnit.SECONDS)
+			.callTimeout(15, TimeUnit.SECONDS)
+			.readTimeout(15, TimeUnit.SECONDS)
+			.writeTimeout(15, TimeUnit.SECONDS)
+			.build();
+		Request request = new Request.Builder()
+			.url(url)
+			.build();
+
+		try (Response response = client.newCall(request).execute()) {
+			if (response.body() != null) {
+				return response.body().bytes();
+			} else {
+				return null;
+			}
+		}
+	}
 }
