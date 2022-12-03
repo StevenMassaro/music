@@ -218,7 +218,7 @@
 					<plugin>no-arg</plugin>
 				</compilerPlugins>
 				<pluginOptions>
-					<option>no-arg:annotation=javax.persistence.Entity</option>
+					<option>no-arg:annotation=jakarta.persistence.Entity</option>
 					<!-- Call instance initializers in the synthetic constructor -->
 					<!-- <option>no-arg:invokeInitializers=true</option> -->
 				</pluginOptions>

@@ -1,9 +1,9 @@
 package music.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 @Entity

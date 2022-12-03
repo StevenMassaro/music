@@ -1,7 +1,7 @@
 package music.model
 
+import jakarta.persistence.*
 import java.util.*
-import javax.persistence.*
 
 @Entity
 open class Playlist(

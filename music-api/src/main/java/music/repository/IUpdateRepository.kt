@@ -1,10 +1,10 @@
 package music.repository
 
+import jakarta.transaction.Transactional
 import music.model.TrackUpdate
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 import java.util.*
-import javax.transaction.Transactional
 
 @Repository
 @Transactional

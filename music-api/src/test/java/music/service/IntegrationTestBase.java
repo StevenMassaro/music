@@ -1,5 +1,6 @@
 package music.service;
 
+import jakarta.transaction.Transactional;
 import music.model.DeferredTrack;
 import music.model.Library;
 import music.model.SyncResult;
@@ -19,7 +20,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.util.ResourceUtils;
 
-import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
