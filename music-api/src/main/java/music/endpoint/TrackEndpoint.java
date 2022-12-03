@@ -99,7 +99,7 @@ public class TrackEndpoint extends AbstractEndpoint {
     @PatchMapping
 	public Track updateTrackInfo(@RequestBody Track track){
     	Track existing = trackService.get(track.getId());
-		DiffResult diff = existing.diff(track);
+		DiffResult<?> diff = existing.diff(track);
 		for(Diff<?> d: diff.getDiffs()) {
 			log.trace("Applying track update: {}, from {} to {}", d.getFieldName(), d.getLeft(), d.getRight());
 			updateService.queueTrackUpdate(track.getId(), d.getFieldName(), d.getRight().toString());
