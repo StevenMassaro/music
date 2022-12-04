@@ -23,12 +23,6 @@ I built this after not being able to find another music program that satisfied a
 - metadata changes are cached, and written to disk at a later time (when requested) - to avoid unnecessary hard drive spin ups as metadata is modified
 - local folder monitoring, where newly added files are automatically uploaded
 
-## OpenAPI specifications
-
-[http://localhost:8080/Music/v2/api-docs](http://localhost:8080/Music/v2/api-docs)
-
-[http://localhost:8080/Music/swagger-ui/index.html](http://localhost:8080/Music/swagger-ui/index.html)
-
 ## Reverse proxy via nginx
 ```
 location /Music {
