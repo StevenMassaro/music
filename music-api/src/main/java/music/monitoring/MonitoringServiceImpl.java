@@ -13,7 +13,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +60,7 @@ public class MonitoringServiceImpl {
 								log.info("Uploading {}", fullPath);
 								Library library = libraryRepository.findByName(parentFolderName);
 								File file = fullPath.toFile();
-								trackService.uploadNewTrack(new FileInputStream(file), FilenameUtils.getExtension(filename), library.getId());
+								trackService.uploadNewTrack(Files.newInputStream(file.toPath()), FilenameUtils.getExtension(filename), library.getId());
 								log.info("Successfully uploaded {}", fullPath);
 								FileUtils.moveFileToDirectory(file, Paths.get(folderPath, "uploaded", library.getName()).toFile(), true);
 							} catch (Exception e) {
