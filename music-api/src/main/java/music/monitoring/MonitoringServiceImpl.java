@@ -24,6 +24,7 @@ public class MonitoringServiceImpl {
 
 	@Value("${monitoring-folder}")
 	private String folderPath;
+	private final String tmpdir = System.getProperty("java.io.tmpdir");
 
 	private final WatchService watchService;
 	private final TrackService trackService;
@@ -62,7 +63,7 @@ public class MonitoringServiceImpl {
 								File file = fullPath.toFile();
 								trackService.uploadNewTrack(Files.newInputStream(file.toPath()), FilenameUtils.getExtension(filename), library.getId());
 								log.info("Successfully uploaded {}", fullPath);
-								FileUtils.moveFileToDirectory(file, Paths.get(folderPath, "uploaded", library.getName()).toFile(), true);
+								FileUtils.moveFileToDirectory(file, Paths.get(tmpdir, "uploaded", library.getName()).toFile(), true);
 							} catch (Exception e) {
 								log.error("Failed to upload {}", fullPath, e);
 							}
