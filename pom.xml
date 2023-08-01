@@ -54,7 +54,7 @@
 
     <properties>
         <java.version>8</java.version>
-        <kotlin.version>1.8.22</kotlin.version>
+        <kotlin.version>1.9.0</kotlin.version>
 		<revision>1.18.4</revision>
     </properties>
 
