@@ -32,7 +32,7 @@ jobs:
               run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
               id: project
             - name: Set up QEMU
-              uses: docker/setup-qemu-action@v2
+              uses: docker/setup-qemu-action@v3
               with:
                 image: tonistiigi/binfmt:latest
                 platforms: arm64,arm
