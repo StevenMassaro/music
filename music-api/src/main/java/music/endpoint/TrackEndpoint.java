@@ -180,7 +180,7 @@ public class TrackEndpoint extends AbstractEndpoint {
 	private List<Track> determineTracksToUpdateAlbumArt(long id, Boolean updateForEntireAlbum) {
 		Track track = trackService.get(id);
 		List<Track> tracksToUpdate;
-		if (updateForEntireAlbum) {
+		if (Boolean.TRUE.equals(updateForEntireAlbum)) {
 			tracksToUpdate = trackService.listByAlbum(track.getAlbum(), track.getArtist(), track.getDisc_no());
 		} else {
 			tracksToUpdate = Collections.singletonList(track);
