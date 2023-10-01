@@ -3,12 +3,13 @@ package music.service
 import music.model.ModifyableTags
 import music.model.TrackUpdate
 import music.repository.IUpdateRepository
+import org.apache.commons.io.FileUtils
 import org.jaudiotagger.tag.FieldKey
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.io.File
 import java.util.*
-import kotlin.collections.HashMap
 
 @Service
 class UpdateService @Autowired constructor(
@@ -28,15 +29,25 @@ class UpdateService @Autowired constructor(
      */
     fun queueTrackUpdate(id: Long, field: String, newValue: String) {
         requireNotNull(ModifyableTags.values().find { it.propertyName == field }, { "Supplied field $field is not modifyable." })
+		queueUpdate(id, field, newValue)
+    }
+
+	fun queueAlbumArtUpdate(id: Long, artworkFile: File) {
+		val fileByteArray = FileUtils.readFileToByteArray(artworkFile)
+		val base64Artwork = Base64.getEncoder().encodeToString(fileByteArray)
+		queueUpdate(id, "albumArt", base64Artwork, 2L)
+	}
+
+	private fun queueUpdate(id: Long, field: String, newValue: String, updateType: Long = 1) {
 		val trackUpdate: Optional<TrackUpdate> = updateRepository.findBySongIdAndField(id, field)
 		if (trackUpdate.isPresent) {
 			val newUpdate = trackUpdate.get();
 			newUpdate.newValue = newValue
 			updateRepository.saveAndFlush(newUpdate)
 		} else {
-			updateRepository.saveAndFlush(TrackUpdate(null, id, field, newValue, 1))
+			updateRepository.saveAndFlush(TrackUpdate(null, id, field, newValue, updateType))
 		}
-    }
+	}
 
     /**
      * List all the updates.
@@ -81,13 +92,22 @@ class UpdateService @Autowired constructor(
 				val track = trackService.get(id)
 				trackUpdates.forEach {
 					try {
-						val modifyableTag = it.getModifyableTag()!!
-						logger.trace("Applying update to disk: {}", it.toString())
-						metadataService.updateTrackField(track, FieldKey.valueOf(it.field.toUpperCase()), it.newValue)
-						deleteUpdateById(it.id!!)
+						// Album art update
+						if (it.updateType == 2L) {
+							logger.trace("Applying album art update to disk: {}", track.id)
+							val decodedArtworkFile = Base64.getDecoder().decode(it.newValue)
+							val tempArtworkFile = File.createTempFile("temp-artwork-file", ".jpg")
+							FileUtils.writeByteArrayToFile(tempArtworkFile, decodedArtworkFile)
+							metadataService.updateArtwork(track.libraryPath, tempArtworkFile)
+						} else {
+							val modifyableTag = it.getModifyableTag()!!
+							logger.trace("Applying update to disk: {}", it.toString())
+							metadataService.updateTrackField(track, FieldKey.valueOf(it.field.toUpperCase()), it.newValue)
+							deleteUpdateById(it.id!!)
 
-						logger.trace("Updating field {} to {} for ID: {}", it.field, it.newValue, id)
-						modifyableTag.updateModel(track, it.newValue)
+							logger.trace("Updating field {} to {} for ID: {}", it.field, it.newValue, id)
+							modifyableTag.updateModel(track, it.newValue)
+						}
 						track.recalculateHash(localMusicFileLocation)
 						trackService.update(track)
 					} catch (e: Exception) {
