@@ -169,6 +169,7 @@ public class TrackEndpoint extends AbstractEndpoint {
 		}
 	}
 
+	// todo - this needs to check the queued updates
     @GetMapping("/{id}/art")
     public ResponseEntity<Resource> getAlbumArt(@PathVariable long id, @RequestParam(defaultValue = "0") Integer index){
         Track track = trackService.get(id);
@@ -180,7 +181,7 @@ public class TrackEndpoint extends AbstractEndpoint {
 	private List<Track> determineTracksToUpdateAlbumArt(long id, Boolean updateForEntireAlbum) {
 		Track track = trackService.get(id);
 		List<Track> tracksToUpdate;
-		if (updateForEntireAlbum) {
+		if (Boolean.TRUE.equals(updateForEntireAlbum)) {
 			tracksToUpdate = trackService.listByAlbum(track.getAlbum(), track.getArtist(), track.getDisc_no());
 		} else {
 			tracksToUpdate = Collections.singletonList(track);
@@ -226,9 +227,8 @@ public class TrackEndpoint extends AbstractEndpoint {
     	return trackService.get(id);
 	}
 
-	private void updateAlbumArt(Track trackToUpdate, File artworkFile, String albumArtSource, int i, int max) throws IOException {
-		metadataService.updateArtwork(trackToUpdate.getLibraryPath(), artworkFile);
-		trackToUpdate.recalculateHash(localMusicFileLocation);
+	private void updateAlbumArt(Track trackToUpdate, File artworkFile, String albumArtSource, int i, int max) {
+		updateService.queueAlbumArtUpdate(trackToUpdate.getId(), artworkFile);
 		updateAlbumArtSource(trackToUpdate, albumArtSource);
 		trackWebsocket.sendAlbumArtModificationMessage(trackToUpdate.getAlbum(), i, max);
 	}

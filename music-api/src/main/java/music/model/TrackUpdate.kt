@@ -12,6 +12,10 @@ open class TrackUpdate(
         open var songId: Long,
         open var field: String,
         open var newValue: String,
+		/**
+		 * 1 is ID3 tag update
+		 * 2 is album art update
+		 */
         open var updateType: Long? = 1
 ) {
 	override fun toString(): String {
