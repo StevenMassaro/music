@@ -6,6 +6,7 @@ import music.exception.RatingRangeException;
 import music.model.Device;
 import music.model.ModifyableTags;
 import music.model.Track;
+import music.model.TrackUpdate;
 import music.service.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -30,10 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static music.utils.EndpointUtils.responseEntity;
@@ -169,13 +167,19 @@ public class TrackEndpoint extends AbstractEndpoint {
 		}
 	}
 
-	// todo - this needs to check the queued updates
     @GetMapping("/{id}/art")
     public ResponseEntity<Resource> getAlbumArt(@PathVariable long id, @RequestParam(defaultValue = "0") Integer index){
         Track track = trackService.get(id);
 
-        Artwork albumArt = metadataService.getAlbumArt(track.getLibraryPath(), false, index);
-        return responseEntity(null, albumArt.getMimeType(), albumArt.getBinaryData());
+		Optional<TrackUpdate> albumArtUpdate = updateService.getAlbumArtUpdate(id);
+		if (albumArtUpdate.isPresent()) {
+			TrackUpdate trackUpdate = albumArtUpdate.get();
+			byte[] newAlbumArt = Base64.getDecoder().decode(trackUpdate.getNewValue());
+			return responseEntity(null, ImageFormats.getMimeTypeForBinarySignature(newAlbumArt), newAlbumArt);
+		} else {
+			Artwork albumArt = metadataService.getAlbumArt(track.getLibraryPath(), false, index);
+			return responseEntity(null, albumArt.getMimeType(), albumArt.getBinaryData());
+		}
     }
 
 	private List<Track> determineTracksToUpdateAlbumArt(long id, Boolean updateForEntireAlbum) {

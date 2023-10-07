@@ -50,6 +50,7 @@ public enum ModifyableTags {
 		return null;
 	});
 
+	public static final String ALBUM_ART_FIELD_KEY = "albumArt";
 	private FieldKey associatedKey;
 	private HtmlType htmlType;
 	private SQLType sqlType;

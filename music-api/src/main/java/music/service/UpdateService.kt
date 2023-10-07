@@ -35,7 +35,7 @@ class UpdateService @Autowired constructor(
 	fun queueAlbumArtUpdate(id: Long, artworkFile: File) {
 		val fileByteArray = FileUtils.readFileToByteArray(artworkFile)
 		val base64Artwork = Base64.getEncoder().encodeToString(fileByteArray)
-		queueUpdate(id, "albumArt", base64Artwork, 2L)
+		queueUpdate(id, ModifyableTags.ALBUM_ART_FIELD_KEY, base64Artwork, 2L)
 	}
 
 	private fun queueUpdate(id: Long, field: String, newValue: String, updateType: Long = 1) {
@@ -63,6 +63,10 @@ class UpdateService @Autowired constructor(
         }
         return updates
     }
+
+	fun getAlbumArtUpdate(id: Long): Optional<TrackUpdate> {
+		return updateRepository.findBySongIdAndField(id, ModifyableTags.ALBUM_ART_FIELD_KEY);
+	}
 
 	/**
 	 * Delete a queued track update by the [id] of the particular update (not the track ID).
