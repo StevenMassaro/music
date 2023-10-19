@@ -107,11 +107,11 @@ class UpdateService @Autowired constructor(
 							val modifyableTag = it.getModifyableTag()!!
 							logger.trace("Applying update to disk: {}", it.toString())
 							metadataService.updateTrackField(track, FieldKey.valueOf(it.field.toUpperCase()), it.newValue)
-							deleteUpdateById(it.id!!)
 
 							logger.trace("Updating field {} to {} for ID: {}", it.field, it.newValue, id)
 							modifyableTag.updateModel(track, it.newValue)
 						}
+						deleteUpdateById(it.id!!)
 						track.recalculateHash(localMusicFileLocation)
 						trackService.update(track)
 					} catch (e: Exception) {
