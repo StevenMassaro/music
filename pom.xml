@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.stevenmassaro</groupId>
-    <artifactId>music-parent</artifactId>
+    <artifactId>Music</artifactId>
 	<version>${revision}</version>
     <modules>
         <module>music-model</module>
@@ -20,14 +20,6 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.1.3</version>
     </parent>
-
-	<distributionManagement>
-		<repository>
-			<id>github</id>
-			<name>GitHub Packages</name>
-			<url>https://maven.pkg.github.com/StevenMassaro/music</url>
-		</repository>
-	</distributionManagement>
 
     <dependencies>
 		<dependency>
@@ -172,6 +164,13 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
           <plugin>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-maven-plugin</artifactId>
