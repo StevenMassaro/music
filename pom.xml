@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.massaro</groupId>
-    <artifactId>Music</artifactId>
+    <groupId>com.stevenmassaro</groupId>
+    <artifactId>music-parent</artifactId>
 	<version>${revision}</version>
     <modules>
         <module>music-model</module>
@@ -20,6 +20,14 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.1.3</version>
     </parent>
+
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/StevenMassaro/music</url>
+		</repository>
+	</distributionManagement>
 
     <dependencies>
 		<dependency>
@@ -55,28 +63,28 @@
     <properties>
         <java.version>8</java.version>
         <kotlin.version>1.9.10</kotlin.version>
-		<revision>1.19</revision>
+		<revision>1.20</revision>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.massaro</groupId>
+                <groupId>com.stevenmassaro</groupId>
                 <artifactId>music-model</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.massaro</groupId>
+				<groupId>com.stevenmassaro</groupId>
 				<artifactId>music-api</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.massaro</groupId>
+				<groupId>com.stevenmassaro</groupId>
 				<artifactId>music-service</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.massaro</groupId>
+				<groupId>com.stevenmassaro</groupId>
 				<artifactId>music-utils</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -164,13 +172,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
           <plugin>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-maven-plugin</artifactId>
