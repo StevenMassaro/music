@@ -22,7 +22,7 @@ jobs:
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots clean install
       - run: mkdir staging && cp music-api/target/*.jar staging
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Package
           path: staging
