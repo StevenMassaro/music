@@ -38,7 +38,3 @@ location /Music {
 	proxy_set_header Connection "upgrade";
 }
 ```
-
-## To-do
-- cache album art changes (currently album art changes get applied directly to disk)
-- generate swagger/OpenAPI specifications
