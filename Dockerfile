@@ -1,5 +1,7 @@
-FROM alpine:3.20
-EXPOSE 8080
-RUN apk add --no-cache --update ffmpeg openjdk17-jre
+FROM ibm-semeru-runtimes:open-21-jre
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 ADD /music-api/target/music-api.jar music-api.jar
 ENTRYPOINT ["java","-jar","music-api.jar"]
