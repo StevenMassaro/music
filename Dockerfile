@@ -1,4 +1,4 @@
-FROM ibm-semeru-runtimes:open-21-jre
+FROM ibm-semeru-runtimes:open-22-jre
 RUN apt-get update && \
     apt-get install -y ffmpeg && \
     apt-get clean && \
