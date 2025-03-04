@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
@@ -63,7 +64,7 @@ public class MonitoringServiceImpl {
 								File file = fullPath.toFile();
 								trackService.uploadNewTrack(Files.newInputStream(file.toPath()), FilenameUtils.getExtension(filename), library.getId());
 								log.info("Successfully uploaded {}", fullPath);
-								FileUtils.moveFileToDirectory(file, Paths.get(tmpdir, "uploaded", library.getName()).toFile(), true);
+								FileUtils.moveFileToDirectory(file, Paths.get(tmpdir, "uploaded", library.getName() + new Date().getTime()).toFile(), true);
 							} catch (Exception e) {
 								log.error("Failed to upload {}", fullPath, e);
 							}
